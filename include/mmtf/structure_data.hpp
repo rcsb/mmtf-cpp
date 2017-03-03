@@ -185,7 +185,7 @@ inline bool isDefaultValue(const std::string& value);
  * @tparam T Can be any numeric type (no need for vector or strings here)
  */
 template <typename T>
-inline bool setDefaultValue(T& value);
+inline void setDefaultValue(T& value);
 
 
 // *************************************************************************
@@ -389,7 +389,7 @@ inline bool isDefaultValue(const std::string& value) {
 }
 
 template <typename T>
-inline bool setDefaultValue(T& value) {
+inline void setDefaultValue(T& value) {
     value = getDefaultValue<T>();
 }
 

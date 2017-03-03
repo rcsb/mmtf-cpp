@@ -257,16 +257,16 @@ void traverse_main(const mmtf::StructureData& example) {
     printopt("releaseDate", example.releaseDate, true);
 
     for (size_t i = 0; i < example.ncsOperatorList.size(); ++i) {
-        printf("ncsOperatorList[%d]", i);
+        printf("ncsOperatorList[%d]", int(i));
         printreq("", "%g", example.ncsOperatorList[i], true);
     }
 
     for (size_t i = 0; i < example.bioAssemblyList.size(); ++i) {
-        printf("bioAssemblyIndex: %d\n", i);
+        printf("bioAssemblyIndex: %d\n", int(i));
         const mmtf::BioAssembly& ba = example.bioAssemblyList[i];
         printreq(" name", ba.name, true);
         for (size_t j = 0; j < ba.transformList.size(); ++j) {
-            printf(" bioAssemblyTransformIndex: %d\n", j);
+            printf(" bioAssemblyTransformIndex: %d\n", int(j));
             const mmtf::Transform & transform = ba.transformList[j];
             printreq("  chainIndexList", "%d", transform.chainIndexList, true);
             printreq("  matrix", "%g", transform.matrix, 16, true);
@@ -274,7 +274,7 @@ void traverse_main(const mmtf::StructureData& example) {
     }
     
     for (size_t i = 0; i < example.entityList.size(); ++i) {
-        printf("entityIndex: %d\n", i);
+        printf("entityIndex: %d\n", int(i));
         const mmtf::Entity& ent = example.entityList[i];
         printreq(" chainIndexList", "%d", ent.chainIndexList, true);
         printreq(" description", ent.description, true);
@@ -283,7 +283,7 @@ void traverse_main(const mmtf::StructureData& example) {
     }
     
     for (size_t i = 0; i < example.experimentalMethods.size(); ++i) {
-        printf("experimentalMethod %d: %s\n", i,
+        printf("experimentalMethod %d: %s\n", int(i),
                example.experimentalMethods[i].c_str());
     }
 
