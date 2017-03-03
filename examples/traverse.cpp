@@ -256,6 +256,11 @@ void traverse_main(const mmtf::StructureData& example) {
     printopt("depositionDate", example.depositionDate, true);
     printopt("releaseDate", example.releaseDate, true);
 
+    for (size_t i = 0; i < example.ncsOperatorList.size(); ++i) {
+        printf("ncsOperatorList[%d]", i);
+        printreq("", "%g", example.ncsOperatorList[i], true);
+    }
+
     for (size_t i = 0; i < example.bioAssemblyList.size(); ++i) {
         printf("bioAssemblyIndex: %d\n", i);
         const mmtf::BioAssembly& ba = example.bioAssemblyList[i];
