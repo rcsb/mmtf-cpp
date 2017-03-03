@@ -35,6 +35,7 @@
 # The build dir
 build/*
 
-# Execution output
-src/out/*
-src/out_json_ref/*
+# Generated folders
+docs/html/*
+examples/out/*
+examples/out_json_ref/*

@@ -69,3 +69,9 @@ Furthermore, we have:
 ```bash
 ./compile_and_run_all.sh <MSGPACK_INCLUDE_PATH> demo.cpp
 ```
+
+## Code documentation
+
+You can generate a [doxygen](http://www.doxygen.org) based documentation of the
+library by calling `doxygen` in the docs folder. You will need doxygen 1.8.11 or
+later for that. Open `docs/html/index.html` to see the generated documentation.
