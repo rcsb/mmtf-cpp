@@ -150,7 +150,7 @@ struct convert<mmtf::StructureData> {
         md.decode("groupTypeList", true, data.groupTypeList);
         md.decode("secStructList", false, data.secStructList);
         md.decode("insCodeList", false, data.insCodeList);
-        md.decode("sequenceIndexList", true, data.sequenceIndexList);
+        md.decode("sequenceIndexList", false, data.sequenceIndexList);
         md.decode("chainIdList", true, data.chainIdList);
         md.decode("chainNameList", false, data.chainNameList);
         md.decode("groupsPerChain", true, data.groupsPerChain);

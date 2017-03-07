@@ -193,10 +193,10 @@ void json_print(const mmtf::StructureData& example) {
     printreq(" \"xCoordList\"", "%g", example.xCoordList);
     printreq(" \"yCoordList\"", "%g", example.yCoordList);
     printreq(" \"zCoordList\"", "%g", example.zCoordList);
-    printreq(" \"bFactorList\"", "%g", example.bFactorList);
-    printreq(" \"atomIdList\"", "%d", example.atomIdList);
-    printreq(" \"altLocList\"", "%d", example.altLocList);
-    printreq(" \"occupancyList\"", "%g", example.occupancyList);
+    printopt(" \"bFactorList\"", "%g", example.bFactorList);
+    printopt(" \"atomIdList\"", "%d", example.atomIdList);
+    printopt(" \"altLocList\"", "%d", example.altLocList);
+    printopt(" \"occupancyList\"", "%g", example.occupancyList);
 
     printreq(" \"groupIdList\"", "%d", example.groupIdList);
     printreq(" \"groupTypeList\"", "%d", example.groupTypeList);
@@ -226,6 +226,17 @@ void json_print(const mmtf::StructureData& example) {
  */
 char safechar(char c) {
     return (c < ' ') ? '.' : c;
+}
+
+// helper for optional entries (printval(pff, vec[i]) only if vec given)
+template<typename T>
+void printvalo(const char* pff, const std::vector<T>& vec, size_t i) {
+    if (!mmtf::isDefaultValue(vec)) printval(pff, vec[i]);
+}
+// helper for char entries (do safeprint of vec[i])
+template<>
+void printvalo(const char* pff, const std::vector<char>& vec, size_t i) {
+    if (!mmtf::isDefaultValue(vec)) printval(pff, safechar(vec[i]));
 }
 
 /**
@@ -301,18 +312,19 @@ void traverse_main(const mmtf::StructureData& example) {
         for (j = 0; j < modelChainCount; j++) {
             printf(" chainIndex : %d\n", chainIndex);
             printval("  Chain id: %s\n", example.chainIdList[chainIndex]);
-            printval("  Chain name: %s\n", example.chainNameList[chainIndex]);
+            printvalo("  Chain name: %s\n", example.chainNameList, chainIndex);
             int chainGroupCount = example.groupsPerChain[chainIndex];
             //        # traverse groups
             int k;
             for (k = 0; k < chainGroupCount; k++) {
                 printf("  groupIndex: %d\n", groupIndex);
                 printf("   groupId: %d\n", example.groupIdList[groupIndex]);
-                printf("   insCodeList: %c\n",
-                        safechar(example.insCodeList[groupIndex]));
-                printf("   secStruc: %d\n", example.secStructList[groupIndex]);
-                printf("   seqIndex: %i\n",
-                       example.sequenceIndexList[groupIndex]);
+                printvalo("   insCodeList: %c\n", example.insCodeList,
+                          groupIndex);
+                printvalo("   secStruc: %d\n", example.secStructList,
+                          groupIndex);
+                printvalo("   seqIndex: %i\n", example.sequenceIndexList,
+                          groupIndex);
                 printf("   groupType: %d\n", example.groupTypeList[groupIndex]);
                 const mmtf::GroupType& group =
                         example.groupList[example.groupTypeList[groupIndex]];
@@ -338,13 +350,14 @@ void traverse_main(const mmtf::StructureData& example) {
                            example.yCoordList[atomIndex]);
                     printf("     z coord: %.3f\n",
                            example.zCoordList[atomIndex]);
-                    printf("     b factor: %.2f\n",
-                           example.bFactorList[atomIndex]);
-                    printf("     atom id: %d\n", example.atomIdList[atomIndex]);
-                    printf("     altLocList: %c\n",
-                           safechar(example.altLocList[atomIndex]));
-                    printf("     occupancy: %.2f\n",
-                           example.occupancyList[atomIndex]);
+                    printvalo("     b factor: %.2f\n", example.bFactorList,
+                              atomIndex);
+                    printvalo("     atom id: %d\n", example.atomIdList,
+                              atomIndex);
+                    printvalo("     altLocList: %c\n", example.altLocList,
+                              atomIndex);
+                    printvalo("     occupancy: %.2f\n", example.occupancyList,
+                              atomIndex);
                     printf("     charge: %d\n", group.formalChargeList[l]);
                     printval("     atom name: %s\n", group.atomNameList[l]);
                     printval("     element: %s\n", group.elementList[l]);
@@ -432,23 +445,23 @@ void traverse_pdb_like(const mmtf::StructureData& example) {
                     // Atom name
                     printval("%s ", group.atomNameList[l]);
                     // Alternate location
-                    printf("%c ", safechar(example.altLocList[atomIndex]));
+                    printvalo("%c ", example.altLocList, atomIndex);
                     // Group name
                     printval("%s ", group.groupName);
                     // Chain
-                    printval("%s ", example.chainNameList[chainIndex]);
+                    printvalo("%s ", example.chainNameList, chainIndex);
                     // Group serial
                     printf("%d ", example.groupIdList[groupIndex]);
                     // Insertion code
-                    printf("%c ", safechar(example.insCodeList[groupIndex]));
+                    printvalo("%c ", example.insCodeList, groupIndex);
                     // x, y, z
                     printf("%.3f ", example.xCoordList[atomIndex]);
                     printf("%.3f ", example.yCoordList[atomIndex]);
                     printf("%.3f ", example.zCoordList[atomIndex]);
                     // B-factor
-                    printf("%.2f ", example.bFactorList[atomIndex]);
+                    printvalo("%.2f ", example.bFactorList, atomIndex);
                     // Occupancy
-                    printf("%.2f ", example.occupancyList[atomIndex]);
+                    printvalo("%.2f ", example.occupancyList, atomIndex);
                     // Element
                     printval("%s ", group.elementList[l]);
                     // Charge

@@ -331,7 +331,8 @@ bool StructureData::hasConsistentData() {
         for (int j = 0; j < chainsPerModel[model_idx]; ++j, ++chain_idx) {
             // check chain names (fixed length)
             if (chainIdList[chain_idx].size() != 4) return false;
-            if (chainNameList[chain_idx].size() != 4) return false;
+            if (   !isDefaultValue(chainNameList)
+                && chainNameList[chain_idx].size() != 4) return false;
             // traverse groups
             for (int k = 0; k < groupsPerChain[chain_idx]; ++k, ++group_idx) {
                 // check seq. idx
