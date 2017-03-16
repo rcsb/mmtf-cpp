@@ -8,4 +8,4 @@ fi
 
 MAIN_FILENAME="${2%.*}"
 
-g++ -I$1 -I"../include" -o $MAIN_FILENAME.exe $MAIN_FILENAME.cpp
+g++ -I$1 -I"../include" -O2 -o $MAIN_FILENAME.exe $MAIN_FILENAME.cpp

@@ -30,42 +30,42 @@ void printval(const char* pff, const std::string& val) {
     printf(pff, val.c_str());
 }
 
-// writing with no check if it's set or not
+// print vector only
 template<typename T>
-void printreq(const char* label, const char* pff,
-              const T* v, const size_t N, bool last = false) {
-    printf("%s: [", label);
+void printvec(const char* pff, const T* v, const size_t N) {
+    printf("[");
     for (size_t i = 0; i < N; ++i) {
         if (i > 0) printf(", ");
         printval(pff, v[i]);
     }
     printf("]");
-    if (last) printf("\n");
-    else      printf(",\n");
+}
+
+// writing with no check if it's set or not
+template<typename T>
+void printreq(const char* label, const char* pff,
+              const T* v, const size_t N, bool last = false) {
+    printf("%s: ", label);
+    printvec(pff, v, N);
+    printf("%s\n", (last) ? "" : ",");
 }
 
 template<typename T>
 void printreq(const char* label, const char* pff,
               const std::vector<T>& v, bool last = false) {
     if (v.empty()) {
-        printf("%s: []", label);
-        if (last) printf("\n");
-        else      printf(",\n");
+        printf("%s: []%s\n", label, (last) ? "" : ",");
     } else {
         printreq(label, pff, &v[0], v.size(), last);
     }
 }
 
 void printreq(const char* label, const std::string& s, bool last = false) {
-    printf("%s: \"%s\"", label, s.c_str());
-    if (last) printf("\n");
-    else      printf(",\n");
+    printf("%s: \"%s\"%s\n", label, s.c_str(), (last) ? "" : ",");
 }
 
 void printreq(const char* label, const float& f, bool last = false) {
-    printf("%s: %g", label, f);
-    if (last) printf("\n");
-    else      printf(",\n");
+    printf("%s: %g%s\n", label, f, (last) ? "" : ",");
 }
 
 // write with check if set
@@ -74,9 +74,7 @@ void printopt(const char* label, const T& val, bool last = false) {
     if (!mmtf::isDefaultValue(val)) {
         printreq(label, val, last);
     } else {
-        printf("%s: null", label);
-        if (last) printf("\n");
-        else      printf(",\n");
+        printf("%s: null%s\n", label, (last) ? "" : ",");
     }
 }
 
@@ -86,15 +84,13 @@ void printopt(const char* label, const char* pff,
     if (!mmtf::isDefaultValue(vec)) {
         printreq(label, pff, vec, last);
     } else {
-        printf("%s: null", label);
-        if (last) printf("\n");
-        else      printf(",\n");
+        printf("%s: null%s\n", label, (last) ? "" : ",");
     }
 }
 
 // JSON style printing of parts (not very elegant hack here)
 template<typename T>
-void json_print(const T& transform);
+void json_print(const T& t);
 
 template<typename T>
 void json_print_list(const char* label, const T* v, const size_t N,
@@ -105,15 +101,31 @@ void json_print_list(const char* label, const T* v, const size_t N,
         else       printf("\n");
         json_print(v[i]);
     }
-    printf("\n%*s", indent+1, "]");
-    if (last) printf("\n");
-    else      printf(",\n");
+    printf("\n%*s%s\n", indent+1, "]", (last) ? "" : ",");
 }
 
 template<typename T>
 void json_print_list(const char* label, const std::vector<T>& v,
                      int indent, bool last = false) {
     json_print_list(label, &v[0], v.size(), indent, last);
+}
+
+// for optional vectors
+template<typename T>
+void json_print_opt(const char* label, const std::vector<T>& v,
+                    int indent, bool last = false) {
+    if (!mmtf::isDefaultValue(v)) {
+        json_print_list(label, &v[0], v.size(), indent, last);
+    } else {
+        printf("%s: null%s\n", label, (last) ? "" : ",");
+    }
+}
+
+// just aimed for ncsOperatorList
+template<>
+void json_print(const std::vector<float>& list) {
+    printf("  ");
+    printvec("%g", &list[0], list.size());
 }
 
 template<>
@@ -171,8 +183,9 @@ void json_print(const mmtf::StructureData& example) {
     printopt(" \"depositionDate\"", example.depositionDate);
     printopt(" \"releaseDate\"", example.releaseDate);
     
-    json_print_list(" \"bioAssemblyList\"", example.bioAssemblyList, 1);
-    json_print_list(" \"entityList\"", example.entityList, 1);
+    // json_print_opt(" \"ncsOperatorList\"", example.ncsOperatorList, 1);
+    json_print_opt(" \"bioAssemblyList\"", example.bioAssemblyList, 1);
+    json_print_opt(" \"entityList\"", example.entityList, 1);
     printopt(" \"experimentalMethods\"", "\"%s\"", example.experimentalMethods);
 
     printopt(" \"resolution\"", example.resolution);
@@ -372,7 +385,6 @@ void traverse_main(const mmtf::StructureData& example) {
     printf("Number of inter group bonds: %d\n",
            (int) example.bondOrderList.size());
     for (i = 0; i < example.bondOrderList.size(); i++) {
-        //*** Issue here - seems too few (two entries for 4HHB).
         printf(" Atom One: %d\n", example.bondAtomList[i * 2]);
         printf(" Atom Two: %d\n", example.bondAtomList[i * 2 + 1]);
         printf(" Bond order: %d\n", example.bondOrderList[i]);
@@ -441,7 +453,7 @@ void traverse_pdb_like(const mmtf::StructureData& example) {
                     else
                         printf("ATOM ");
                     // Atom serial
-                    printf("%d ", example.atomIdList[atomIndex]);
+                    printvalo("%d ", example.atomIdList, atomIndex);
                     // Atom name
                     printval("%s ", group.atomNameList[l]);
                     // Alternate location
