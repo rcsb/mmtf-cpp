@@ -152,6 +152,7 @@ BinaryDecoder::BinaryDecoder(const msgpack::object& obj, const std::string& key)
     }
     // get data (encoded data is only pointed to and not parsed here)
     const char* bytes = obj.via.bin.ptr;
+
     assignBigendian4(&strategy_, bytes);
     assignBigendian4(&length_, bytes + 4);
     assignBigendian4(&parameter_, bytes + 8);

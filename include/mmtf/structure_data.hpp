@@ -6,7 +6,7 @@
 // 
 // Based on mmtf_c developed by Julien Ferte (http://www.julienferte.com/),
 // Anthony Bradley, Thomas Holder with contributions from Yana Valasatava,
-// Gazal Kalyan, Alexander Rose.
+// Gazal Kalyan, Alexander Rose. Updated 2018 by Daniel Farrell.
 //
 // *************************************************************************
 
@@ -18,6 +18,8 @@
 #include <stdint.h>
 #include <sstream>
 #include <limits>
+#include <msgpack.hpp>
+#include <iostream>
 
 namespace mmtf {
 
@@ -43,7 +45,7 @@ inline bool isVersionSupported(const std::string& version_string);
  *
  * https://github.com/rcsb/mmtf/blob/HEAD/spec.md#group-data
  */
-struct GroupType {
+struct GroupType { // NOTE: can't use MSGPACK_DEFINE_MAP due to char
     std::vector<int32_t>      formalChargeList;
     std::vector<std::string>  atomNameList;
     std::vector<std::string>  elementList;
@@ -52,6 +54,18 @@ struct GroupType {
     std::string               groupName;
     char                      singleLetterCode;
     std::string               chemCompType;
+
+    bool operator==(GroupType const & c) const {
+      return(
+        formalChargeList == c.formalChargeList &&
+        atomNameList == c.atomNameList &&
+        elementList == c.elementList &&
+        bondAtomList == c.bondAtomList &&
+        bondOrderList == c.bondOrderList &&
+        groupName == c.groupName &&
+        singleLetterCode == c.singleLetterCode &&
+        chemCompType == c.chemCompType);
+    }
 };
 
 /**
@@ -64,6 +78,20 @@ struct Entity {
     std::string          description;
     std::string          type;
     std::string          sequence;
+
+    bool operator==(Entity const & c) const {
+      return(
+        chainIndexList == c.chainIndexList &&
+        description == c.description &&
+        type == c.type &&
+        sequence == c.sequence);
+    }
+
+    MSGPACK_DEFINE_MAP(
+      chainIndexList,
+      description,
+      type,
+      sequence);
 };
 
 /**
@@ -74,6 +102,19 @@ struct Entity {
 struct Transform {
     std::vector<int32_t> chainIndexList;
     float                matrix[16];
+
+    bool operator==(Transform const & c) const {
+      bool comp = true;
+      for(size_t i = 16; i--;) {
+        if ( matrix[i] != c.matrix[i] ) {
+          comp = false;
+          break;
+        }
+      }
+      return (chainIndexList == c.chainIndexList && comp);
+    }
+
+    MSGPACK_DEFINE_MAP(chainIndexList, matrix);
 };
 
 /**
@@ -84,6 +125,14 @@ struct Transform {
 struct BioAssembly {
     std::vector<Transform> transformList;
     std::string            name;
+
+    bool operator==(BioAssembly const & c) const {
+        return (
+            transformList == c.transformList &&
+            name == c.name);
+    }
+
+    MSGPACK_DEFINE_MAP(transformList, name);
 };
 
 /**
@@ -150,6 +199,83 @@ struct StructureData {
      *         are consistent.
      */
     bool hasConsistentData();
+
+
+    /**
+     * @brief Check if type is hetatm
+     * Used when printing this struct
+     */
+    int is_hetatm(const char* type) {
+        const char* hetatm_type[] = {
+            "D-SACCHARIDE",
+            "D-SACCHARIDE 1,4 AND 1,4 LINKING",
+            "D-SACCHARIDE 1,4 AND 1,6 LINKING",
+            "L-SACCHARIDE",
+            "L-SACCHARIDE 1,4 AND 1,4 LINKING",
+            "L-SACCHARIDE 1,4 AND 1,6 LINKING",
+            "SACCHARIDE",
+            "OTHER",
+            "NON-POLYMER",
+            0 };
+        for (int i=0; hetatm_type[i]; ++i) {
+            if (strcmp(type,hetatm_type[i]) == 0)
+                return 1;
+        }
+        return 0;
+    }
+
+    /**
+     * @brief Read out the contents of mmtf::StructureData in a PDB-like fashion
+     * Columns are in order:
+     * ATOM/HETATM AtomId Element AtomName AltLoc GroupId GroupType
+     * InsCode ChainName x y z B-factor Occupancy Charge
+     * @param example Any existing mmtf::StructureData which you want to read
+     */
+    void print();
+
+    bool operator==(StructureData const & c) const {
+        return (
+            mmtfVersion == c.mmtfVersion &&
+            mmtfProducer == c.mmtfProducer &&
+            unitCell == c.unitCell &&
+            spaceGroup == c.spaceGroup &&
+            structureId == c.structureId &&
+            title == c.title &&
+            depositionDate == c.depositionDate &&
+            releaseDate == c.releaseDate &&
+            ncsOperatorList == c.ncsOperatorList &&
+            bioAssemblyList == c.bioAssemblyList &&
+            entityList == c.entityList &&
+            experimentalMethods == c.experimentalMethods &&
+            resolution == c.resolution &&
+            rFree == c.rFree &&
+            rWork == c.rWork &&
+            numBonds == c.numBonds &&
+            numAtoms == c.numAtoms &&
+            numGroups == c.numGroups &&
+            numChains == c.numChains &&
+            numModels == c.numModels &&
+            groupList == c.groupList &&
+            bondAtomList == c.bondAtomList &&
+            bondOrderList == c.bondOrderList &&
+            xCoordList == c.xCoordList &&
+            yCoordList == c.yCoordList &&
+            zCoordList == c.zCoordList &&
+            bFactorList == c.bFactorList &&
+            atomIdList == c.atomIdList &&
+            altLocList == c.altLocList &&
+            occupancyList == c.occupancyList &&
+            groupIdList == c.groupIdList &&
+            groupTypeList == c.groupTypeList &&
+            secStructList == c.secStructList &&
+            insCodeList == c.insCodeList &&
+            sequenceIndexList == c.sequenceIndexList &&
+            chainIdList == c.chainIdList &&
+            chainNameList == c.chainNameList &&
+            groupsPerChain == c.groupsPerChain &&
+            chainsPerModel == c.chainsPerModel);
+    }
+
 };
 
 /**
@@ -239,6 +365,29 @@ inline bool isVersionSupported(const std::string& version_string) {
     std::stringstream ss(version_string);
     int major = -1;
     return ((ss >> major) && (major <= MMTF_SPEC_VERSION_MAJOR));
+}
+
+// DEFAULT VALUES
+
+template <typename T>
+inline T getDefaultValue() { return std::numeric_limits<T>::max(); }
+
+template <typename T>
+inline bool isDefaultValue(const T& value) {
+    return (value == getDefaultValue<T>());
+}
+template <typename T>
+inline bool isDefaultValue(const std::vector<T>& value) {
+    return value.empty();
+}
+template <>
+inline bool isDefaultValue(const std::string& value) {
+    return value.empty();
+}
+
+template <typename T>
+inline void setDefaultValue(T& value) {
+    value = getDefaultValue<T>();
 }
 
 // CLASS StructureData
@@ -360,29 +509,82 @@ bool StructureData::hasConsistentData() {
     return true;
 }
 
-// DEFAULT VALUES
+void StructureData::print() {
+    int modelIndex = 0;
+    int chainIndex = 0;
+    int groupIndex = 0;
+    int atomIndex = 0;
 
-template <typename T>
-inline T getDefaultValue() { return std::numeric_limits<T>::max(); }
+    //# traverse models
+    for (int i = 0; i < numModels; i++, modelIndex++) {
+        //    # traverse chains
+        for (int j = 0; j < chainsPerModel[modelIndex]; j++, chainIndex++) {
+            //        # traverse groups
+            for (int k = 0; k < groupsPerChain[chainIndex]; k++, groupIndex++) {
+                const mmtf::GroupType& group =
+                        groupList[groupTypeList[groupIndex]];
+                int groupAtomCount = group.atomNameList.size();
 
-template <typename T>
-inline bool isDefaultValue(const T& value) {
-    return (value == getDefaultValue<T>());
-}
-template <typename T>
-inline bool isDefaultValue(const std::vector<T>& value) {
-    return value.empty();
-}
-template <>
-inline bool isDefaultValue(const std::string& value) {
-    return value.empty();
-}
+                for (int l = 0; l < groupAtomCount; l++, atomIndex++) {
+                    // ATOM or HETATM
+                    if (is_hetatm(group.chemCompType.c_str()))
+                        std::cout << "HETATM ";
+                    else
+                        std::cout << "ATOM ";
+                    // Atom serial
+                    if ( !mmtf::isDefaultValue(atomIdList) ) {
+                        std::cout << std::setfill('0') << std::setw(6) <<
+                          std::right << atomIdList[atomIndex] << " ";
+                    } else std::cout << ". ";
+                    // Atom name
+                    std::cout << std::setw(3)<< std::setfill(' ') <<
+                      std::left << group.atomNameList[l] << " ";
+                    // Alternate location
+                    if ( !mmtf::isDefaultValue(altLocList) ) {
+                        if ( altLocList[atomIndex] == ' ' ) std::cout << ". ";
+                        else std::cout << altLocList[atomIndex] << " ";
+                    } else std::cout << ". ";
+                    // Group name
+                    std::cout << " " << group.groupName << " ";
+                    // Chain
+                    if ( !mmtf::isDefaultValue(chainNameList) ) {
+                        std::cout << chainNameList[chainIndex] << " ";
+                    } else std::cout << ". ";
+                    // Group serial
+                    std::cout << groupIdList[groupIndex] << " ";
+                    // Insertion code
+                    if ( !mmtf::isDefaultValue(insCodeList) ) {
+                        if ( insCodeList[chainIndex] == ' ' ) std::cout << ". ";
+                        else std::cout << int(insCodeList[chainIndex]) << " ";
+                    } else std::cout << ". ";
+                    // x, y, z
+                    std::cout << std::setw(8) << std::right << std::fixed <<
+                      std::setprecision(3) <<  xCoordList[atomIndex] << " ";
 
-template <typename T>
-inline void setDefaultValue(T& value) {
-    value = getDefaultValue<T>();
+                    std::cout << std::setw(7) << std::right << std::fixed <<
+                      std::setprecision(3) <<  yCoordList[atomIndex] << " ";
+
+                    std::cout << std::setw(7) << std::right << std::fixed <<
+                      std::setprecision(3) <<  zCoordList[atomIndex] << " ";
+                    // B-factor
+                    if ( !mmtf::isDefaultValue(bFactorList) ) {
+                        std::cout << bFactorList[atomIndex] << " ";
+                    } else std::cout << ". ";
+                    // Occupancy
+                    if ( !mmtf::isDefaultValue(occupancyList) ) {
+                        std::cout << occupancyList[atomIndex] << " ";
+                    } else std::cout << ". ";
+                    // Element
+                    std::cout << group.elementList[l] << " ";
+                    // Charge
+                    std::cout << group.formalChargeList[l] << std::endl;
+                }
+            }
+        }
+    }
 }
 
 } // mmtf namespace
 
 #endif
+

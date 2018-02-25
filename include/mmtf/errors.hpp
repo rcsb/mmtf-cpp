@@ -6,12 +6,12 @@
 // 
 // Based on mmtf_c developed by Julien Ferte (http://www.julienferte.com/),
 // Anthony Bradley, Thomas Holder with contributions from Yana Valasatava,
-// Gazal Kalyan, Alexander Rose.
+// Gazal Kalyan, Alexander Rose. Updated 2018 by Daniel Farrell.
 //
 // *************************************************************************
 
-#ifndef MMTF_ENCODER_H
-#define MMTF_ENCODER_H
+#ifndef MMTF_ERRORS_H
+#define MMTF_ERRORS_H
 
 #include <stdexcept>
 
