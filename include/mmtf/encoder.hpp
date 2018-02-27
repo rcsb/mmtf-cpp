@@ -15,6 +15,7 @@
 #include "structure_data.hpp"
 #include "object_encoders.hpp"
 #include <string>
+#include <math.h>
 
 namespace mmtf {
 
@@ -148,16 +149,17 @@ inline std::vector<char> encodeDeltaRecursiveFloat(std::vector<float> floats_in,
 inline std::vector<int32_t> convertFloatsToInts(std::vector<float> const & vec_in,
                                             int multiplier) {
   std::vector<int32_t> vec_out;
-  for (float x : vec_in) {
-    vec_out.push_back(std::round(x*multiplier));
+  for (int i=0; i<vec_in.size(); ++i) {
+    vec_out.push_back(round(vec_in[i]*multiplier));
   }
   return vec_out;
 }
 
 
 inline std::vector<int32_t> deltaEncode(std::vector<int32_t> const & vec_in) {
-  std::vector<int32_t> vec_out{vec_in[0]};
-  for ( int32_t i=1; i<vec_in.size(); ++i ) {
+  std::vector<int32_t> vec_out;
+  vec_out.push_back(vec_in[0]);
+  for (int32_t i=1; i<vec_in.size(); ++i) {
     vec_out.push_back(vec_in[i]-vec_in[i-1]); 
   }
   return vec_out;
@@ -170,7 +172,7 @@ inline std::vector<int32_t> runLengthEncode(std::vector<int32_t> const & vec_in 
   int32_t curr = vec_in[0];
   ret.push_back(curr);
   int32_t counter = 1;
-  for ( int32_t i = 1; i < vec_in.size(); ++i ) {
+  for (int32_t i = 1; i < vec_in.size(); ++i) {
     if ( vec_in[i] == curr ) {
       ++counter;
     } else {
@@ -189,7 +191,8 @@ inline std::vector<int32_t> recursiveIndexEncode(
     std::vector<int32_t> const & vec_in,
     int max /* =32767 */, int min /*=-32768 */) {
   std::vector<int32_t> vec_out;
-  for ( int32_t x : vec_in ) {
+  for (int32_t i=0; i<vec_in.size(); ++i) {
+    int32_t x = vec_in[i];
     if ( x >= 0 ) {
       while (x >= max) {
         vec_out.push_back(max);
@@ -209,8 +212,8 @@ inline std::vector<int32_t> recursiveIndexEncode(
 
 inline std::vector<int32_t> convertCharsToInts(std::vector<char> const & vec_in) {
   std::vector<int32_t> vec_out;
-  for (char x : vec_in) {
-    vec_out.push_back((int)x);
+  for (int i=0; i<vec_in.size(); ++i) {
+    vec_out.push_back((int)vec_in[i]);
   }
   return vec_out;
 }
@@ -235,8 +238,8 @@ inline std::vector<char> stringstreamToCharVector(std::stringstream & ss) {
 inline std::vector<char> encodeInt8ToByte(std::vector<int8_t> vec_in) {
   std::stringstream ss;
   add_header(ss, vec_in.size(), 2, 0);
-  for (int8_t x : vec_in) {
-    ss.write(reinterpret_cast< char * >(&x), sizeof(x));
+  for (int i=0; i<vec_in.size(); ++i) {
+    ss.write(reinterpret_cast< char * >(&vec_in[i]), sizeof(vec_in[i]));
   }
   return stringstreamToCharVector(ss);
 }
@@ -245,8 +248,8 @@ inline std::vector<char> encodeInt8ToByte(std::vector<int8_t> vec_in) {
 inline std::vector<char> encodeFourByteToInt(std::vector<int32_t> vec_in) {
   std::stringstream ss;
   add_header(ss, vec_in.size(), 4, 0);
-  for (int32_t x : vec_in) {
-    int32_t be_x = htobe32(x);
+  for (int i=0; i<vec_in.size(); ++i) {
+    int32_t be_x = htobe32(vec_in[i]);
     ss.write(reinterpret_cast< char * >(&be_x), sizeof(be_x));
   }
   return stringstreamToCharVector(ss);
@@ -258,14 +261,14 @@ inline std::vector<char> encodeStringVector(std::vector<std::string> in_sv, int3
   std::stringstream ss;
   add_header(ss, in_sv.size(), 5, CHAIN_LEN);
   std::vector<char> char_vec;
-  for ( std::string x : in_sv ) {
-    char_vec.insert(char_vec.end(), x.begin(), x.end());
-    for ( int i = 0; i < CHAIN_LEN-x.size(); ++i ) {
+  for (int i=0; i<in_sv.size(); ++i) {
+    char_vec.insert(char_vec.end(), in_sv[i].begin(), in_sv[i].end());
+    for (int j=0; j<CHAIN_LEN-in_sv[i].size(); ++j) {
       char_vec.push_back(NULL_BYTE);
     }
   }
-  for ( char x : char_vec ) {
-    ss.write(reinterpret_cast< char * >(&x), sizeof(x));
+  for (int i=0; i<char_vec.size(); ++i) {
+    ss.write(reinterpret_cast< char * >(&char_vec[i]), sizeof(char_vec[i]));
   }
   return stringstreamToCharVector(ss);
 }
@@ -277,8 +280,8 @@ inline std::vector<char> encodeRunLengthChar(std::vector<char> in_cv) {
   std::vector<int32_t> int_vec;
   int_vec = convertCharsToInts(in_cv);
   int_vec = runLengthEncode(int_vec);
-  for ( int32_t x : int_vec ) {
-    int32_t temp = htobe32(x);
+  for (int i=0; i<int_vec.size(); ++i) {
+    int32_t temp = htobe32(int_vec[i]);
     ss.write(reinterpret_cast< char * >(&temp), sizeof(temp));
   }
   return stringstreamToCharVector(ss);
@@ -290,8 +293,8 @@ inline std::vector<char> encodeRunLengthDeltaInt(std::vector<int32_t> int_vec) {
   add_header(ss, int_vec.size(), 8, 0);
   int_vec = deltaEncode(int_vec);
   int_vec = runLengthEncode(int_vec);
-  for ( int32_t x : int_vec ) {
-    int32_t temp = htobe32(x);
+  for (int i=0; i<int_vec.size(); ++i) {
+    int32_t temp = htobe32(int_vec[i]);
     ss.write(reinterpret_cast< char * >(&temp), sizeof(temp));
   }
   return stringstreamToCharVector(ss);
@@ -302,8 +305,8 @@ inline std::vector<char> encodeRunLengthFloat(std::vector<float> floats_in, int3
   add_header(ss, floats_in.size(), 9, multiplier);
   std::vector<int32_t> int_vec = convertFloatsToInts(floats_in, multiplier);
   int_vec = runLengthEncode(int_vec);
-  for ( int32_t x : int_vec ) {
-    int32_t temp = htobe32(x);
+  for (int i=0; i<int_vec.size(); ++i) {
+    int32_t temp = htobe32(int_vec[i]);
     ss.write(reinterpret_cast< char * >(&temp), sizeof(temp));
   }
   return stringstreamToCharVector(ss);
@@ -316,8 +319,8 @@ inline std::vector<char> encodeDeltaRecursiveFloat(std::vector<float> floats_in,
   std::vector<int32_t> int_vec = convertFloatsToInts(floats_in, multiplier);
   int_vec = deltaEncode(int_vec);
   int_vec = recursiveIndexEncode(int_vec);
-  for ( int16_t x : int_vec ) {
-    int16_t temp = htobe16(x);
+  for (int i=0; i<int_vec.size(); ++i) {
+    int16_t temp = htobe16(int_vec[i]);
     ss.write(reinterpret_cast< char * >(&temp), sizeof(temp));
   }
   return stringstreamToCharVector(ss);
