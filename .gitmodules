@@ -4,3 +4,6 @@
 [submodule "msgpack-c"]
 	path = msgpack-c
 	url = https://github.com/msgpack/msgpack-c
+[submodule "mmtf_spec"]
+	path = mmtf_spec
+	url = https://github.com/rcsb/mmtf
