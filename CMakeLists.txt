@@ -8,7 +8,8 @@ option(mmtf_build_examples "Build the examples" OFF)
 
 add_library(MMTFcpp INTERFACE)
 target_compile_features(MMTFcpp INTERFACE cxx_auto_type)
-target_compile_options(MMTFcpp INTERFACE $<$<CXX_COMPILER_ID:GNU>:-Wall>)
+# TODO add back
+#target_compile_options(MMTFcpp INTERFACE $<$<CXX_COMPILER_ID:GNU>:-Wall>)
 
 target_include_directories(MMTFcpp INTERFACE
 	${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -21,8 +22,17 @@ if (mmtf_build_local)
 	endif()
 endif()
 
+if (NOT TARGET msgpackc)
+	find_package(msgpack)
+endif()
+
+target_link_libraries(MMTFcpp INTERFACE msgpackc)
+
 if (BUILD_TESTS)
 	add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tests)
 endif()
 
+if (mmtf_build_examples)
+	add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/examples)
+endif()
 
