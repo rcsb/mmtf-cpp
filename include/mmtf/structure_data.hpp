@@ -541,20 +541,28 @@ void StructureData::print() {
                       std::left << group.atomNameList[l] << " ";
                     // Alternate location
                     if ( !mmtf::isDefaultValue(altLocList) ) {
-                        if ( altLocList[atomIndex] == ' ' ) std::cout << ". ";
+                        if ( altLocList[atomIndex] == ' ' ||
+                             altLocList[atomIndex] == 0x00 ) std::cout << ". ";
                         else std::cout << altLocList[atomIndex] << " ";
                     } else std::cout << ". ";
                     // Group name
-                    std::cout << " " << group.groupName << " ";
+                    std::cout << group.groupName << " ";
                     // Chain
                     if ( !mmtf::isDefaultValue(chainNameList) ) {
-                        std::cout << chainNameList[chainIndex] << " ";
+                        for (std::size_t cnlci = 0;
+                          cnlci < chainNameList[chainIndex].size(); ++cnlci) {
+                            if (chainNameList[chainIndex][cnlci] != 0x00) {
+                                std::cout << chainNameList[chainIndex][cnlci];
+                            }
+                        }
+                        std::cout << " ";
                     } else std::cout << ". ";
                     // Group serial
                     std::cout << groupIdList[groupIndex] << " ";
                     // Insertion code
                     if ( !mmtf::isDefaultValue(insCodeList) ) {
-                        if ( insCodeList[chainIndex] == ' ' ) std::cout << ". ";
+                        if ( altLocList[atomIndex] == ' ' ||
+                             altLocList[atomIndex] == 0x00 ) std::cout << ". ";
                         else std::cout << int(insCodeList[chainIndex]) << " ";
                     } else std::cout << ". ";
                     // x, y, z
