@@ -19,6 +19,7 @@
 #include <cstring> // low level mem
 #include <sstream>
 #include <limits>
+#include <algorithm>
 
 namespace mmtf {
 
@@ -400,6 +401,7 @@ void BinaryDecoder::decodeFromBytes_(std::vector<int32_t>& output) {
 }
 // special one: decode to vector of strings
 void BinaryDecoder::decodeFromBytes_(std::vector<std::string>& output) {
+    char NULL_BYTE = 0x00;
     // check parameter
     const int32_t str_len = parameter_;
     checkDivisibleBy_(str_len);
@@ -408,6 +410,7 @@ void BinaryDecoder::decodeFromBytes_(std::vector<std::string>& output) {
     // get data
     for (size_t i = 0; i < output.size(); ++i) {
         output[i].assign(encodedData_ + i * str_len, str_len);
+        output[i].erase(std::remove(output[i].begin(), output[i].end(), NULL_BYTE), output[i].end());
     }
 }
 
