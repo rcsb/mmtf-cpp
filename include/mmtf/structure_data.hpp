@@ -231,7 +231,7 @@ struct StructureData {
      * InsCode ChainName x y z B-factor Occupancy Charge
      * @param example Any existing mmtf::StructureData which you want to read
      */
-    void print();
+    void print(std::string delim=" ");
 
     bool operator==(StructureData const & c) const {
         return (
@@ -509,7 +509,7 @@ bool StructureData::hasConsistentData() {
     return true;
 }
 
-void StructureData::print() {
+void StructureData::print(std::string delim) {
     int modelIndex = 0;
     int chainIndex = 0;
     int groupIndex = 0;
@@ -528,62 +528,58 @@ void StructureData::print() {
                 for (int l = 0; l < groupAtomCount; l++, atomIndex++) {
                     // ATOM or HETATM
                     if (is_hetatm(group.chemCompType.c_str()))
-                        std::cout << "HETATM ";
+                        std::cout << "HETATM" << delim;
                     else
-                        std::cout << "ATOM ";
+                        std::cout << "ATOM" << delim;
                     // Atom serial
                     if ( !mmtf::isDefaultValue(atomIdList) ) {
                         std::cout << std::setfill('0') << std::setw(6) <<
-                          std::right << atomIdList[atomIndex] << " ";
-                    } else std::cout << ". ";
+                          std::right << atomIdList[atomIndex] << delim;
+                    } else std::cout << "." << delim;
                     // Atom name
-                    std::cout << std::setw(3)<< std::setfill(' ') <<
-                      std::left << group.atomNameList[l] << " ";
+                    std::cout << group.atomNameList[l] << delim;
                     // Alternate location
                     if ( !mmtf::isDefaultValue(altLocList) ) {
                         if ( altLocList[atomIndex] == ' ' ||
-                             altLocList[atomIndex] == 0x00 ) std::cout << ". ";
-                        else std::cout << altLocList[atomIndex] << " ";
-                    } else std::cout << ". ";
+                             altLocList[atomIndex] == 0x00 )
+                                   std::cout << "." << delim;
+                        else std::cout << altLocList[atomIndex] << delim;
+                    } else std::cout << "." << delim;
                     // Group name
-                    std::cout << group.groupName << " ";
+                    std::cout << group.groupName << delim;
                     // Chain
                     if ( !mmtf::isDefaultValue(chainNameList) ) {
-                        for (std::size_t cnlci = 0;
-                          cnlci < chainNameList[chainIndex].size(); ++cnlci) {
-                            if (chainNameList[chainIndex][cnlci] != 0x00) {
-                                std::cout << chainNameList[chainIndex][cnlci];
-                            }
-                        }
-                        std::cout << " ";
-                    } else std::cout << ". ";
+                        std::cout << chainNameList[chainIndex];
+                        std::cout << delim;
+                    } else std::cout << "." << delim;
                     // Group serial
-                    std::cout << groupIdList[groupIndex] << " ";
+                    std::cout << groupIdList[groupIndex] << delim;
                     // Insertion code
                     if ( !mmtf::isDefaultValue(insCodeList) ) {
                         if ( altLocList[atomIndex] == ' ' ||
-                             altLocList[atomIndex] == 0x00 ) std::cout << ". ";
-                        else std::cout << int(insCodeList[chainIndex]) << " ";
+                             altLocList[atomIndex] == 0x00 )
+                                  std::cout << "." << delim;
+                        else std::cout << int(insCodeList[chainIndex]) << delim;
                     } else std::cout << ". ";
                     // x, y, z
                     std::cout << std::setw(8) << std::right << std::fixed <<
-                      std::setprecision(3) <<  xCoordList[atomIndex] << " ";
+                      std::setprecision(3) <<  xCoordList[atomIndex] << delim;
 
                     std::cout << std::setw(7) << std::right << std::fixed <<
-                      std::setprecision(3) <<  yCoordList[atomIndex] << " ";
+                      std::setprecision(3) <<  yCoordList[atomIndex] << delim;
 
                     std::cout << std::setw(7) << std::right << std::fixed <<
-                      std::setprecision(3) <<  zCoordList[atomIndex] << " ";
+                      std::setprecision(3) <<  zCoordList[atomIndex] << delim;
                     // B-factor
                     if ( !mmtf::isDefaultValue(bFactorList) ) {
-                        std::cout << bFactorList[atomIndex] << " ";
-                    } else std::cout << ". ";
+                        std::cout << bFactorList[atomIndex] << delim;
+                    } else std::cout << "." << delim;
                     // Occupancy
                     if ( !mmtf::isDefaultValue(occupancyList) ) {
-                        std::cout << occupancyList[atomIndex] << " ";
-                    } else std::cout << ". ";
+                        std::cout << occupancyList[atomIndex] << delim;
+                    } else std::cout << "." << delim;
                     // Element
-                    std::cout << group.elementList[l] << " ";
+                    std::cout << group.elementList[l] << delim;
                     // Charge
                     std::cout << group.formalChargeList[l] << std::endl;
                 }
