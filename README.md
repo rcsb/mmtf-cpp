@@ -57,7 +57,7 @@ chmod +x ./tests/mmtf_tests
 ```
 
 Example codes:
-- demo.cpp: Loads an MMTF file and checks internal consistency using
+- mmtf_demo.cpp: Loads an MMTF file and checks internal consistency using
             mmtf::StructureData::hasConsistentData.
 ```bash
 ./examples/mmtf_demo ../mmtf_spec/test-suite/mmtf/173D.mmtf
