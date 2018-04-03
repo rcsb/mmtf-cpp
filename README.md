@@ -69,8 +69,6 @@ Example codes:
 ./examples/mmtf_demo.cpp ../mmtf_spec/test-suite/mmtf/173D.mmtf print
 ```
 
-Furthermore, we have:
-
 ## Code documentation
 
 You can generate a [doxygen](http://www.doxygen.org) based documentation of the
