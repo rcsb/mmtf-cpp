@@ -195,33 +195,61 @@ struct StructureData {
 
     /**
      * @brief Check consistency of structural data.
+     * @param chain_name_max_length   max allowed chain name length
+     * @param errors                  print back you
      * @return True if all required fields are set and vector sizes and indices
      *         are consistent.
      */
-    bool hasConsistentData();
+    bool hasConsistentData(int32_t chain_name_max_length = 4, bool verbose=false) const;
 
 
     /**
      * @brief Check if type is hetatm
-     * Used when printing this struct
+     * @param type   cstring of group.chemCompType
+     * @return True if is a HETATM 
+     * Used when printing this struct, also all chemCompTypes are listed, but
+     * the non-HETATM ones are commented out for reference
+     * Relevant threads:
+     * https://github.com/rcsb/mmtf/issues/28
+     * http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Items/_chem_comp.type.html
      */
     int is_hetatm(const char* type) {
-        const char* hetatm_type[] = {
-            "D-SACCHARIDE",
-            "D-SACCHARIDE 1,4 AND 1,4 LINKING",
-            "D-SACCHARIDE 1,4 AND 1,6 LINKING",
-            "L-SACCHARIDE",
-            "L-SACCHARIDE 1,4 AND 1,4 LINKING",
-            "L-SACCHARIDE 1,4 AND 1,6 LINKING",
-            "SACCHARIDE",
-            "OTHER",
-            "NON-POLYMER",
-            0 };
-        for (int i=0; hetatm_type[i]; ++i) {
-            if (strcmp(type,hetatm_type[i]) == 0)
-                return 1;
-        }
-        return 0;
+      const char* hetatm_type[] = {
+        "D-BETA-PEPTIDE, C-GAMMA LINKING",
+        "D-GAMMA-PEPTIDE, C-DELTA LINKING",
+        "D-PEPTIDE COOH CARBOXY TERMINUS",
+        "D-PEPTIDE NH3 AMINO TERMINUS",
+        "D-PEPTIDE LINKING",
+        "D-SACCHARIDE",
+        "D-SACCHARIDE 1,4 AND 1,4 LINKING",
+        "D-SACCHARIDE 1,4 AND 1,6 LINKING",
+        "DNA OH 3 PRIME TERMINUS",
+        "DNA OH 5 PRIME TERMINUS",
+        "DNA LINKING",
+        "L-DNA LINKING",
+        "L-RNA LINKING",
+        "L-BETA-PEPTIDE, C-GAMMA LINKING",
+        "L-GAMMA-PEPTIDE, C-DELTA LINKING",
+        "L-PEPTIDE COOH CARBOXY TERMINUS",
+        "L-PEPTIDE NH3 AMINO TERMINUS",
+        //"L-PEPTIDE LINKING",
+        "L-SACCHARIDE",
+        "L-SACCHARIDE 1,4 AND 1,4 LINKING",
+        "L-SACCHARIDE 1,4 AND 1,6 LINKING",
+        "RNA OH 3 PRIME TERMINUS",
+        "RNA OH 5 PRIME TERMINUS",
+        "RNA LINKING",
+        "NON-POLYMER",
+        "OTHER",
+        "PEPTIDE LINKING",
+        "PEPTIDE-LIKE",
+        "SACCHARIDE",
+        0 };
+      for (int i=0; hetatm_type[i]; ++i) {
+        if (strcmp(type,hetatm_type[i]) == 0)
+          return 1;
+      }
+      return 0;
     }
 
     /**
@@ -229,60 +257,65 @@ struct StructureData {
      * Columns are in order:
      * ATOM/HETATM AtomId Element AtomName AltLoc GroupId GroupType
      * InsCode ChainName x y z B-factor Occupancy Charge
-     * @param example Any existing mmtf::StructureData which you want to read
+     * @param delim what to split columns with
      */
-    void print(std::string delim=" ");
+    std::string print(std::string delim="\t");
 
+    /**
+     * @brief compare two StructureData classes
+     * @param delim what to compare to
+     */
     bool operator==(StructureData const & c) const {
-        return (
-            mmtfVersion == c.mmtfVersion &&
-            mmtfProducer == c.mmtfProducer &&
-            unitCell == c.unitCell &&
-            spaceGroup == c.spaceGroup &&
-            structureId == c.structureId &&
-            title == c.title &&
-            depositionDate == c.depositionDate &&
-            releaseDate == c.releaseDate &&
-            ncsOperatorList == c.ncsOperatorList &&
-            bioAssemblyList == c.bioAssemblyList &&
-            entityList == c.entityList &&
-            experimentalMethods == c.experimentalMethods &&
-            resolution == c.resolution &&
-            rFree == c.rFree &&
-            rWork == c.rWork &&
-            numBonds == c.numBonds &&
-            numAtoms == c.numAtoms &&
-            numGroups == c.numGroups &&
-            numChains == c.numChains &&
-            numModels == c.numModels &&
-            groupList == c.groupList &&
-            bondAtomList == c.bondAtomList &&
-            bondOrderList == c.bondOrderList &&
-            xCoordList == c.xCoordList &&
-            yCoordList == c.yCoordList &&
-            zCoordList == c.zCoordList &&
-            bFactorList == c.bFactorList &&
-            atomIdList == c.atomIdList &&
-            altLocList == c.altLocList &&
-            occupancyList == c.occupancyList &&
-            groupIdList == c.groupIdList &&
-            groupTypeList == c.groupTypeList &&
-            secStructList == c.secStructList &&
-            insCodeList == c.insCodeList &&
-            sequenceIndexList == c.sequenceIndexList &&
-            chainIdList == c.chainIdList &&
-            chainNameList == c.chainNameList &&
-            groupsPerChain == c.groupsPerChain &&
-            chainsPerModel == c.chainsPerModel);
+      return (
+        mmtfVersion == c.mmtfVersion &&
+        mmtfProducer == c.mmtfProducer &&
+        unitCell == c.unitCell &&
+        spaceGroup == c.spaceGroup &&
+        structureId == c.structureId &&
+        title == c.title &&
+        depositionDate == c.depositionDate &&
+        releaseDate == c.releaseDate &&
+        ncsOperatorList == c.ncsOperatorList &&
+        bioAssemblyList == c.bioAssemblyList &&
+        entityList == c.entityList &&
+        experimentalMethods == c.experimentalMethods &&
+        resolution == c.resolution &&
+        rFree == c.rFree &&
+        rWork == c.rWork &&
+        numBonds == c.numBonds &&
+        numAtoms == c.numAtoms &&
+        numGroups == c.numGroups &&
+        numChains == c.numChains &&
+        numModels == c.numModels &&
+        groupList == c.groupList &&
+        bondAtomList == c.bondAtomList &&
+        bondOrderList == c.bondOrderList &&
+        xCoordList == c.xCoordList &&
+        yCoordList == c.yCoordList &&
+        zCoordList == c.zCoordList &&
+        bFactorList == c.bFactorList &&
+        atomIdList == c.atomIdList &&
+        altLocList == c.altLocList &&
+        occupancyList == c.occupancyList &&
+        groupIdList == c.groupIdList &&
+        groupTypeList == c.groupTypeList &&
+        secStructList == c.secStructList &&
+        insCodeList == c.insCodeList &&
+        sequenceIndexList == c.sequenceIndexList &&
+        chainIdList == c.chainIdList &&
+        chainNameList == c.chainNameList &&
+        groupsPerChain == c.groupsPerChain &&
+        chainsPerModel == c.chainsPerModel);
     }
-
 };
+
 
 /**
  * @brief Get default value for given type.
  */
 template <typename T>
 inline T getDefaultValue();
+
 
 /**
  * @return True if given value is default.
@@ -294,6 +327,7 @@ template <typename T>
 inline bool isDefaultValue(const std::vector<T>& value);
 template <>
 inline bool isDefaultValue(const std::string& value);
+
 
 /**
  * @brief Set default value to given type.
@@ -313,42 +347,42 @@ namespace {
 // check optional date string
 // -> either default or "YYYY-MM-DD" (only string format checked, not date)
 bool isValidDateFormatOptional(const std::string& s) {
-    // default?
-    if (isDefaultValue(s)) return true;
-    // check length
-    if (s.length() != 10) return false;
-    // check delimiters
-    if (s[4] != '-' || s[7] != '-') return false;
-    // check format
-    std::istringstream is(s);
-    int d, m, y;
-    char dash1, dash2;
-    if (is >> y >> dash1 >> m >> dash2 >> d) {
-        return (dash1 == '-' && dash2 == '-');
-    } else {
-        return false;
-    }
+  // default?
+  if (isDefaultValue(s)) return true;
+  // check length
+  if (s.length() != 10) return false;
+  // check delimiters
+  if (s[4] != '-' || s[7] != '-') return false;
+  // check format
+  std::istringstream is(s);
+  int d, m, y;
+  char dash1, dash2;
+  if (is >> y >> dash1 >> m >> dash2 >> d) {
+    return (dash1 == '-' && dash2 == '-');
+  } else {
+    return false;
+  }
 }
 
 // check if optional vector has right size
 template<typename T>
 bool hasRightSizeOptional(const std::vector<T>& v, int exp_size) {
-    return (isDefaultValue(v) || v.size() == exp_size);
+  return (isDefaultValue(v) || (int)v.size() == exp_size);
 }
 
 // check if all indices in vector are in [0, num-1] (T = integer type)
 template<typename T, typename Tnum>
 bool hasValidIndices(const T* v, size_t size, Tnum num) {
-    T tnum = T(num);
-    for (size_t i = 0; i < size; ++i) {
-        if (v[i] < T(0) || v[i] >= tnum) return false;
-    }
-    return true;
+  T tnum = T(num);
+  for (size_t i = 0; i < size; ++i) {
+    if (v[i] < T(0) || v[i] >= tnum) return false;
+  }
+  return true;
 }
 template<typename T, typename Tnum>
 bool hasValidIndices(const std::vector<T>& v, Tnum num) {
-    if (v.empty()) return true;
-    else           return hasValidIndices(&v[0], v.size(), num);
+  if (v.empty()) return true;
+  else           return hasValidIndices(&v[0], v.size(), num);
 }
 
 } // anon ns
@@ -356,15 +390,15 @@ bool hasValidIndices(const std::vector<T>& v, Tnum num) {
 // VERSIONING
 
 inline std::string getVersionString() {
-    std::stringstream version;
-    version << MMTF_SPEC_VERSION_MAJOR << "." << MMTF_SPEC_VERSION_MINOR;
-    return version.str();
+  std::stringstream version;
+  version << MMTF_SPEC_VERSION_MAJOR << "." << MMTF_SPEC_VERSION_MINOR;
+  return version.str();
 }
 
 inline bool isVersionSupported(const std::string& version_string) {
-    std::stringstream ss(version_string);
-    int major = -1;
-    return ((ss >> major) && (major <= MMTF_SPEC_VERSION_MAJOR));
+  std::stringstream ss(version_string);
+  int major = -1;
+  return ((ss >> major) && (major <= MMTF_SPEC_VERSION_MAJOR));
 }
 
 // DEFAULT VALUES
@@ -374,218 +408,414 @@ inline T getDefaultValue() { return std::numeric_limits<T>::max(); }
 
 template <typename T>
 inline bool isDefaultValue(const T& value) {
-    return (value == getDefaultValue<T>());
+  return (value == getDefaultValue<T>());
 }
 template <typename T>
 inline bool isDefaultValue(const std::vector<T>& value) {
-    return value.empty();
+  return value.empty();
 }
 template <>
 inline bool isDefaultValue(const std::string& value) {
-    return value.empty();
+  return value.empty();
 }
 
 template <typename T>
 inline void setDefaultValue(T& value) {
-    value = getDefaultValue<T>();
+  value = getDefaultValue<T>();
 }
 
 // CLASS StructureData
 
 StructureData::StructureData() {
-    // no need to do anything with strings and vectors
-    setDefaultValue(resolution);
-    setDefaultValue(rFree);
-    setDefaultValue(rWork);
-    // numXX set to 0 to have consistent data
-    numBonds = 0;
-    numAtoms = 0;
-    numGroups = 0;
-    numChains = 0;
-    numModels = 0;
-    // set version and producer
-    mmtfVersion = getVersionString();
-    mmtfProducer = "mmtf-cpp library (github.com/rcsb/mmtf-cpp)";
+  // no need to do anything with strings and vectors
+  setDefaultValue(resolution);
+  setDefaultValue(rFree);
+  setDefaultValue(rWork);
+  // numXX set to 0 to have consistent data
+  numBonds = 0;
+  numAtoms = 0;
+  numGroups = 0;
+  numChains = 0;
+  numModels = 0;
+  // set version and producer
+  mmtfVersion = getVersionString();
+  mmtfProducer = "mmtf-cpp library (github.com/rcsb/mmtf-cpp)";
 }
 
-bool StructureData::hasConsistentData() {
-    // check unitCell: if given, must be of length 6
-    if (!hasRightSizeOptional(unitCell, 6)) return false;
-    // check dates
-    if (!isValidDateFormatOptional(depositionDate)) return false;
-    if (!isValidDateFormatOptional(releaseDate)) return false;
-    // check ncsOperatorList: all elements must have length 16
-    for (size_t i = 0; i < ncsOperatorList.size(); ++i) {
-        if (ncsOperatorList[i].size() != 16) return false;
+bool StructureData::hasConsistentData(int32_t chain_name_max_length, bool verbose) const {
+  // check unitCell: if given, must be of length 6
+  if (!hasRightSizeOptional(unitCell, 6)) {
+    if (verbose) {
+      std::cout << "inconsistent unitCell" << std::endl;
     }
-    // check chain indices in bioAssembly-transforms and entities
-    for (size_t i = 0; i < bioAssemblyList.size(); ++i) {
-        const BioAssembly& ba = bioAssemblyList[i];
-        for (size_t j = 0; j < ba.transformList.size(); ++j) {
-            const Transform & t = ba.transformList[j];
-            if (!hasValidIndices(t.chainIndexList, numChains)) return false;
+    return false;
+  }
+  // check dates
+  if (!isValidDateFormatOptional(depositionDate)) {
+    if (verbose) {
+      std::cout << "inconsistent depositionDate" << std::endl;
+    }
+    return false;
+  }
+  if (!isValidDateFormatOptional(releaseDate)) {
+    if (verbose) {
+      std::cout << "releaseDate" << std::endl;
+    }
+    return false;
+  }
+  // check ncsOperatorList: all elements must have length 16
+  for (size_t i = 0; i < ncsOperatorList.size(); ++i) {
+    if ((int)ncsOperatorList[i].size() != 16) {
+      if (verbose) {
+        std::cout << "inconsistent ncsOperatorList idx: "
+            << i << std::endl;
+      }
+      return false;
+    }
+  }
+  // check chain indices in bioAssembly-transforms and entities
+  for (size_t i = 0; i < bioAssemblyList.size(); ++i) {
+    const BioAssembly& ba = bioAssemblyList[i];
+    for (size_t j = 0; j < ba.transformList.size(); ++j) {
+      const Transform & t = ba.transformList[j];
+      if (!hasValidIndices(t.chainIndexList, numChains)) {
+        if (verbose) {
+          std::cout << "inconsistent BioAssemby transform i j: " << i
+              << " " << j << std::endl;
         }
+        return false;
+      }
     }
-    for (size_t i = 0; i < entityList.size(); ++i) {
-        const Entity& ent = entityList[i];
-        if (!hasValidIndices(ent.chainIndexList, numChains)) return false;
+  }
+  for (size_t i = 0; i < entityList.size(); ++i) {
+    const Entity& ent = entityList[i];
+    if (!hasValidIndices(ent.chainIndexList, numChains)) {
+      if (verbose) {
+          std::cout << "inconsistent entity idx: " << i << std::endl;
+      }
+      return false;   
     }
-    // check groups
-    for (size_t i = 0; i < groupList.size(); ++i) {
-        const GroupType& g = groupList[i];
-        const size_t num_atoms = g.formalChargeList.size();
-        if (g.atomNameList.size() != num_atoms) return false;
-        if (g.elementList.size() != num_atoms) return false;
-        if (g.bondAtomList.size() != g.bondOrderList.size() * 2) return false;
-        if (!hasValidIndices(g.bondAtomList, num_atoms)) return false;
+  }
+  // check groups
+  for (size_t i = 0; i < groupList.size(); ++i) {
+    const GroupType& g = groupList[i];
+    const size_t num_atoms = g.formalChargeList.size();
+    if (g.atomNameList.size() != num_atoms) {
+      if (verbose) {
+        std::cout << "inconsistent group::atomNameList size: "
+            << i << std::endl;
+      }
+      return false;
     }
-    // check global bonds
-    if (bondAtomList.size() != bondOrderList.size() * 2) return false;
-    if (!hasValidIndices(bondAtomList, numAtoms)) return false;
-    // check vector sizes
-    if (xCoordList.size() != numAtoms) return false;
-    if (yCoordList.size() != numAtoms) return false;
-    if (zCoordList.size() != numAtoms) return false;
-    if (!hasRightSizeOptional(bFactorList, numAtoms)) return false;
-    if (!hasRightSizeOptional(atomIdList, numAtoms)) return false;
-    if (!hasRightSizeOptional(altLocList, numAtoms)) return false;
-    if (!hasRightSizeOptional(occupancyList, numAtoms)) return false;
-    if (groupIdList.size() != numGroups) return false;
-    if (groupTypeList.size() != numGroups) return false;
-    if (!hasRightSizeOptional(secStructList, numGroups)) return false;
-    if (!hasRightSizeOptional(insCodeList, numGroups)) return false;
-    if (!hasRightSizeOptional(sequenceIndexList, numGroups)) return false;
-    if (chainIdList.size() != numChains) return false;
-    if (!hasRightSizeOptional(chainNameList, numChains)) return false;
-    if (groupsPerChain.size() != numChains) return false;
-    if (chainsPerModel.size() != numModels) return false;
-    // check indices
-    if (!hasValidIndices(groupTypeList, groupList.size())) return false;
-    // collect sequence lengths from entities and use to check
-    std::vector<int32_t> sequenceIndexSize(numChains);
-    for (size_t i = 0; i < entityList.size(); ++i) {
-        const Entity& ent = entityList[i];
-        for (size_t j = 0; j < ent.chainIndexList.size(); ++j) {
-            sequenceIndexSize[ent.chainIndexList[j]] = ent.sequence.length();
+    if (g.elementList.size() != num_atoms) {
+      if (verbose) {
+        std::cout << "inconsistent group::elementList size: "
+            << i << std::endl;
+      }
+      return false;
+    }
+    if (g.bondAtomList.size() != g.bondOrderList.size() * 2) {
+      if (verbose) {
+        std::cout << "inconsistent group::bondAtomList size: "
+            << i << std::endl;
+      }
+      return false;
+    }
+    if (!hasValidIndices(g.bondAtomList, num_atoms)) {
+      if (verbose) {
+        std::cout << "inconsistent group::bondAtomList indicies: "
+            << i << std::endl;
+      }
+      return false;
+    }
+  }
+  // check global bonds
+  if (bondAtomList.size() != bondOrderList.size() * 2) {
+    if (verbose) {
+      std::cout << "inconsistent group::bondAtomList/bondOrderList"
+          << std::endl;
+    }
+    return false;
+  }
+  if (!hasValidIndices(bondAtomList, numAtoms)) {
+    if (verbose) {
+      std::cout << "inconsistent bondAtomList indicies" << std::endl;
+    }
+    return false;
+  }
+  // check vector sizes
+  if ((int)xCoordList.size() != numAtoms) {
+    if (verbose) {
+      std::cout << "inconsistent xCoordList size" << std::endl;
+    }
+    return false;
+  }
+  if ((int)yCoordList.size() != numAtoms) {
+    if (verbose) {
+      std::cout << "inconsistent yCoordList size" << std::endl;
+    }
+    return false;
+  }
+  if ((int)zCoordList.size() != numAtoms) {
+    if (verbose) {
+      std::cout << "inconsistent zCoordList size" << std::endl;
+    }
+    return false;
+  }
+  if (!hasRightSizeOptional(bFactorList, numAtoms)) {
+    if (verbose) {
+      std::cout << "inconsistent bFactorList size" << std::endl;
+    }
+    return false;
+  }
+  if (!hasRightSizeOptional(atomIdList, numAtoms)) {
+    if (verbose) {
+      std::cout << "inconsistent atomIdList size" << std::endl;
+    }
+    return false;
+  }
+  if (!hasRightSizeOptional(altLocList, numAtoms)) {
+    if (verbose) {
+      std::cout << "inconsistent altLocList size" << std::endl;
+    }
+    return false;
+  }
+  if (!hasRightSizeOptional(occupancyList, numAtoms)) {
+    if (verbose) {
+      std::cout << "inconsistent occupancyList size" << std::endl;
+    }
+    return false;
+  }
+  if ((int)groupIdList.size() != numGroups) {
+    if (verbose) {
+      std::cout << "inconsistent groupIdList size" << std::endl;
+    }
+    return false;
+  }
+  if ((int)groupTypeList.size() != numGroups) {
+    if (verbose) {
+      std::cout << "inconsistent groupTypeList size" << std::endl;
+    }
+    return false;
+  }
+  if (!hasRightSizeOptional(secStructList, numGroups)) {
+    if (verbose) {
+      std::cout << "inconsistent secStructList size" << std::endl;
+    }
+    return false;
+  }
+  if (!hasRightSizeOptional(insCodeList, numGroups)) {
+    if (verbose) {
+      std::cout << "inconsistent insCodeList size" << std::endl;
+    }
+    return false;
+  }
+  if (!hasRightSizeOptional(sequenceIndexList, numGroups)) {
+    if (verbose) {
+      std::cout << "inconsistent sequenceIndexList size" << std::endl;
+    }
+    return false;
+  }
+  if ((int)chainIdList.size() != numChains) {
+    if (verbose) {
+      std::cout << "inconsistent chainIdList size" << std::endl;
+    }
+    return false;
+  }
+  if (!hasRightSizeOptional(chainNameList, numChains)) {
+    if (verbose) {
+      std::cout << "inconsistent chainNameList size" << std::endl;
+    }
+    return false;
+  }
+  if ((int)groupsPerChain.size() != numChains) {
+    if (verbose) {
+      std::cout << "inconsistent groupsPerChain size" << std::endl;
+    }
+    return false;
+  }
+  if ((int)chainsPerModel.size() != numModels) {
+    if (verbose) {
+      std::cout << "inconsistent chainsPerModel size" << std::endl;
+    }
+    return false;
+  }
+  // check indices
+  if (!hasValidIndices(groupTypeList, groupList.size())) {
+    if (verbose) {
+      std::cout << "inconsistent groupTypeList size" << std::endl;
+    }
+    return false;
+  }
+  // collect sequence lengths from entities and use to check
+  std::vector<int32_t> sequenceIndexSize(numChains);
+  for (size_t i = 0; i < entityList.size(); ++i) {
+      const Entity& ent = entityList[i];
+      for (size_t j = 0; j < ent.chainIndexList.size(); ++j) {
+          sequenceIndexSize[ent.chainIndexList[j]] = ent.sequence.length();
+      }
+  }
+  // traverse structure for more checks
+  int bond_count = bondOrderList.size();
+  int chain_idx = 0; // will be count at end of loop
+  int group_idx = 0; // will be count at end of loop
+  int atom_idx = 0;  // will be count at end of loop
+  // traverse models
+  for (int model_idx = 0; model_idx < numModels; ++model_idx) {
+    // traverse chains
+    for (int j = 0; j < chainsPerModel[model_idx]; ++j, ++chain_idx) {
+      // check chain names (fixed length)
+      if (chainIdList[chain_idx].size() > chain_name_max_length) {
+        if (verbose) {
+          std::cout << "inconsistent chainIdList size at chain_idx: "
+            << chain_idx << " size: "
+            << chainIdList[chain_idx].size() << std::endl;
         }
-    }
-    // traverse structure for more checks
-    int bond_count = bondOrderList.size();
-    int chain_idx = 0; // will be count at end of loop
-    int group_idx = 0; // will be count at end of loop
-    int atom_idx = 0;  // will be count at end of loop
-    // traverse models
-    for (int model_idx = 0; model_idx < numModels; ++model_idx) {
-        // traverse chains
-        for (int j = 0; j < chainsPerModel[model_idx]; ++j, ++chain_idx) {
-            // check chain names (fixed length)
-            if (chainIdList[chain_idx].size() != 4) return false;
-            if (   !isDefaultValue(chainNameList)
-                && chainNameList[chain_idx].size() != 4) return false;
-            // traverse groups
-            for (int k = 0; k < groupsPerChain[chain_idx]; ++k, ++group_idx) {
-                // check seq. idx
-                if (!isDefaultValue(sequenceIndexList)) {
-                    const int32_t idx = sequenceIndexList[group_idx];
-                    // -1 is ok here
-                    if (idx < -1 || idx >= sequenceIndexSize[chain_idx]) {
-                        return false;
-                    }
-                }
-                // count atoms
-                const GroupType& group = groupList[groupTypeList[group_idx]];
-                atom_idx += group.atomNameList.size();
-                // count bonds
-                bond_count += group.bondOrderList.size();
+        return false;
+      }
+      if (   !isDefaultValue(chainNameList)
+        && chainNameList[chain_idx].size() > chain_name_max_length) {
+        if (verbose) {
+          std::cout << "inconsistent chainNameList size at chain_idx:"
+            << chain_idx << " size: "
+            << chainNameList[chain_idx].size() << std::endl;
+        }
+        return false;
+      }
+      // traverse groups
+      for (int k = 0; k < groupsPerChain[chain_idx]; ++k, ++group_idx) {
+        // check seq. idx
+        if (!isDefaultValue(sequenceIndexList)) {
+          const int32_t idx = sequenceIndexList[group_idx];
+          // -1 is ok here
+          if (idx < -1 || idx >= sequenceIndexSize[chain_idx]) {
+            if (verbose) {
+              std::cout << "inconsistent sequenceIndexSize at"
+                " chain_idx: " << chain_idx << std::endl;
             }
+            return false;
+          }
         }
+        // count atoms
+        const GroupType& group = groupList[groupTypeList[group_idx]];
+        atom_idx += group.atomNameList.size();
+        // count bonds
+        bond_count += group.bondOrderList.size();
+      }
     }
-    // check sizes
-    if (bond_count != numBonds) return false;
-    if (chain_idx != numChains) return false;
-    if (group_idx != numGroups) return false;
-    if (atom_idx != numAtoms) return false;
-
-    return true;
+  }
+  // check sizes
+  if (bond_count != numBonds) {
+    if (verbose) {
+      std::cout << "inconsistent numBonds" << std::endl;
+    }
+    return false;
+  }
+  if (chain_idx != numChains) {
+    if (verbose) {
+      std::cout << "inconsistent numChains" << std::endl;
+    }
+    return false;
+  }
+  if (group_idx != numGroups) {
+    if (verbose) {
+      std::cout << "inconsistent numGroups size" << std::endl;
+    }
+    return false;
+  }
+  if (atom_idx != numAtoms) {
+    if (verbose) {
+      std::cout << "inconsistent numAtoms size" << std::endl;
+    }
+    return false;
+  }
+  // All looks good :)
+  return true;
 }
 
-void StructureData::print(std::string delim) {
-    int modelIndex = 0;
-    int chainIndex = 0;
-    int groupIndex = 0;
-    int atomIndex = 0;
+std::string StructureData::print(std::string delim) {
+  std::ostringstream out;
+  int modelIndex = 0;
+  int chainIndex = 0;
+  int groupIndex = 0;
+  int atomIndex = 0;
+  out << "{\n";
+  out << "  \"mmtfVersion\": \"" << mmtfVersion << "\"\n";
+  out << "  \"mmtfProducer\": \"" << mmtfProducer << "\"\n";
+  out << "}\n";
 
-    //# traverse models
-    for (int i = 0; i < numModels; i++, modelIndex++) {
-        //    # traverse chains
-        for (int j = 0; j < chainsPerModel[modelIndex]; j++, chainIndex++) {
-            //        # traverse groups
-            for (int k = 0; k < groupsPerChain[chainIndex]; k++, groupIndex++) {
-                const mmtf::GroupType& group =
-                        groupList[groupTypeList[groupIndex]];
-                int groupAtomCount = group.atomNameList.size();
+  //# traverse models
+  for (int i = 0; i < numModels; i++, modelIndex++) {
+    //    # traverse chains
+    for (int j = 0; j < chainsPerModel[modelIndex]; j++, chainIndex++) {
+      //        # traverse groups
+      for (int k = 0; k < groupsPerChain[chainIndex]; k++, groupIndex++) {
+        const mmtf::GroupType& group =
+            groupList[groupTypeList[groupIndex]];
+        int groupAtomCount = group.atomNameList.size();
 
-                for (int l = 0; l < groupAtomCount; l++, atomIndex++) {
-                    // ATOM or HETATM
-                    if (is_hetatm(group.chemCompType.c_str()))
-                        std::cout << "HETATM" << delim;
-                    else
-                        std::cout << "ATOM" << delim;
-                    // Atom serial
-                    if ( !mmtf::isDefaultValue(atomIdList) ) {
-                        std::cout << std::setfill('0') << std::setw(6) <<
-                          std::right << atomIdList[atomIndex] << delim;
-                    } else std::cout << "." << delim;
-                    // Atom name
-                    std::cout << group.atomNameList[l] << delim;
-                    // Alternate location
-                    if ( !mmtf::isDefaultValue(altLocList) ) {
-                        if ( altLocList[atomIndex] == ' ' ||
-                             altLocList[atomIndex] == 0x00 )
-                                   std::cout << "." << delim;
-                        else std::cout << altLocList[atomIndex] << delim;
-                    } else std::cout << "." << delim;
-                    // Group name
-                    std::cout << group.groupName << delim;
-                    // Chain
-                    if ( !mmtf::isDefaultValue(chainNameList) ) {
-                        std::cout << chainNameList[chainIndex];
-                        std::cout << delim;
-                    } else std::cout << "." << delim;
-                    // Group serial
-                    std::cout << groupIdList[groupIndex] << delim;
-                    // Insertion code
-                    if ( !mmtf::isDefaultValue(insCodeList) ) {
-                        if ( altLocList[atomIndex] == ' ' ||
-                             altLocList[atomIndex] == 0x00 )
-                                  std::cout << "." << delim;
-                        else std::cout << int(insCodeList[chainIndex]) << delim;
-                    } else std::cout << ". ";
-                    // x, y, z
-                    std::cout << std::setw(8) << std::right << std::fixed <<
-                      std::setprecision(3) <<  xCoordList[atomIndex] << delim;
+        for (int l = 0; l < groupAtomCount; l++, atomIndex++) {
+          // ATOM or HETATM
+          if (is_hetatm(group.chemCompType.c_str()))
+            out << "HETATM" << delim;
+          else
+            out << "ATOM" << delim;
+          // Atom serial
+          if ( !mmtf::isDefaultValue(atomIdList) ) {
+            out << std::setfill('0') << std::setw(6) <<
+             std::right << atomIdList[atomIndex] << delim;
+          } else out << "." << delim;
+          // Atom name
+          out << group.atomNameList[l] << delim;
+          // Alternate location
+          if ( !mmtf::isDefaultValue(altLocList) ) {
+            if ( altLocList[atomIndex] == ' ' ||
+              altLocList[atomIndex] == 0x00 )
+                 out << "." << delim;
+            else out << altLocList[atomIndex] << delim;
+          } else out << "." << delim;
+          // Group name
+          out << group.groupName << delim;
+          // Chain
+          if ( !mmtf::isDefaultValue(chainNameList) ) {
+            out << chainNameList[chainIndex];
+            out << delim;
+          } else out << "." << delim;
+          // Group serial
+          out << groupIdList[groupIndex] << delim;
+          // Insertion code
+          if ( !mmtf::isDefaultValue(insCodeList) ) {
+            if ( altLocList[atomIndex] == ' ' ||
+              altLocList[atomIndex] == 0x00 )
+                 out << "." << delim;
+            else out << int(insCodeList[chainIndex]) << delim;
+          } else out << ". ";
+          // x, y, z
+          out << std::setw(8) << std::right << std::fixed <<
+           std::setprecision(3) <<  xCoordList[atomIndex] << delim;
 
-                    std::cout << std::setw(7) << std::right << std::fixed <<
-                      std::setprecision(3) <<  yCoordList[atomIndex] << delim;
+          out << std::setw(7) << std::right << std::fixed <<
+           std::setprecision(3) <<  yCoordList[atomIndex] << delim;
 
-                    std::cout << std::setw(7) << std::right << std::fixed <<
-                      std::setprecision(3) <<  zCoordList[atomIndex] << delim;
-                    // B-factor
-                    if ( !mmtf::isDefaultValue(bFactorList) ) {
-                        std::cout << bFactorList[atomIndex] << delim;
-                    } else std::cout << "." << delim;
-                    // Occupancy
-                    if ( !mmtf::isDefaultValue(occupancyList) ) {
-                        std::cout << occupancyList[atomIndex] << delim;
-                    } else std::cout << "." << delim;
-                    // Element
-                    std::cout << group.elementList[l] << delim;
-                    // Charge
-                    std::cout << group.formalChargeList[l] << std::endl;
-                }
-            }
+          out << std::setw(7) << std::right << std::fixed <<
+           std::setprecision(3) <<  zCoordList[atomIndex] << delim;
+          // B-factor
+          if ( !mmtf::isDefaultValue(bFactorList) ) {
+            out << bFactorList[atomIndex] << delim;
+          } else out << "." << delim;
+          // Occupancy
+          if ( !mmtf::isDefaultValue(occupancyList) ) {
+            out << occupancyList[atomIndex] << delim;
+          } else out << "." << delim;
+          // Element
+          out << group.elementList[l] << delim;
+          // Charge
+          out << group.formalChargeList[l] << "\n";
         }
+      }
     }
+  }
+  return out.str();
 }
 
 } // mmtf namespace

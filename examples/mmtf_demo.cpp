@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
     mmtf::decodeFromFile(data, filename);
 
     // check if the data is self-consistent
-    if (data.hasConsistentData()) {
+    if (data.hasConsistentData(true)) {
       std::cout << "Successfully read " << filename << ".\n";
       return 0;
     } else {
