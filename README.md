@@ -70,18 +70,6 @@ Example codes:
 ```
 
 Furthermore, we have:
-- data folder: MMTF test set
-- compile_and_run.sh: Convenience script to compile and run an executable with
-                      a single argument. E.g. with demo.cpp:
-```bash
-./compile_and_run.sh <MSGPACK_INCLUDE_PATH> demo.cpp "../mmtf_spec/test-suite/mmtf/173D.mmtf"
-```
-- compile_and_run_all.sh: Similar to compile_and_run.sh, but processing all
-                          .mmtf files in the data folder. E.g. with demo.cpp:
-
-```bash
-./compile_and_run_all.sh <MSGPACK_INCLUDE_PATH> demo.cpp
-```
 
 ## Code documentation
 
