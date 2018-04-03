@@ -8,8 +8,6 @@ option(mmtf_build_examples "Build the examples" OFF)
 
 add_library(MMTFcpp INTERFACE)
 target_compile_features(MMTFcpp INTERFACE cxx_auto_type)
-# TODO Do we want wall on?
-#target_compile_options(MMTFcpp INTERFACE $<$<CXX_COMPILER_ID:GNU>:-Wall>)
 
 target_include_directories(MMTFcpp INTERFACE
 	${CMAKE_CURRENT_SOURCE_DIR}/include

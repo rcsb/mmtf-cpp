@@ -50,7 +50,8 @@ To build the tests + examples we recommend using the following lines:
 git submodule update --init --recursive
 mkdir build
 cd build
-cmake -DBUILD_TESTS=ON -Dmmtf_build_local=ON -Dmmtf_build_examples=ON ..
+cmake -G Ninja -DBUILD_TESTS=ON -Dmmtf_build_local=ON -Dmmtf_build_examples=ON ..
+ninja
 chmod +x ./tests/mmtf_tests
 ./tests/mmtf_tests
 ```
@@ -59,14 +60,18 @@ Example codes:
 - demo.cpp: Loads an MMTF file and checks internal consistency using
             mmtf::StructureData::hasConsistentData.
 ```bash
-./examples/mmtf_demo.cpp ../mmtf_spec/test-suite/mmtf/173D.mmtf
+./examples/mmtf_demo ../mmtf_spec/test-suite/mmtf/173D.mmtf
 ```
 - traverse.cpp: Loads an MMTF file and dumps it in human-readable forms.
-                The json-like output is used in test_compile_and_traverse.sh.
 ```bash
-./examples/mmtf_demo.cpp ../mmtf_spec/test-suite/mmtf/173D.mmtf
-./examples/mmtf_demo.cpp ../mmtf_spec/test-suite/mmtf/173D.mmtf json
-./examples/mmtf_demo.cpp ../mmtf_spec/test-suite/mmtf/173D.mmtf print
+./examples/traverse ../mmtf_spec/test-suite/mmtf/173D.mmtf
+./examples/traverse ../mmtf_spec/test-suite/mmtf/173D.mmtf json
+./examples/traverse ../mmtf_spec/test-suite/mmtf/173D.mmtf print
+```
+
+- print_as_pdb.cpp: Loads an MMTF file and prints it in pdb format.
+```bash
+./examples/print_as_pdb ../mmtf_spec/test-suite/mmtf/173D.mmtf
 ```
 
 ## Code documentation

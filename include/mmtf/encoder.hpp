@@ -70,7 +70,7 @@ template <typename Stream>
 inline void encodeToStream(const StructureData& data, Stream& stream,
     int32_t coord_divider, int32_t occupancy_b_factor_divider,
     int32_t chain_name_max_length) {
-  if (!data.hasConsistentData(chain_name_max_length,true)) {
+  if (!data.hasConsistentData(true,chain_name_max_length)) {
     throw mmtf::EncodeError("mmtf EncoderError, StructureData does not have Consistent data... exiting!");
   }
 

@@ -201,57 +201,8 @@ struct StructureData {
      * @return True if all required fields are set and vector sizes and indices
      *         are consistent.
      */
-    bool hasConsistentData(int32_t chain_name_max_length = 4, bool verbose=false) const;
+    bool hasConsistentData(bool verbose=false, int32_t chain_name_max_length = 4) const;
 
-
-    /**
-     * @brief Check if type is hetatm
-     * @param type   cstring of group.chemCompType
-     * @return True if is a HETATM 
-     * Used when printing this struct, also all chemCompTypes are listed, but
-     * the non-HETATM ones are commented out for reference
-     * Relevant threads:
-     * https://github.com/rcsb/mmtf/issues/28
-     * http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Items/_chem_comp.type.html
-     */
-    int is_hetatm(const char* type) {
-      const char* hetatm_type[] = {
-        "D-BETA-PEPTIDE, C-GAMMA LINKING",
-        "D-GAMMA-PEPTIDE, C-DELTA LINKING",
-        "D-PEPTIDE COOH CARBOXY TERMINUS",
-        "D-PEPTIDE NH3 AMINO TERMINUS",
-        "D-PEPTIDE LINKING",
-        "D-SACCHARIDE",
-        "D-SACCHARIDE 1,4 AND 1,4 LINKING",
-        "D-SACCHARIDE 1,4 AND 1,6 LINKING",
-        "DNA OH 3 PRIME TERMINUS",
-        "DNA OH 5 PRIME TERMINUS",
-        "DNA LINKING",
-        "L-DNA LINKING",
-        "L-RNA LINKING",
-        "L-BETA-PEPTIDE, C-GAMMA LINKING",
-        "L-GAMMA-PEPTIDE, C-DELTA LINKING",
-        "L-PEPTIDE COOH CARBOXY TERMINUS",
-        "L-PEPTIDE NH3 AMINO TERMINUS",
-        //"L-PEPTIDE LINKING",
-        "L-SACCHARIDE",
-        "L-SACCHARIDE 1,4 AND 1,4 LINKING",
-        "L-SACCHARIDE 1,4 AND 1,6 LINKING",
-        "RNA OH 3 PRIME TERMINUS",
-        "RNA OH 5 PRIME TERMINUS",
-        "RNA LINKING",
-        "NON-POLYMER",
-        "OTHER",
-        "PEPTIDE LINKING",
-        "PEPTIDE-LIKE",
-        "SACCHARIDE",
-        0 };
-      for (int i=0; hetatm_type[i]; ++i) {
-        if (strcmp(type,hetatm_type[i]) == 0)
-          return 1;
-      }
-      return 0;
-    }
 
     /**
      * @brief Read out the contents of mmtf::StructureData in a PDB-like fashion
@@ -337,6 +288,17 @@ inline bool isDefaultValue(const std::string& value);
 template <typename T>
 inline void setDefaultValue(T& value);
 
+/**
+ * @brief Check if type is hetatm
+ * @param type   cstring of group.chemCompType
+ * @return True if is a HETATM 
+ * Used when printing this struct, also all chemCompTypes are listed, but
+ * the non-HETATM ones are commented out for reference
+ * Relevant threads:
+ * https://github.com/rcsb/mmtf/issues/28
+ * http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Items/_chem_comp.type.html
+ */
+inline bool is_hetatm(const char* type);
 
 // *************************************************************************
 // IMPLEMENTATION
@@ -425,6 +387,56 @@ inline void setDefaultValue(T& value) {
   value = getDefaultValue<T>();
 }
 
+// HELPERS
+
+/**
+ * @brief Check if type is hetatm
+ * @param type   cstring of group.chemCompType
+ * @return True if is a HETATM 
+ * Used when printing this struct, also all chemCompTypes are listed, but
+ * the non-HETATM ones are commented out for reference
+ * Relevant threads:
+ * https://github.com/rcsb/mmtf/issues/28
+ * http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Items/_chem_comp.type.html
+ */
+bool is_hetatm(const char* type) {
+  const char* hetatm_type[] = {
+    "D-BETA-PEPTIDE, C-GAMMA LINKING",
+    "D-GAMMA-PEPTIDE, C-DELTA LINKING",
+    "D-PEPTIDE COOH CARBOXY TERMINUS",
+    "D-PEPTIDE NH3 AMINO TERMINUS",
+    "D-PEPTIDE LINKING",
+    "D-SACCHARIDE",
+    "D-SACCHARIDE 1,4 AND 1,4 LINKING",
+    "D-SACCHARIDE 1,4 AND 1,6 LINKING",
+    "DNA OH 3 PRIME TERMINUS",
+    "DNA OH 5 PRIME TERMINUS",
+    "DNA LINKING",
+    "L-DNA LINKING",
+    "L-RNA LINKING",
+    "L-BETA-PEPTIDE, C-GAMMA LINKING",
+    "L-GAMMA-PEPTIDE, C-DELTA LINKING",
+    "L-PEPTIDE COOH CARBOXY TERMINUS",
+    "L-PEPTIDE NH3 AMINO TERMINUS",
+    //"L-PEPTIDE LINKING",
+    "L-SACCHARIDE",
+    "L-SACCHARIDE 1,4 AND 1,4 LINKING",
+    "L-SACCHARIDE 1,4 AND 1,6 LINKING",
+    "RNA OH 3 PRIME TERMINUS",
+    "RNA OH 5 PRIME TERMINUS",
+    "RNA LINKING",
+    "NON-POLYMER",
+    "OTHER",
+    "PEPTIDE LINKING",
+    "PEPTIDE-LIKE",
+    "SACCHARIDE",
+    0 };
+  for (int i=0; hetatm_type[i]; ++i) {
+    if (strcmp(type,hetatm_type[i]) == 0) return true;
+  }
+  return false;
+}
+
 // CLASS StructureData
 
 StructureData::StructureData() {
@@ -443,7 +455,7 @@ StructureData::StructureData() {
   mmtfProducer = "mmtf-cpp library (github.com/rcsb/mmtf-cpp)";
 }
 
-bool StructureData::hasConsistentData(int32_t chain_name_max_length, bool verbose) const {
+bool StructureData::hasConsistentData(bool verbose, int32_t chain_name_max_length) const {
   // check unitCell: if given, must be of length 6
   if (!hasRightSizeOptional(unitCell, 6)) {
     if (verbose) {
