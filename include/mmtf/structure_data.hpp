@@ -20,6 +20,7 @@
 #include <limits>
 #include <msgpack.hpp>
 #include <iostream>
+#include <iomanip>
 
 namespace mmtf {
 
@@ -739,10 +740,6 @@ std::string StructureData::print(std::string delim) {
   int chainIndex = 0;
   int groupIndex = 0;
   int atomIndex = 0;
-  out << "{\n";
-  out << "  \"mmtfVersion\": \"" << mmtfVersion << "\"\n";
-  out << "  \"mmtfProducer\": \"" << mmtfProducer << "\"\n";
-  out << "}\n";
 
   //# traverse models
   for (int i = 0; i < numModels; i++, modelIndex++) {
@@ -762,7 +759,7 @@ std::string StructureData::print(std::string delim) {
             out << "ATOM" << delim;
           // Atom serial
           if ( !mmtf::isDefaultValue(atomIdList) ) {
-            out << std::setfill('0') << std::setw(6) <<
+            out << std::setfill('0') << std::internal << std::setw(6) <<
              std::right << atomIdList[atomIndex] << delim;
           } else out << "." << delim;
           // Atom name
@@ -791,14 +788,11 @@ std::string StructureData::print(std::string delim) {
             else out << int(insCodeList[chainIndex]) << delim;
           } else out << ". ";
           // x, y, z
-          out << std::setw(8) << std::right << std::fixed <<
-           std::setprecision(3) <<  xCoordList[atomIndex] << delim;
+          out << std::fixed << std::setprecision(3);
+          out << xCoordList[atomIndex] << delim;
+          out << yCoordList[atomIndex] << delim;
+          out << zCoordList[atomIndex] << delim;
 
-          out << std::setw(7) << std::right << std::fixed <<
-           std::setprecision(3) <<  yCoordList[atomIndex] << delim;
-
-          out << std::setw(7) << std::right << std::fixed <<
-           std::setprecision(3) <<  zCoordList[atomIndex] << delim;
           // B-factor
           if ( !mmtf::isDefaultValue(bFactorList) ) {
             out << bFactorList[atomIndex] << delim;

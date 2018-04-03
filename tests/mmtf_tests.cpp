@@ -79,6 +79,14 @@ TEST_CASE("Test round trip StructureData not working - EncodeError") {
 		sd.numAtoms = 20;
 		REQUIRE_THROWS_AS(mmtf::encodeToFile(sd, "test_mmtf.mmtf"), mmtf::EncodeError);
 	}
+	SECTION("Alter chainIdList") {
+		sd.chainIdList.push_back("xsz");
+		REQUIRE_THROWS_AS(mmtf::encodeToFile(sd, "test_mmtf.mmtf"), mmtf::EncodeError);
+	}
+	SECTION("chainIdList one too large") {
+		sd.chainIdList[0] = "IheartMMTF";
+		REQUIRE_THROWS_AS(mmtf::encodeToFile(sd, "test_mmtf.mmtf"), mmtf::EncodeError);
+	}
 }
 
 

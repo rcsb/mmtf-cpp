@@ -39,33 +39,46 @@ g++ -I<MSGPACK_INCLUDE_PATH> -I<MMTF_INCLUDE_PATH> demo.cpp -o demo.exe
 Here, `<MSGPACK_INCLUDE_PATH>` and `<MMTF_INCLUDE_PATH>` are the paths to the
 "include" directories of MessagePack and this library respectively.
 
+For your more complicated projects, a `CMakeLists.txt` is included for you.
+
 ## Examples and tests
 
-The examples folder contains tests and examples for you to run.
-To test the library on your machine, you can run:
+To build the tests + examples we recommend using the following lines:
+
 ```bash
-./test_compile_and_traverse.sh <MSGPACK_INCLUDE_PATH>
+# download Catch2 testing framework, msgpack-c, and the mmtf-spec test-dataset
+git submodule update --init --recursive
+mkdir build
+cd build
+cmake -DBUILD_TESTS=ON -Dmmtf_build_local=ON -Dmmtf_build_examples=ON ..
+chmod +x ./tests/mmtf_tests
+./tests/mmtf_tests
 ```
-If it concludes stating that the test has passed, it is all good.
 
 Example codes:
 - demo.cpp: Loads an MMTF file and checks internal consistency using
             mmtf::StructureData::hasConsistentData.
+```bash
+./examples/mmtf_demo.cpp ../mmtf_spec/test-suite/mmtf/173D.mmtf
+```
 - traverse.cpp: Loads an MMTF file and dumps it in human-readable forms.
                 The json-like output is used in test_compile_and_traverse.sh.
+```bash
+./examples/mmtf_demo.cpp ../mmtf_spec/test-suite/mmtf/173D.mmtf
+./examples/mmtf_demo.cpp ../mmtf_spec/test-suite/mmtf/173D.mmtf json
+./examples/mmtf_demo.cpp ../mmtf_spec/test-suite/mmtf/173D.mmtf print
+```
 
 Furthermore, we have:
 - data folder: MMTF test set
-- out_json_ref.tar.gz: Reference output generated using the
-                       [mmtf-c library](https://github.com/rcsb/mmtf-c).
-                       This is used in test_compile_and_traverse.sh.
 - compile_and_run.sh: Convenience script to compile and run an executable with
                       a single argument. E.g. with demo.cpp:
 ```bash
-./compile_and_run.sh <MSGPACK_INCLUDE_PATH> demo.cpp "./data/173D.mmtf"
+./compile_and_run.sh <MSGPACK_INCLUDE_PATH> demo.cpp "../mmtf_spec/test-suite/mmtf/173D.mmtf"
 ```
 - compile_and_run_all.sh: Similar to compile_and_run.sh, but processing all
                           .mmtf files in the data folder. E.g. with demo.cpp:
+
 ```bash
 ./compile_and_run_all.sh <MSGPACK_INCLUDE_PATH> demo.cpp
 ```

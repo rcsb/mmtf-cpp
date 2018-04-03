@@ -490,6 +490,7 @@ int main(int argc, char** argv) {
       printf("USAGE: traverse <mmtffile> [<style>]\n");
       printf("-> if style ommited, we output a PDB-like output\n");
       printf("-> if style == 'json', we output a json-dump of all data\n");
+      printf("-> if style == 'print', we output a built-in tab delimited format\n");
       printf("-> else, we output all the data in a verbose, readable form\n");
       return 1;
     }
@@ -502,12 +503,13 @@ int main(int argc, char** argv) {
     if (argc > 2) {
         if (strcmp(argv[2], "json") == 0) {
             json_print(example);
+        } else if (strcmp(argv[2], "print") == 0) {
+            std::cout << example.print() << std::endl;
         } else {
             traverse_main(example);
         }
     } else {
       traverse_pdb_like(example);
     }
-
     return 0;
 }
