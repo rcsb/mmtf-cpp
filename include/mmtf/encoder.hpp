@@ -47,14 +47,14 @@ inline void encodeToStream(const StructureData& data, Stream& stream,
  * Common settings for the divisors are the default values for a loss-less
  * encoding and both set to 10 for a lossy variant.
  */
-inline void encodeToFile(const StructureData& struct_data,
+inline void encodeToFile(const StructureData& data,
     const std::string& filename, int32_t coord_divider = 1000,
     int32_t occupancy_b_factor_divider = 100, int32_t chain_name_max_length  = 4);
 
 // *************************************************************************
 // IMPLEMENTATION
 // *************************************************************************
-inline void encodeToFile(const StructureData& struct_data,
+inline void encodeToFile(const StructureData& data,
     const std::string& filename, int32_t coord_divider,
     int32_t occupancy_b_factor_divider, int32_t chain_name_max_length) {
     // encode to a file
@@ -62,7 +62,7 @@ inline void encodeToFile(const StructureData& struct_data,
     if ( !ofs ) {
         throw EncodeError("Could not open >" + filename + "< for writing, exiting.");
     }
-    encodeToStream(struct_data, ofs);
+    encodeToStream(data, ofs);
 }
 
 
@@ -70,7 +70,7 @@ template <typename Stream>
 inline void encodeToStream(const StructureData& data, Stream& stream,
     int32_t coord_divider, int32_t occupancy_b_factor_divider,
     int32_t chain_name_max_length) {
-  if (!data.hasConsistentData(true,chain_name_max_length)) {
+  if (!data.hasConsistentData(true, chain_name_max_length)) {
     throw mmtf::EncodeError("mmtf EncoderError, StructureData does not have Consistent data... exiting!");
   }
 

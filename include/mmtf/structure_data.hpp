@@ -196,8 +196,8 @@ struct StructureData {
 
     /**
      * @brief Check consistency of structural data.
-     * @param chain_name_max_length   max allowed chain name length
-     * @param errors                  print back you
+     * @param verbose                 Print first error encountered (if any)
+     * @param chain_name_max_length   Max allowed chain name length
      * @return True if all required fields are set and vector sizes and indices
      *         are consistent.
      */
@@ -215,7 +215,7 @@ struct StructureData {
 
     /**
      * @brief compare two StructureData classes
-     * @param delim what to compare to
+     * @param c what to compare to
      */
     bool operator==(StructureData const & c) const {
       return (
@@ -472,7 +472,7 @@ bool StructureData::hasConsistentData(bool verbose, int32_t chain_name_max_lengt
   }
   if (!isValidDateFormatOptional(releaseDate)) {
     if (verbose) {
-      std::cout << "releaseDate" << std::endl;
+      std::cout << "inconsistent releaseDate" << std::endl;
     }
     return false;
   }
