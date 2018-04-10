@@ -7,7 +7,7 @@
 int main(int argc, char** argv) {
     // check arguments
     if (argc < 2) {
-      printf("USAGE: demo <mmtffile>\n");
+      printf("USAGE: mmtf_demo <mmtffile>\n");
       return 1;
     }
 
