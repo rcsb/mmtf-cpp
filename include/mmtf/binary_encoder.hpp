@@ -22,6 +22,12 @@
 
 namespace mmtf {
 
+// *************************************************************************
+// PRIVATE FUNCTIONS (only visible in this header)
+// *************************************************************************
+
+namespace { // private helpers
+
 /**
  * @brief Convert floats to ints via multiplier.
  * @param[in] vec_in        vector of floats
@@ -80,6 +86,12 @@ inline void add_header(std::stringstream & ss, uint32_t array_size, uint32_t cod
  */
 inline std::vector<char> stringstreamToCharVector(std::stringstream & ss);
 
+} // anon ns
+
+// *************************************************************************
+// PUBLIC FUNCTIONS
+// *************************************************************************
+
 /** encode 8 bit int to bytes encoding (type 2)
  * @param[in] vec_in        vector of ints to encode
  * @return cv               char vector of encoded bytes
@@ -130,6 +142,8 @@ inline std::vector<char> encodeDeltaRecursiveFloat(std::vector<float> floats_in,
 // *************************************************************************
 // IMPLEMENTATION
 // *************************************************************************
+
+namespace { // private helpers
 
 inline std::vector<int32_t> convertFloatsToInts(std::vector<float> const & vec_in,
                                             int multiplier) {
@@ -219,6 +233,8 @@ inline std::vector<char> stringstreamToCharVector(std::stringstream & ss) {
   std::vector<char> ret(s.begin(), s.end());
   return ret;
 }
+
+} // anon ns
 
 
 inline std::vector<char> encodeInt8ToByte(std::vector<int8_t> vec_in) {
