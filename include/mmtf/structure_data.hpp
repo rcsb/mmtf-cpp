@@ -786,6 +786,7 @@ std::string StructureData::print(std::string delim) {
           // Group name
           out << group.groupName << delim;
           // Chain
+          out << chainIdList[chainIndex] << delim;
           if ( !mmtf::isDefaultValue(chainNameList) ) {
             out << chainNameList[chainIndex];
             out << delim;
@@ -794,10 +795,10 @@ std::string StructureData::print(std::string delim) {
           out << groupIdList[groupIndex] << delim;
           // Insertion code
           if ( !mmtf::isDefaultValue(insCodeList) ) {
-            if ( altLocList[atomIndex] == ' ' ||
-              altLocList[atomIndex] == 0x00 )
+            if ( insCodeList[groupIndex] == ' ' ||
+              insCodeList[groupIndex] == 0x00 )
                  out << "." << delim;
-            else out << int(insCodeList[chainIndex]) << delim;
+            else out << int(insCodeList[groupIndex]) << delim;
           } else out << ". ";
           // x, y, z
           out << std::fixed << std::setprecision(3);
