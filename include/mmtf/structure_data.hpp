@@ -418,7 +418,7 @@ bool is_hetatm(const char* type) {
     "L-GAMMA-PEPTIDE, C-DELTA LINKING",
     "L-PEPTIDE COOH CARBOXY TERMINUS",
     "L-PEPTIDE NH3 AMINO TERMINUS",
-    //"L-PEPTIDE LINKING",
+    //"L-PEPTIDE LINKING", // All canonical L AA
     "L-SACCHARIDE",
     "L-SACCHARIDE 1,4 AND 1,4 LINKING",
     "L-SACCHARIDE 1,4 AND 1,6 LINKING",
@@ -427,7 +427,7 @@ bool is_hetatm(const char* type) {
     "RNA LINKING",
     "NON-POLYMER",
     "OTHER",
-    "PEPTIDE LINKING",
+    //"PEPTIDE LINKING", // GLY
     "PEPTIDE-LIKE",
     "SACCHARIDE",
     0 };
