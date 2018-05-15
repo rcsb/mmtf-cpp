@@ -19,6 +19,7 @@
 #include <cstring> // low level mem
 #include <sstream>
 #include <limits>
+#include <algorithm>
 
 namespace mmtf {
 
@@ -152,6 +153,7 @@ BinaryDecoder::BinaryDecoder(const msgpack::object& obj, const std::string& key)
     }
     // get data (encoded data is only pointed to and not parsed here)
     const char* bytes = obj.via.bin.ptr;
+
     assignBigendian4(&strategy_, bytes);
     assignBigendian4(&length_, bytes + 4);
     assignBigendian4(&parameter_, bytes + 8);
@@ -399,6 +401,7 @@ void BinaryDecoder::decodeFromBytes_(std::vector<int32_t>& output) {
 }
 // special one: decode to vector of strings
 void BinaryDecoder::decodeFromBytes_(std::vector<std::string>& output) {
+    char NULL_BYTE = 0x00;
     // check parameter
     const int32_t str_len = parameter_;
     checkDivisibleBy_(str_len);
@@ -407,6 +410,7 @@ void BinaryDecoder::decodeFromBytes_(std::vector<std::string>& output) {
     // get data
     for (size_t i = 0; i < output.size(); ++i) {
         output[i].assign(encodedData_ + i * str_len, str_len);
+        output[i].erase(std::remove(output[i].begin(), output[i].end(), NULL_BYTE), output[i].end());
     }
 }
 
