@@ -439,7 +439,7 @@ bool is_hetatm(const char* type) {
 
 // CLASS StructureData
 
-StructureData::StructureData() {
+inline StructureData::StructureData() {
   // no need to do anything with strings and vectors
   setDefaultValue(resolution);
   setDefaultValue(rFree);
@@ -455,7 +455,7 @@ StructureData::StructureData() {
   mmtfProducer = "mmtf-cpp library (github.com/rcsb/mmtf-cpp)";
 }
 
-bool StructureData::hasConsistentData(bool verbose, int32_t chain_name_max_length) const {
+inline bool StructureData::hasConsistentData(bool verbose, int32_t chain_name_max_length) const {
   // check unitCell: if given, must be of length 6
   if (!hasRightSizeOptional(unitCell, 6)) {
     if (verbose) {
@@ -746,7 +746,7 @@ bool StructureData::hasConsistentData(bool verbose, int32_t chain_name_max_lengt
   return true;
 }
 
-std::string StructureData::print(std::string delim) {
+inline std::string StructureData::print(std::string delim) {
   std::ostringstream out;
   int modelIndex = 0;
   int chainIndex = 0;
