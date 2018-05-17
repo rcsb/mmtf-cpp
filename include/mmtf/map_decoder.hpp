@@ -87,7 +87,7 @@ private:
 // IMPLEMENTATION
 // *************************************************************************
 
-MapDecoder::MapDecoder(const msgpack::object& obj) {
+inline MapDecoder::MapDecoder(const msgpack::object& obj) {
     // sanity checks
     if (obj.type != msgpack::type::MAP) {
         throw DecodeError("Expected msgpack type to be MAP");
@@ -129,7 +129,7 @@ void MapDecoder::decode(const std::string& key, bool required, T& target) {
     }
 }
 
-void MapDecoder::checkExtraKeys() {
+inline void MapDecoder::checkExtraKeys() {
     // note: cost of O(N*log(M))) string comparisons (M parsed, N in map)
     // simple set difference algorithm
     std::map<std::string, msgpack::object*>::iterator map_it;
@@ -143,34 +143,34 @@ void MapDecoder::checkExtraKeys() {
     }
 }
 
-void MapDecoder::checkType_(const std::string& key,
-                            msgpack::type::object_type type,
-                            const float& target) {
+inline void MapDecoder::checkType_(const std::string& key,
+                                   msgpack::type::object_type type,
+                                   const float& target) {
     if (type != msgpack::type::FLOAT32 && type != msgpack::type::FLOAT64) {
         std::cerr << "Warning: Non-float type " << type << " found for "
                      "entry " << key << std::endl;
     }
 }
-void MapDecoder::checkType_(const std::string& key,
-                            msgpack::type::object_type type,
-                            const int32_t& target) {
+inline void MapDecoder::checkType_(const std::string& key,
+                                   msgpack::type::object_type type,
+                                   const int32_t& target) {
     if (   type != msgpack::type::POSITIVE_INTEGER
         && type != msgpack::type::NEGATIVE_INTEGER) {
         std::cerr << "Warning: Non-int type " << type << " found for "
                      "entry " << key << std::endl;
     }
 }
-void MapDecoder::checkType_(const std::string& key,
-                            msgpack::type::object_type type,
-                            const char& target) {
+inline void MapDecoder::checkType_(const std::string& key,
+                                   msgpack::type::object_type type,
+                                   const char& target) {
     if (type != msgpack::type::STR) {
         std::cerr << "Warning: Non-string type " << type << " found for "
                      "entry " << key << std::endl;
     }
 }
-void MapDecoder::checkType_(const std::string& key,
-                            msgpack::type::object_type type,
-                            const std::string& target) {
+inline void MapDecoder::checkType_(const std::string& key,
+                                   msgpack::type::object_type type,
+                                   const std::string& target) {
     if (type != msgpack::type::STR) {
         std::cerr << "Warning: Non-string type " << type << " found for "
                      "entry " << key << std::endl;
