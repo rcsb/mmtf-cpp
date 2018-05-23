@@ -169,6 +169,10 @@ void BinaryDecoder::decode(T& target) {
 
 template<>
 inline void BinaryDecoder::decode(std::vector<float>& output) {
+    if(encodedDataLength_ == 0) {
+        return;
+    }
+
     // check strategy to parse
     switch (strategy_) {
     case 1: {
@@ -180,7 +184,7 @@ inline void BinaryDecoder::decode(std::vector<float>& output) {
         std::vector<int32_t> step2;
         decodeFromBytes_(step1);
         runLengthDecode_(step1, step2);
-        decodeDivide_(step2, parameter_, output);
+        decodeDivide_(step2, static_cast<float>(parameter_), output);
         break;
     }
     case 10: {
@@ -189,13 +193,13 @@ inline void BinaryDecoder::decode(std::vector<float>& output) {
         decodeFromBytes_(step1);
         recursiveIndexDecode_(step1, step2);
         deltaDecode_(step2);
-        decodeDivide_(step2, parameter_, output);
+        decodeDivide_(step2, static_cast<float>(parameter_), output);
         break;
     }
     case 11: {
         std::vector<int16_t> step1;
         decodeFromBytes_(step1);
-        decodeDivide_(step1, parameter_, output);
+        decodeDivide_(step1, static_cast<float>(parameter_), output);
         break;
     }
     case 12: {
@@ -203,7 +207,7 @@ inline void BinaryDecoder::decode(std::vector<float>& output) {
         std::vector<int32_t> step2;
         decodeFromBytes_(step1);
         recursiveIndexDecode_(step1, step2);
-        decodeDivide_(step2, parameter_, output);
+        decodeDivide_(step2, static_cast<float>(parameter_), output);
         break;
     }
     case 13: {
@@ -211,7 +215,7 @@ inline void BinaryDecoder::decode(std::vector<float>& output) {
         std::vector<int32_t> step2;
         decodeFromBytes_(step1);
         recursiveIndexDecode_(step1, step2);
-        decodeDivide_(step2, parameter_, output);
+        decodeDivide_(step2, static_cast<float>(parameter_), output);
         break;
     }
     default: {
@@ -228,6 +232,10 @@ inline void BinaryDecoder::decode(std::vector<float>& output) {
 
 template<>
 inline void BinaryDecoder::decode(std::vector<int8_t>& output) {
+    if(encodedDataLength_ == 0) {
+        return;
+    }
+
     // check strategy to parse
     switch (strategy_) {
     case 2: {
@@ -248,6 +256,10 @@ inline void BinaryDecoder::decode(std::vector<int8_t>& output) {
 
 template<>
 inline void BinaryDecoder::decode(std::vector<int16_t>& output) {
+    if(encodedDataLength_ == 0) {
+        return;
+    }
+
     // check strategy to parse
     switch (strategy_) {
     case 3: {
@@ -268,6 +280,10 @@ inline void BinaryDecoder::decode(std::vector<int16_t>& output) {
 
 template<>
 inline void BinaryDecoder::decode(std::vector<int32_t>& output) {
+    if(encodedDataLength_ == 0) {
+        return;
+    }
+
     // check strategy to parse
     switch (strategy_) {
     case 4: {
@@ -313,6 +329,10 @@ inline void BinaryDecoder::decode(std::vector<int32_t>& output) {
 
 template<>
 inline void BinaryDecoder::decode(std::vector<std::string>& output) {
+    if(encodedDataLength_ == 0) {
+        return;
+    }
+
     // check strategy to parse
     switch (strategy_) {
     case 5: {
@@ -333,6 +353,10 @@ inline void BinaryDecoder::decode(std::vector<std::string>& output) {
 
 template<>
 inline void BinaryDecoder::decode(std::vector<char>& output) {
+    if(encodedDataLength_ == 0) {
+        return;
+    }
+
     // check strategy to parse
     switch (strategy_) {
     case 6: {

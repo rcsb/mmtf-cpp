@@ -149,7 +149,7 @@ inline std::vector<int32_t> convertFloatsToInts(std::vector<float> const & vec_i
                                             int multiplier) {
   std::vector<int32_t> vec_out;
   for (size_t i=0; i<vec_in.size(); ++i) {
-    vec_out.push_back(round(vec_in[i]*multiplier));
+    vec_out.push_back(static_cast<int32_t>(round(vec_in[i]*multiplier)));
   }
   return vec_out;
 }
@@ -219,9 +219,9 @@ inline std::vector<int32_t> convertCharsToInts(std::vector<char> const & vec_in)
 }
 
 inline void add_header(std::stringstream & ss, uint32_t array_size, uint32_t codec, uint32_t param /* =0 */) { 
-    uint32_t be_codec = htobe32(codec);
-    uint32_t be_array_size = htobe32(array_size);
-    uint32_t be_param = htobe32(param);
+    uint32_t be_codec = htonl(codec);
+    uint32_t be_array_size = htonl(array_size);
+    uint32_t be_param = htonl(param);
     ss.write(reinterpret_cast< char * >(&be_codec), sizeof(be_codec));
     ss.write(reinterpret_cast< char * >(&be_array_size), sizeof(be_array_size));
     ss.write(reinterpret_cast< char * >(&be_param), sizeof(be_param));
@@ -251,7 +251,7 @@ inline std::vector<char> encodeFourByteInt(std::vector<int32_t> vec_in) {
   std::stringstream ss;
   add_header(ss, vec_in.size(), 4, 0);
   for (size_t i=0; i<vec_in.size(); ++i) {
-    int32_t be_x = htobe32(vec_in[i]);
+    int32_t be_x = htonl(vec_in[i]);
     ss.write(reinterpret_cast< char * >(&be_x), sizeof(be_x));
   }
   return stringstreamToCharVector(ss);
@@ -283,7 +283,7 @@ inline std::vector<char> encodeRunLengthChar(std::vector<char> in_cv) {
   int_vec = convertCharsToInts(in_cv);
   int_vec = runLengthEncode(int_vec);
   for (size_t i=0; i<int_vec.size(); ++i) {
-    int32_t temp = htobe32(int_vec[i]);
+    int32_t temp = htonl(int_vec[i]);
     ss.write(reinterpret_cast< char * >(&temp), sizeof(temp));
   }
   return stringstreamToCharVector(ss);
@@ -296,7 +296,7 @@ inline std::vector<char> encodeRunLengthDeltaInt(std::vector<int32_t> int_vec) {
   int_vec = deltaEncode(int_vec);
   int_vec = runLengthEncode(int_vec);
   for (size_t i=0; i<int_vec.size(); ++i) {
-    int32_t temp = htobe32(int_vec[i]);
+    int32_t temp = htonl(int_vec[i]);
     ss.write(reinterpret_cast< char * >(&temp), sizeof(temp));
   }
   return stringstreamToCharVector(ss);
@@ -308,7 +308,7 @@ inline std::vector<char> encodeRunLengthFloat(std::vector<float> floats_in, int3
   std::vector<int32_t> int_vec = convertFloatsToInts(floats_in, multiplier);
   int_vec = runLengthEncode(int_vec);
   for (size_t i=0; i<int_vec.size(); ++i) {
-    int32_t temp = htobe32(int_vec[i]);
+    int32_t temp = htonl(int_vec[i]);
     ss.write(reinterpret_cast< char * >(&temp), sizeof(temp));
   } 
   return stringstreamToCharVector(ss);
@@ -323,7 +323,7 @@ inline std::vector<char> encodeDeltaRecursiveFloat(std::vector<float> floats_in,
   int_vec = deltaEncode(int_vec);
   int_vec = recursiveIndexEncode(int_vec);
   for (size_t i=0; i<int_vec.size(); ++i) {
-    int16_t temp = htobe16(int_vec[i]);
+    int16_t temp = htons(int_vec[i]);
     ss.write(reinterpret_cast< char * >(&temp), sizeof(temp));
   }
   return stringstreamToCharVector(ss);

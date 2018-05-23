@@ -7,10 +7,11 @@
 // NOTE!!! Margin is set to 0.00001
 // If we ever get more specific data this may need to be altered!
 template <typename T>
-bool approx_equal_vector(const T& a, const T& b) {
+bool approx_equal_vector(const T& a, const T& b, float eps = 0.00001) {
 	if (a.size() != b.size()) return false;
-	for (std::size_t i=0; i<=a.size(); ++i) {
-		if (a[i] != Approx(b[i]).margin(0.00001)) return false;
+	// Please be careful! '<=' is not a good idea!
+	for (std::size_t i=0; i < a.size(); ++i) {
+		if (a[i] != Approx(b[i]).margin(eps)) return false;
 	}
 	return true;
 }
@@ -60,19 +61,19 @@ TEST_CASE("Test round trip StructureData not working - EncodeError") {
 	mmtf::StructureData sd;
 	mmtf::decodeFromFile(sd, basic);
 	SECTION("Alter xCoordList") {
-		sd.xCoordList.push_back(0.334);
+		sd.xCoordList.push_back(0.334f);
 		REQUIRE_THROWS_AS(mmtf::encodeToFile(sd, "test_mmtf.mmtf"), mmtf::EncodeError);
 	}
 	SECTION("Alter yCoordList") {
-		sd.yCoordList.push_back(0.334);
+		sd.yCoordList.push_back(0.334f);
 		REQUIRE_THROWS_AS(mmtf::encodeToFile(sd, "test_mmtf.mmtf"), mmtf::EncodeError);
 	}
 	SECTION("Alter zCoordList") {
-		sd.zCoordList.push_back(0.334);
+		sd.zCoordList.push_back(0.334f);
 		REQUIRE_THROWS_AS(mmtf::encodeToFile(sd, "test_mmtf.mmtf"), mmtf::EncodeError);
 	}
 	SECTION("Alter bFactorList") {
-		sd.bFactorList.push_back(0.334);
+		sd.bFactorList.push_back(0.334f);
 		REQUIRE_THROWS_AS(mmtf::encodeToFile(sd, "test_mmtf.mmtf"), mmtf::EncodeError);
 	}
 	SECTION("Alter numAtoms") {
