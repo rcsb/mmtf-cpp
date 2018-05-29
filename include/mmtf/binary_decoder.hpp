@@ -169,9 +169,6 @@ void BinaryDecoder::decode(T& target) {
 
 template<>
 inline void BinaryDecoder::decode(std::vector<float>& output) {
-    if(encodedDataLength_ == 0) {
-        return;
-    }
 
     // check strategy to parse
     switch (strategy_) {
@@ -232,9 +229,6 @@ inline void BinaryDecoder::decode(std::vector<float>& output) {
 
 template<>
 inline void BinaryDecoder::decode(std::vector<int8_t>& output) {
-    if(encodedDataLength_ == 0) {
-        return;
-    }
 
     // check strategy to parse
     switch (strategy_) {
@@ -256,9 +250,6 @@ inline void BinaryDecoder::decode(std::vector<int8_t>& output) {
 
 template<>
 inline void BinaryDecoder::decode(std::vector<int16_t>& output) {
-    if(encodedDataLength_ == 0) {
-        return;
-    }
 
     // check strategy to parse
     switch (strategy_) {
@@ -280,9 +271,6 @@ inline void BinaryDecoder::decode(std::vector<int16_t>& output) {
 
 template<>
 inline void BinaryDecoder::decode(std::vector<int32_t>& output) {
-    if(encodedDataLength_ == 0) {
-        return;
-    }
 
     // check strategy to parse
     switch (strategy_) {
@@ -329,9 +317,6 @@ inline void BinaryDecoder::decode(std::vector<int32_t>& output) {
 
 template<>
 inline void BinaryDecoder::decode(std::vector<std::string>& output) {
-    if(encodedDataLength_ == 0) {
-        return;
-    }
 
     // check strategy to parse
     switch (strategy_) {
@@ -353,9 +338,6 @@ inline void BinaryDecoder::decode(std::vector<std::string>& output) {
 
 template<>
 inline void BinaryDecoder::decode(std::vector<char>& output) {
-    if(encodedDataLength_ == 0) {
-        return;
-    }
 
     // check strategy to parse
     switch (strategy_) {
@@ -402,27 +384,35 @@ inline void BinaryDecoder::decodeFromBytes_(std::vector<float>& output) {
     // prepare memory
     output.resize(encodedDataLength_ / 4);
     // get data
-    arrayCopyBigendian4(&output[0], encodedData_, encodedDataLength_);
+    if(!output.empty()) {
+        arrayCopyBigendian4(&output[0], encodedData_, encodedDataLength_);
+    }
 }
 inline void BinaryDecoder::decodeFromBytes_(std::vector<int8_t>& output) {
     // prepare memory
     output.resize(encodedDataLength_);
     // get data
-    memcpy(&output[0], encodedData_, encodedDataLength_);
+    if (!output.empty()) {
+        memcpy(&output[0], encodedData_, encodedDataLength_);
+    }
 }
 inline void BinaryDecoder::decodeFromBytes_(std::vector<int16_t>& output) {
     checkDivisibleBy_(2);
     // prepare memory
     output.resize(encodedDataLength_ / 2);
     // get data
-    arrayCopyBigendian2(&output[0], encodedData_, encodedDataLength_);
+    if (!output.empty()) {
+        arrayCopyBigendian2(&output[0], encodedData_, encodedDataLength_);
+    }
 }
 inline void BinaryDecoder::decodeFromBytes_(std::vector<int32_t>& output) {
     checkDivisibleBy_(4);
     // prepare memory
     output.resize(encodedDataLength_ / 4);
     // get data
-    arrayCopyBigendian4(&output[0], encodedData_, encodedDataLength_);
+    if (!output.empty()) {
+        arrayCopyBigendian4(&output[0], encodedData_, encodedDataLength_);
+    }
 }
 // special one: decode to vector of strings
 inline void BinaryDecoder::decodeFromBytes_(std::vector<std::string>& output) {
