@@ -178,6 +178,10 @@ inline void encodeToStream(const StructureData& data, Stream& stream,
   if (!mmtf::isDefaultValue(data.ncsOperatorList)) {
     data_map["ncsOperatorList"] = msgpack::object(data.ncsOperatorList, m_zone);
   }
+  // msgpack::object
+  if (!mmtf::isDefaultValue(data.extraData)) {
+    data_map["extraData"] = msgpack::object(data.extraData, m_zone);
+  }
   msgpack::pack(stream, data_map);
 }
 

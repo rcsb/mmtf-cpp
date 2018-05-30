@@ -9,7 +9,7 @@
 template <typename T>
 bool approx_equal_vector(const T& a, const T& b) {
 	if (a.size() != b.size()) return false;
-	for (std::size_t i=0; i<=a.size(); ++i) {
+	for (std::size_t i=0; i<a.size(); ++i) {
 		if (a[i] != Approx(b[i]).margin(0.00001)) return false;
 	}
 	return true;

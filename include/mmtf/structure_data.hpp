@@ -188,6 +188,7 @@ struct StructureData {
     std::vector<std::string>         chainNameList;
     std::vector<int32_t>             groupsPerChain;
     std::vector<int32_t>             chainsPerModel;
+    msgpack::object                  extraData;
 
     /**
      * @brief Construct object with default values set.
@@ -279,6 +280,8 @@ template <typename T>
 inline bool isDefaultValue(const std::vector<T>& value);
 template <>
 inline bool isDefaultValue(const std::string& value);
+template <>
+inline bool isDefaultValue(const msgpack::object& value);
 
 
 /**
@@ -380,6 +383,10 @@ inline bool isDefaultValue(const std::vector<T>& value) {
 template <>
 inline bool isDefaultValue(const std::string& value) {
   return value.empty();
+}
+template <>
+inline bool isDefaultValue(const msgpack::object& value) {
+  return value.is_nil();
 }
 
 template <typename T>
