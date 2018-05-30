@@ -118,6 +118,7 @@ namespace {
 #include <arpa/inet.h>
 #endif
 
+#ifndef __EMSCRIPTEN__
 void assignBigendian4(void* dst, const char* src) {
     *((uint32_t*)dst) = ntohl(*((uint32_t*)src));
 }
@@ -125,6 +126,20 @@ void assignBigendian4(void* dst, const char* src) {
 void assignBigendian2(void* dst, const char* src) {
     *((uint16_t*)dst) = ntohs(*((uint16_t*)src));
 }
+#else
+// Need to avoid how emscripten handles memory
+void assignBigendian4(void* dst, const char* src) {
+    ((uint8_t*)dst)[0] = src[3];
+    ((uint8_t*)dst)[1] = src[2];
+    ((uint8_t*)dst)[2] = src[1];
+    ((uint8_t*)dst)[3] = src[0];
+}
+
+void assignBigendian2(void* dst, const char* src) {
+    ((uint8_t*)dst)[0] = src[1];
+    ((uint8_t*)dst)[1] = src[0];
+}
+#endif
 
 void arrayCopyBigendian4(void* dst, const char* src, size_t n) {
     for (size_t i = 0; i < n; i += 4) {
