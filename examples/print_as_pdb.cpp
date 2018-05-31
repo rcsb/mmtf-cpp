@@ -9,7 +9,7 @@
 // Please DO NOT USE THIS IN PRODUCTION.
 // *************************************************************************
 
-#include "../include/mmtf.hpp"
+#include <mmtf.hpp>
 
 // C-style libraries used here to keep it close to traverse.c
 #include <stdio.h>

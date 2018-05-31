@@ -76,8 +76,8 @@ inline void decodeFromStream(StructureData& data, Stream& stream) {
 }
 
 inline void decodeFromFile(StructureData& data, const std::string& filename) {
-    // read file
-    std::ifstream ifs(filename.c_str(), std::ifstream::in);
+    // read file, ios::binary is required for windows
+    std::ifstream ifs(filename.c_str(), std::ifstream::in | std::ios::binary);
     if (!ifs.is_open()) {
         throw DecodeError("Could not open file: " + filename);
     }
