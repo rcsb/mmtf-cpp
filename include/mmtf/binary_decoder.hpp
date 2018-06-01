@@ -128,6 +128,10 @@ void assignBigendian2(void* dst, const char* src) {
 }
 #else
 // Need to avoid how emscripten handles memory
+// Note that this will only work on little endian machines, but this should not be a major
+//      an issue as Emscripten only supports little endian hardware.
+// see: https://kripken.github.io/emscripten-site/docs/porting/guidelines/portability_guidelines.html
+
 void assignBigendian4(void* dst, const char* src) {
     ((uint8_t*)dst)[0] = src[3];
     ((uint8_t*)dst)[1] = src[2];
