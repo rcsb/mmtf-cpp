@@ -1,0 +1,43 @@
+version: "{build}"
+
+os: Visual Studio 2015
+
+environment:
+  matrix:
+    - generator: MinGW Makefiles
+      CXX_PATH: 'C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\mingw64\bin'
+      ARCH: x64
+    - generator: MinGW Makefiles
+      CXX_PATH: 'C:\mingw-w64\i686-6.3.0-posix-dwarf-rt_v5-rev1\mingw32\bin'
+      ARCH: x86
+    - generator: Visual Studio 14 2015 Win64
+      ARCH: x64
+    - generator: Visual Studio 14 2015
+      ARCH: x86
+
+clone_folder: c:\mmtf-cpp
+clone_script:
+- cmd: git clone -q --recursive --branch=%APPVEYOR_REPO_BRANCH% https://github.com/%APPVEYOR_REPO_NAME%.git %APPVEYOR_BUILD_FOLDER%
+- cmd: git checkout -qf %APPVEYOR_REPO_COMMIT%
+
+# Uncomment the following lines to enable remote desktop access to Appveyor
+# after a failed build.
+
+# init:
+#   - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+# on_failure:
+#   - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
+install:
+  - ps: . .\ci\setup-appveyor.ps1
+
+build_script:
+  - cd C:\mmtf-cpp
+  - mkdir build
+  - cd build
+  - ps: echo $env:CMAKE_ARGUMENTS
+  - cmake %CMAKE_ARGUMENTS% ..
+  - cmake --build . --config Debug -- %BUILD_ARGUMENTS%
+
+test_script:
+  - ctest --build-config Debug --timeout 300 --output-on-failure

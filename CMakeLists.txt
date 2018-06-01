@@ -32,6 +32,7 @@ endif()
 target_link_libraries(MMTFcpp INTERFACE msgpackc)
 
 if (BUILD_TESTS)
+    enable_testing()
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tests)
 endif()
 

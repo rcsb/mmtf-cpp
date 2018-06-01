@@ -1,4 +1,10 @@
+#ifdef __EMSCRIPTEN__
+#define CATCH_INTERNAL_CONFIG_NO_POSIX_SIGNALS
+#define CATCH_CONFIG_RUNNER
+#else
 #define CATCH_CONFIG_MAIN
+#endif
+
 #include "catch.hpp"
 
 #include <mmtf.hpp>
@@ -9,7 +15,7 @@
 template <typename T>
 bool approx_equal_vector(const T& a, const T& b, float eps = 0.00001) {
 	if (a.size() != b.size()) return false;
-	// Please be careful! '<=' is not a good idea!
+	
 	for (std::size_t i=0; i < a.size(); ++i) {
 		if (a[i] != Approx(b[i]).margin(eps)) return false;
 	}
@@ -455,3 +461,17 @@ TEST_CASE("Test FourByteInt enc/dec") {
 	REQUIRE(decoded_data == decoded_input);
 }
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+
+int main(int argc, char* argv[]) {
+    // Give node.js an access to the root filesystem
+    EM_ASM(
+        FS.mkdir('root');
+        FS.mount(NODEFS, { root: '/' }, 'root');
+        FS.chdir('root/' + process.cwd() + '/../');
+    );
+
+    return Catch::Session().run(argc, argv);
+}
+#endif
