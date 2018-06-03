@@ -202,7 +202,7 @@ struct StructureData {
      * @return True if all required fields are set and vector sizes and indices
      *         are consistent.
      */
-    bool hasConsistentData(bool verbose=false, int32_t chain_name_max_length = 4) const;
+    bool hasConsistentData(bool verbose=false, uint32_t chain_name_max_length = 4) const;
 
 
     /**
@@ -462,7 +462,7 @@ inline StructureData::StructureData() {
   mmtfProducer = "mmtf-cpp library (github.com/rcsb/mmtf-cpp)";
 }
 
-inline bool StructureData::hasConsistentData(bool verbose, int32_t chain_name_max_length) const {
+inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_max_length) const {
   // check unitCell: if given, must be of length 6
   if (!hasRightSizeOptional(unitCell, 6)) {
     if (verbose) {
