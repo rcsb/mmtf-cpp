@@ -8,7 +8,7 @@ libraries. The MMTF specification can be found
 
 ## Prerequisites for using MMTF in C++
 
-You need the headers of the MessagePack C++ library (version 2.1.1 or newer).
+You need the headers of the MessagePack C++ library (version 2.1.5 or newer).
 If you do not have them on your machine already, you can download the "include"
 directory from the
 [MessagePack GitHub repository](https://github.com/msgpack/msgpack-c).
