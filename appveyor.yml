@@ -16,9 +16,6 @@ environment:
       ARCH: x86
 
 clone_folder: c:\mmtf-cpp
-clone_script:
-- cmd: git clone -q --recursive --branch=%APPVEYOR_REPO_BRANCH% https://github.com/%APPVEYOR_REPO_NAME%.git %APPVEYOR_BUILD_FOLDER%
-- cmd: git checkout -qf %APPVEYOR_REPO_COMMIT%
 
 # Uncomment the following lines to enable remote desktop access to Appveyor
 # after a failed build.
@@ -29,6 +26,7 @@ clone_script:
 #   - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 install:
+  - git submodule update --init --recursive
   - ps: . .\ci\setup-appveyor.ps1
 
 build_script:
