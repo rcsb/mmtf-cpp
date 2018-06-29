@@ -517,14 +517,14 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
     const size_t num_atoms = g.formalChargeList.size();
     if (g.atomNameList.size() != num_atoms) {
       if (verbose) {
-        std::cout << "inconsistent group::atomNameList size: "
+        std::cout << "inconsistent group::atomNameList size at idx: "
             << i << std::endl;
       }
       return false;
     }
     if (g.elementList.size() != num_atoms) {
       if (verbose) {
-        std::cout << "inconsistent group::elementList size: "
+        std::cout << "inconsistent group::elementList size at idx: "
             << i << std::endl;
       }
       return false;
@@ -541,8 +541,8 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
     }
     if (!hasValidIndices(g.bondAtomList, num_atoms)) {
       if (verbose) {
-        std::cout << "inconsistent group::bondAtomList indicies: "
-            << i << std::endl;
+        std::cout << "inconsistent group::bondAtomList indices (not all in [0, "
+            << num_atoms - 1 << "]) at idx: " << i << std::endl;
       }
       return false;
     }
@@ -551,7 +551,7 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
   if (!isDefaultValue(bondOrderList)) {
     if (bondAtomList.size() != bondOrderList.size() * 2) {
       if (verbose) {
-          std::cout << "inconsistent bondAtomList size :" <<
+          std::cout << "inconsistent bondAtomList size: " <<
               bondAtomList.size() << " != bondOrderList size(*2): " <<
               bondOrderList.size()*2 << std::endl;
       }
@@ -560,7 +560,8 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
   }
   if (!hasValidIndices(bondAtomList, numAtoms)) {
     if (verbose) {
-      std::cout << "inconsistent bondAtomList indicies" << std::endl;
+      std::cout << "inconsistent bondAtomList indices (not all in [0, "
+          << numAtoms - 1 << "])" << std::endl;
     }
     return false;
   }
@@ -664,8 +665,8 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
   // check indices
   if (!hasValidIndices(groupTypeList, groupList.size())) {
     if (verbose) {
-      std::cout << "inconsistent groupTypeList indicies " <<
-          "Not between 0->" << groupList.size() <<  std::endl;
+      std::cout << "inconsistent groupTypeList indices (not all in [0, "
+          << groupList.size() - 1 << "])" << std::endl;
     }
     return false;
   }

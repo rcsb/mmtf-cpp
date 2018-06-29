@@ -94,6 +94,19 @@ TEST_CASE("Test round trip StructureData not working - EncodeError") {
 		sd.chainIdList[0] = "IheartMMTF";
 		REQUIRE_THROWS_AS(mmtf::encodeToFile(sd, "test_mmtf.mmtf"), mmtf::EncodeError);
 	}
+	SECTION("Alter single groupList entry") {
+		sd.groupList[0].formalChargeList.pop_back();
+		REQUIRE_THROWS_AS(mmtf::encodeToFile(sd, "test_mmtf.mmtf"), mmtf::EncodeError);
+		sd.groupList[0].atomNameList.pop_back();
+		REQUIRE_THROWS_AS(mmtf::encodeToFile(sd, "test_mmtf.mmtf"), mmtf::EncodeError);
+		sd.groupList[0].elementList.pop_back();
+		REQUIRE_THROWS_AS(mmtf::encodeToFile(sd, "test_mmtf.mmtf"), mmtf::EncodeError);
+	}
+	SECTION("Alter groupTypeList") {
+		sd.groupTypeList[0] = 100;
+		REQUIRE_THROWS_AS(mmtf::encodeToFile(sd, "test_mmtf.mmtf"), mmtf::EncodeError);
+	}
+
 }
 
 
