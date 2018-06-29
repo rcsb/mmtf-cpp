@@ -459,20 +459,22 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
   // check unitCell: if given, must be of length 6
   if (!hasRightSizeOptional(unitCell, 6)) {
     if (verbose) {
-      std::cout << "inconsistent unitCell" << std::endl;
+      std::cout << "inconsistent unitCell (unitCell length != 6)" << std::endl;
     }
     return false;
   }
   // check dates
   if (!isValidDateFormatOptional(depositionDate)) {
     if (verbose) {
-      std::cout << "inconsistent depositionDate" << std::endl;
+      std::cout << "inconsistent depositionDate (does not match 'YYYY-MM-DD' "
+          "or empty)" << std::endl;
     }
     return false;
   }
   if (!isValidDateFormatOptional(releaseDate)) {
     if (verbose) {
-      std::cout << "inconsistent releaseDate" << std::endl;
+      std::cout << "inconsistent releaseDate (does not match 'YYYY-MM-DD' "
+          "or empty)" << std::endl;
     }
     return false;
   }
@@ -480,8 +482,8 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
   for (size_t i = 0; i < ncsOperatorList.size(); ++i) {
     if ((int)ncsOperatorList[i].size() != 16) {
       if (verbose) {
-        std::cout << "inconsistent ncsOperatorList idx: "
-            << i << std::endl;
+        std::cout << "inconsistent ncsOperatorList idx: " << i << " found size: "
+            << ncsOperatorList[i].size() << " != 16" << std::endl;
       }
       return false;
     }
@@ -656,7 +658,8 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
   // check indices
   if (!hasValidIndices(groupTypeList, groupList.size())) {
     if (verbose) {
-      std::cout << "inconsistent groupTypeList size" << std::endl;
+      std::cout << "inconsistent groupTypeList indicies " <<
+          "Not between 0->" << groupList.size() <<  std::endl;
     }
     return false;
   }
