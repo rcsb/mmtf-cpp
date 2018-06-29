@@ -461,6 +461,27 @@ TEST_CASE("Test FourByteInt enc/dec") {
 	REQUIRE(decoded_data == decoded_input);
 }
 
+TEST_CASE("Test bondOrderList vs bondAtomList") {
+	std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
+	mmtf::StructureData sd;
+	mmtf::decodeFromFile(sd, working_mmtf);
+	SECTION("Deleting all bondOrderLists") {
+		for (auto & group : sd.groupList) {
+			group.bondOrderList.clear();
+		}
+		sd.bondOrderList.clear();
+		REQUIRE(sd.hasConsistentData(true) == true);
+	}
+	SECTION("altering group bondOrderLists") {
+		sd.groupList[0].bondOrderList.push_back(1);
+		REQUIRE(sd.hasConsistentData(true) == false);
+	}
+	SECTION("altering sd bondOrderLists") {
+		sd.bondOrderList.push_back(1);
+		REQUIRE(sd.hasConsistentData(true) == false);
+	}
+}
+
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 

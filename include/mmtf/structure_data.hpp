@@ -529,12 +529,15 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
       }
       return false;
     }
-    if (g.bondAtomList.size() != g.bondOrderList.size() * 2) {
-      if (verbose) {
-        std::cout << "inconsistent group::bondAtomList size: "
-            << i << std::endl;
+    if (!isDefaultValue(g.bondOrderList)) {
+      if (g.bondAtomList.size() != g.bondOrderList.size() * 2) {
+        if (verbose) {
+          std::cout << "inconsistent group::bondAtomList size: " <<
+              g.bondAtomList.size() << " != group::bondOrderList size(*2): " <<
+              g.bondOrderList.size()*2 << " at idx: " << i << std::endl;
+        }
+        return false;
       }
-      return false;
     }
     if (!hasValidIndices(g.bondAtomList, num_atoms)) {
       if (verbose) {
@@ -545,12 +548,15 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
     }
   }
   // check global bonds
-  if (bondAtomList.size() != bondOrderList.size() * 2) {
-    if (verbose) {
-      std::cout << "inconsistent group::bondAtomList/bondOrderList"
-          << std::endl;
+  if (!isDefaultValue(bondOrderList)) {
+    if (bondAtomList.size() != bondOrderList.size() * 2) {
+      if (verbose) {
+          std::cout << "inconsistent bondAtomList size :" <<
+              bondAtomList.size() << " != bondOrderList size(*2): " <<
+              bondOrderList.size()*2 << std::endl;
+      }
+      return false;
     }
-    return false;
   }
   if (!hasValidIndices(bondAtomList, numAtoms)) {
     if (verbose) {
@@ -672,7 +678,18 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
       }
   }
   // traverse structure for more checks
-  int bond_count = bondOrderList.size();
+  int bond_count_from_atom = 0;
+  int bond_count_from_order = 0;
+  bool all_bond_orderLists_are_default = true;
+  bool all_bond_atomLists_are_default = true;
+  if (!isDefaultValue(bondOrderList)) {
+    all_bond_orderLists_are_default = false;
+    bond_count_from_order = bondOrderList.size();
+  }
+  if (!isDefaultValue(bondAtomList)) {
+    all_bond_atomLists_are_default = false;
+    bond_count_from_atom = bondAtomList.size()/2;
+  }
   int chain_idx = 0; // will be count at end of loop
   int group_idx = 0; // will be count at end of loop
   int atom_idx = 0;  // will be count at end of loop
@@ -716,16 +733,34 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
         const GroupType& group = groupList[groupTypeList[group_idx]];
         atom_idx += group.atomNameList.size();
         // count bonds
-        bond_count += group.bondOrderList.size();
+        if (!isDefaultValue(group.bondOrderList)) {
+          all_bond_orderLists_are_default = false;
+          bond_count_from_order += group.bondOrderList.size();
+        }
+        if (!isDefaultValue(group.bondAtomList)) {
+          all_bond_atomLists_are_default = false;
+          bond_count_from_atom += group.bondAtomList.size()/2;
+        }
+
       }
     }
   }
   // check sizes
-  if (bond_count != numBonds) {
-    if (verbose) {
-      std::cout << "inconsistent numBonds" << std::endl;
+  if (!all_bond_orderLists_are_default) {
+    if (bond_count_from_order != numBonds) {
+      if (verbose) {
+        std::cout << "inconsistent numBonds vs bond order count" << std::endl;
+      }
+      return false;
     }
-    return false;
+  }
+  if (!all_bond_atomLists_are_default) {
+    if (bond_count_from_atom != numBonds) {
+      if (verbose) {
+        std::cout << "inconsistent numBonds vs bond atom list count" << std::endl;
+      }
+      return false;
+    }
   }
   if (chain_idx != numChains) {
     if (verbose) {
