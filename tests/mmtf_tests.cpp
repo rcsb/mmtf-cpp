@@ -94,6 +94,19 @@ TEST_CASE("Test round trip StructureData not working - EncodeError") {
 		sd.chainIdList[0] = "IheartMMTF";
 		REQUIRE_THROWS_AS(mmtf::encodeToFile(sd, "test_mmtf.mmtf"), mmtf::EncodeError);
 	}
+	SECTION("Alter single groupList entry") {
+		sd.groupList[0].formalChargeList.pop_back();
+		REQUIRE_THROWS_AS(mmtf::encodeToFile(sd, "test_mmtf.mmtf"), mmtf::EncodeError);
+		sd.groupList[0].atomNameList.pop_back();
+		REQUIRE_THROWS_AS(mmtf::encodeToFile(sd, "test_mmtf.mmtf"), mmtf::EncodeError);
+		sd.groupList[0].elementList.pop_back();
+		REQUIRE_THROWS_AS(mmtf::encodeToFile(sd, "test_mmtf.mmtf"), mmtf::EncodeError);
+	}
+	SECTION("Alter groupTypeList") {
+		sd.groupTypeList[0] = 100;
+		REQUIRE_THROWS_AS(mmtf::encodeToFile(sd, "test_mmtf.mmtf"), mmtf::EncodeError);
+	}
+
 }
 
 
@@ -459,6 +472,27 @@ TEST_CASE("Test FourByteInt enc/dec") {
 	REQUIRE(encoded_data == encoded_output);
 	REQUIRE(decoded_data.size() ==  decoded_input.size());
 	REQUIRE(decoded_data == decoded_input);
+}
+
+TEST_CASE("Test bondOrderList vs bondAtomList") {
+	std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
+	mmtf::StructureData sd;
+	mmtf::decodeFromFile(sd, working_mmtf);
+	SECTION("Deleting all bondOrderLists") {
+		for (auto & group : sd.groupList) {
+			group.bondOrderList.clear();
+		}
+		sd.bondOrderList.clear();
+		REQUIRE(sd.hasConsistentData(true) == true);
+	}
+	SECTION("altering group bondOrderLists") {
+		sd.groupList[0].bondOrderList.push_back(1);
+		REQUIRE(sd.hasConsistentData(true) == false);
+	}
+	SECTION("altering sd bondOrderLists") {
+		sd.bondOrderList.push_back(1);
+		REQUIRE(sd.hasConsistentData(true) == false);
+	}
 }
 
 #ifdef __EMSCRIPTEN__
