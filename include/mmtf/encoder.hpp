@@ -66,17 +66,19 @@ inline void encodeToFile(const StructureData& data,
 }
 
 
-template <typename Stream>
-inline void encodeToStream(const StructureData& data, Stream& stream,
-    int32_t coord_divider, int32_t occupancy_b_factor_divider,
-    int32_t chain_name_max_length) {
+/**
+ * @brief Encode an MMTF data structure into a map of msgpack objects
+ */
+inline std::map<std::string, msgpack::object>
+encodeToMap(const StructureData& data, msgpack::zone& m_zone,
+    int32_t coord_divider = 1000, int32_t occupancy_b_factor_divider = 100,
+    int32_t chain_name_max_length = 4) {
   if (!data.hasConsistentData(true, chain_name_max_length)) {
     throw mmtf::EncodeError("mmtf EncoderError, StructureData does not have Consistent data... exiting!");
   }
 
 
   std::map<std::string, msgpack::object> data_map;
-  msgpack::zone m_zone;
   // std::string
   data_map["mmtfVersion"] = msgpack::object(data.mmtfVersion, m_zone);
   data_map["mmtfProducer"] = msgpack::object(data.mmtfProducer, m_zone);
@@ -178,9 +180,19 @@ inline void encodeToStream(const StructureData& data, Stream& stream,
   if (!mmtf::isDefaultValue(data.ncsOperatorList)) {
     data_map["ncsOperatorList"] = msgpack::object(data.ncsOperatorList, m_zone);
   }
-  msgpack::pack(stream, data_map);
+  return data_map;
 }
 
+
+template <typename Stream>
+inline void encodeToStream(const StructureData& data, Stream& stream,
+    int32_t coord_divider, int32_t occupancy_b_factor_divider,
+    int32_t chain_name_max_length) {
+  msgpack::zone _zone;
+  auto data_map = encodeToMap(data, _zone, coord_divider,
+      occupancy_b_factor_divider, chain_name_max_length);
+  msgpack::pack(stream, data_map);
+}
 
 } // mmtf namespace
 
