@@ -17,8 +17,6 @@
 #include "errors.hpp"
 #include "structure_data.hpp"
 
-#include <algorithm>
-#include <iterator>
 #include <vector>
 
 namespace mmtf
@@ -48,14 +46,16 @@ public:
   {
     m_atom2groupType.reserve(data.numAtoms);
 
-    for (auto groupType : data.groupTypeList) {
+    for (size_t i = 0; i < data.groupTypeList.size(); ++i) {
+      int32_t groupType = data.groupTypeList[i];
+
       // sanity check
       if (m_atomOffsets[groupType] != -1) {
         throw EncodeError("groupTypeList has duplicates");
       }
 
-      auto atomOffset = m_atom2groupType.size();
-      auto groupSize = data.groupList[groupType].atomNameList.size();
+      size_t atomOffset = m_atom2groupType.size();
+      size_t groupSize = data.groupList[groupType].atomNameList.size();
 
       m_atomOffsets[groupType] = atomOffset;
       m_atom2groupType.resize(atomOffset + groupSize, groupType);
@@ -78,8 +78,8 @@ public:
       return false;
 
     if (m_atom2groupType[atom1] == m_atom2groupType[atom2]) {
-      auto groupType = m_atom2groupType[atom1];
-      auto& group = m_data->groupList[groupType];
+      int32_t groupType = m_atom2groupType[atom1];
+      GroupType& group = m_data->groupList[groupType];
       group.bondAtomList.emplace_back(atom1 - m_atomOffsets[groupType]);
       group.bondAtomList.emplace_back(atom2 - m_atomOffsets[groupType]);
       group.bondOrderList.emplace_back(order);
@@ -103,20 +103,20 @@ public:
  */
 inline void compressGroupList(StructureData& data)
 {
-  auto& groupList = data.groupList;
-  auto& groupTypeList = data.groupTypeList;
-
-  size_t n_old = groupList.size();
+  size_t n_old = data.groupList.size();
   size_t i_free = 0;
   std::vector<size_t> idremap(n_old, 0);
 
   for (size_t i = 1; i < n_old; ++i) {
-    auto it = std::find(groupList.begin(), groupList.end(), groupList[i]);
-    size_t i_found = std::distance(groupList.begin(), it);
+    size_t i_found = 0;
+
+    while (i_found < i && !(data.groupList[i] == data.groupList[i_found])) {
+      ++i_found;
+    }
 
     if (i_found == i) {
       if (i_free != 0) {
-        groupList[i_free] = std::move(groupList[i]);
+        data.groupList[i_free] = data.groupList[i]; // std::move possible with C++11
         i_found = i_free;
         ++i_free;
       }
@@ -128,10 +128,10 @@ inline void compressGroupList(StructureData& data)
   }
 
   if (i_free != 0) {
-    groupList.resize(i_free);
+    data.groupList.resize(i_free);
 
-    for (size_t i = 0; i < groupTypeList.size(); ++i) {
-      groupTypeList[i] = idremap[groupTypeList[i]];
+    for (size_t i = 0; i < data.groupTypeList.size(); ++i) {
+      data.groupTypeList[i] = idremap[data.groupTypeList[i]];
     }
   }
 }
