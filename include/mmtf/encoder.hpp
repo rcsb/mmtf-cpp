@@ -21,15 +21,29 @@
 namespace mmtf {
 
 /**
- * @brief Encode an MMTF data structure into a stream.
+ * @brief Encode an MMTF data structure into a file.
  * @param[in] data          MMTF data structure to be stored
- * @param[in] stream        Stream to encode to
+ * @param[in] filename      Path to file to load
  * @param[in] coord_divider               Divisor for coordinates
  * @param[in] occupancy_b_factor_divider  Divisor for occupancy and b-factor
  * @param[in] chain_name_max_length       Max. length for chain name strings
- * @throw mmtf::EncodeError if an error occured
+ * @throw mmtf::EncodeError if an error occurred
+ *
  * Common settings for the divisors are the default values for a loss-less
  * encoding and both set to 10 for a lossy variant.
+ */
+inline void encodeToFile(const StructureData& data,
+    const std::string& filename, int32_t coord_divider = 1000,
+    int32_t occupancy_b_factor_divider = 100,
+    int32_t chain_name_max_length  = 4);
+
+/**
+ * @brief Encode an MMTF data structure into a stream.
+ * @param[in] data          MMTF data structure to be stored
+ * @param[in] stream        Stream to encode to
+ *
+ * Other parameters and behavior are as in ::encodeToFile, but this enables you
+ * to store the data to other types of storage.
  */
 template <typename Stream>
 inline void encodeToStream(const StructureData& data, Stream& stream,
@@ -37,19 +51,18 @@ inline void encodeToStream(const StructureData& data, Stream& stream,
     int32_t chain_name_max_length = 4);
 
 /**
- * @brief Encode an MMTF data structure into a file.
- * @param[in] data          MMTF data structure to be stored
- * @param[in] filename      Path to file to load
- * @param[in] coord_divider               Divisor for coordinates
- * @param[in] occupancy_b_factor_divider  Divisor for occupancy and b-factor
- * @param[in] chain_name_max_length       Max. length for chain name strings
- * @throw mmtf::EncodeError if an error occured
- * Common settings for the divisors are the default values for a loss-less
- * encoding and both set to 10 for a lossy variant.
+ * @brief Encode an MMTF data structure into a map of msgpack objects.
+ * @param[in] data     MMTF data structure to be stored
+ * @param[in] m_zone   msgpack::zone object to use
+ * @return             Object which can be modified and passed to msgpack::pack
+ *
+ * Other parameters and behavior are as in ::encodeToFile, but this enables you
+ * to add additional fields before packing.
  */
-inline void encodeToFile(const StructureData& data,
-    const std::string& filename, int32_t coord_divider = 1000,
-    int32_t occupancy_b_factor_divider = 100, int32_t chain_name_max_length  = 4);
+inline std::map<std::string, msgpack::object>
+encodeToMap(const StructureData& data, msgpack::zone& m_zone,
+    int32_t coord_divider = 1000, int32_t occupancy_b_factor_divider = 100,
+    int32_t chain_name_max_length = 4);
 
 // *************************************************************************
 // IMPLEMENTATION
@@ -65,14 +78,20 @@ inline void encodeToFile(const StructureData& data,
     encodeToStream(data, ofs);
 }
 
+template <typename Stream>
+inline void encodeToStream(const StructureData& data, Stream& stream,
+    int32_t coord_divider, int32_t occupancy_b_factor_divider,
+    int32_t chain_name_max_length) {
+  msgpack::zone _zone;
+  auto data_map = encodeToMap(data, _zone, coord_divider,
+      occupancy_b_factor_divider, chain_name_max_length);
+  msgpack::pack(stream, data_map);
+}
 
-/**
- * @brief Encode an MMTF data structure into a map of msgpack objects
- */
 inline std::map<std::string, msgpack::object>
 encodeToMap(const StructureData& data, msgpack::zone& m_zone,
-    int32_t coord_divider = 1000, int32_t occupancy_b_factor_divider = 100,
-    int32_t chain_name_max_length = 4) {
+    int32_t coord_divider, int32_t occupancy_b_factor_divider,
+    int32_t chain_name_max_length) {
   if (!data.hasConsistentData(true, chain_name_max_length)) {
     throw mmtf::EncodeError("mmtf EncoderError, StructureData does not have Consistent data... exiting!");
   }
@@ -181,17 +200,6 @@ encodeToMap(const StructureData& data, msgpack::zone& m_zone,
     data_map["ncsOperatorList"] = msgpack::object(data.ncsOperatorList, m_zone);
   }
   return data_map;
-}
-
-
-template <typename Stream>
-inline void encodeToStream(const StructureData& data, Stream& stream,
-    int32_t coord_divider, int32_t occupancy_b_factor_divider,
-    int32_t chain_name_max_length) {
-  msgpack::zone _zone;
-  auto data_map = encodeToMap(data, _zone, coord_divider,
-      occupancy_b_factor_divider, chain_name_max_length);
-  msgpack::pack(stream, data_map);
 }
 
 } // mmtf namespace
