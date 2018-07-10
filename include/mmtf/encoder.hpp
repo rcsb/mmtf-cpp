@@ -84,9 +84,8 @@ inline void encodeToStream(const StructureData& data, Stream& stream,
     int32_t coord_divider, int32_t occupancy_b_factor_divider,
     int32_t chain_name_max_length) {
   msgpack::zone _zone;
-  auto data_map = encodeToMap(data, _zone, coord_divider,
-      occupancy_b_factor_divider, chain_name_max_length);
-  msgpack::pack(stream, data_map);
+  msgpack::pack(stream, encodeToMap(data, _zone, coord_divider,
+              occupancy_b_factor_divider, chain_name_max_length));
 }
 
 inline std::map<std::string, msgpack::object>
