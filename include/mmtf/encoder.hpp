@@ -75,7 +75,8 @@ inline void encodeToFile(const StructureData& data,
     if ( !ofs ) {
         throw EncodeError("Could not open >" + filename + "< for writing, exiting.");
     }
-    encodeToStream(data, ofs);
+    encodeToStream(data, ofs, coord_divider,
+      occupancy_b_factor_divider, chain_name_max_length);
 }
 
 template <typename Stream>
