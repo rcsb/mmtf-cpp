@@ -11,7 +11,8 @@
 //
 // *************************************************************************
 
-#pragma once
+#ifndef MMTF_EXPORT_HELPERS_H
+#define MMTF_EXPORT_HELPERS_H
 
 #include "errors.hpp"
 #include "structure_data.hpp"
@@ -136,5 +137,7 @@ inline void compressGroupList(StructureData& data)
 }
 
 } // namespace mmtf
+
+#endif
 
 // vi:sw=2:expandtab
