@@ -80,13 +80,13 @@ public:
     if (m_atom2groupType[atom1] == m_atom2groupType[atom2]) {
       int32_t groupType = m_atom2groupType[atom1];
       GroupType& group = m_data->groupList[groupType];
-      group.bondAtomList.emplace_back(atom1 - m_atomOffsets[groupType]);
-      group.bondAtomList.emplace_back(atom2 - m_atomOffsets[groupType]);
-      group.bondOrderList.emplace_back(order);
+      group.bondAtomList.push_back(atom1 - m_atomOffsets[groupType]);
+      group.bondAtomList.push_back(atom2 - m_atomOffsets[groupType]);
+      group.bondOrderList.push_back(order);
     } else {
-      m_data->bondAtomList.emplace_back(atom1);
-      m_data->bondAtomList.emplace_back(atom2);
-      m_data->bondOrderList.emplace_back(order);
+      m_data->bondAtomList.push_back(atom1);
+      m_data->bondAtomList.push_back(atom2);
+      m_data->bondOrderList.push_back(order);
     }
 
     ++m_data->numBonds;
