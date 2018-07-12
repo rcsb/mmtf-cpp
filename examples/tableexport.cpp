@@ -17,6 +17,8 @@
 #include <iostream>
 #include <string>
 
+#define ARRAYEND(a) ((a) + sizeof(a) / sizeof(a)[0])
+
 /*
  * Atom table of example "ALA-GLY-ALA" tripeptide
  */
@@ -71,46 +73,43 @@ struct Bond {
 int main(int argc, char** argv)
 {
   mmtf::StructureData data;
-  mmtf::GroupType* residue = nullptr;
-  const Atom * prevatom = nullptr;
+  mmtf::GroupType* residue = NULL;
+  const Atom* prevatom = NULL;
 
   // start new model
-  data.chainsPerModel.emplace_back(0);
+  data.chainsPerModel.push_back(0);
 
   // add atoms
-  for (const auto& atom : atomarray) {
-    data.xCoordList.emplace_back(atom.x);
-    data.yCoordList.emplace_back(atom.y);
-    data.zCoordList.emplace_back(atom.z);
-
-    const auto& chain = atom.chain;
-    int residue_number = atom.residue_number;
+  for (const Atom* atom = atomarray; atom != ARRAYEND(atomarray); ++atom) {
+    data.xCoordList.push_back(atom->x);
+    data.yCoordList.push_back(atom->y);
+    data.zCoordList.push_back(atom->z);
 
     bool is_same_residue = false;
-    bool is_same_chain = prevatom && prevatom->chain == chain;
+    bool is_same_chain = prevatom && prevatom->chain == atom->chain;
 
     if (!is_same_chain) {
       data.chainsPerModel.back() += 1;
-      data.groupsPerChain.emplace_back(0); // increment with every group
-      data.chainIdList.emplace_back(chain);
+      data.groupsPerChain.push_back(0); // increment with every group
+      data.chainIdList.push_back(atom->chain);
     } else {
-      is_same_residue = prevatom && prevatom->residue_number == residue_number;
+      is_same_residue = prevatom && prevatom->residue_number == atom->residue_number;
     }
 
     if (!is_same_residue) {
       data.groupsPerChain.back() += 1;
-      data.groupTypeList.emplace_back(data.groupList.size());
-      data.groupIdList.emplace_back(residue_number);
-      data.groupList.emplace_back();
+      data.groupTypeList.push_back(data.groupList.size());
+      data.groupIdList.push_back(atom->residue_number);
+      data.groupList.resize(data.groupList.size() + 1);
       residue = &data.groupList.back();
-      residue->groupName = atom.residue_name;
+      residue->groupName = atom->residue_name;
     }
 
-    residue->formalChargeList.emplace_back(atom.formal_charge);
-    residue->atomNameList.emplace_back(atom.atom_name);
-    residue->elementList.emplace_back(atom.element);
+    residue->formalChargeList.push_back(atom->formal_charge);
+    residue->atomNameList.push_back(atom->atom_name);
+    residue->elementList.push_back(atom->element);
 
-    prevatom = &atom;
+    prevatom = atom;
   }
 
   data.numAtoms = data.xCoordList.size();
@@ -122,8 +121,8 @@ int main(int argc, char** argv)
   mmtf::BondAdder bondadder(data);
 
   // add bonds
-  for (const auto& bond : bondarray) {
-    bondadder(bond.atom1, bond.atom2, bond.order);
+  for (const Bond* bond = bondarray; bond != ARRAYEND(bondarray); ++bond) {
+    bondadder(bond->atom1, bond->atom2, bond->order);
   }
 
   std::cout << "INFO numBonds (total): " << data.numBonds << std::endl;
