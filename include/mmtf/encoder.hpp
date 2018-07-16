@@ -199,6 +199,10 @@ encodeToMap(const StructureData& data, msgpack::zone& m_zone,
   if (!mmtf::isDefaultValue(data.ncsOperatorList)) {
     data_map["ncsOperatorList"] = msgpack::object(data.ncsOperatorList, m_zone);
   }
+  // msgpack::object
+  if (!mmtf::isDefaultValue(data.extraData)) {
+    data_map["extraData"] = msgpack::object(data.extraData, m_zone);
+  }
   return data_map;
 }
 
