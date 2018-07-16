@@ -155,6 +155,10 @@ struct convert<mmtf::StructureData> {
         md.decode("chainNameList", false, data.chainNameList);
         md.decode("groupsPerChain", true, data.groupsPerChain);
         md.decode("chainsPerModel", true, data.chainsPerModel);
+        // We must treat extraData differently because converting only creates
+        // a shallow copy.
+        md.decode("extraData", false, data.extraData);
+        data.extraData  = msgpack::object(data.extraData, data.msgpack_zone);
         md.checkExtraKeys();
         return obj;
     }

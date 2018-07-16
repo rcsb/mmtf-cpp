@@ -75,6 +75,9 @@ private:
                     const char& target);
     void checkType_(const std::string& key, msgpack::type::object_type type,
                     const std::string& target);
+    void checkType_(const std::string& key,
+                    msgpack::type::object_type type,
+                    const msgpack::object& target);
     template <typename T>
     void checkType_(const std::string& key, msgpack::type::object_type type,
                     const std::vector<T>& target);
@@ -176,6 +179,14 @@ inline void MapDecoder::checkType_(const std::string& key,
                      "entry " << key << std::endl;
     }
 }
+inline void MapDecoder::checkType_(const std::string& key,
+                                   msgpack::type::object_type type,
+                                   const msgpack::object& target) {
+    // Should we check Type of msgpack object? it assumes the type of the obj
+    // it holds... If we decide that it must be of type MAP, this is where we
+    // would check.
+}
+
 template <typename T>
 void MapDecoder::checkType_(const std::string& key,
                             msgpack::type::object_type type,
