@@ -494,6 +494,35 @@ TEST_CASE("Test bondOrderList vs bondAtomList") {
 	}
 }
 
+TEST_CASE("extraData field") {
+	std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
+	mmtf::StructureData sd, sd2;
+	mmtf::decodeFromFile(sd, working_mmtf);
+
+	// Add an extraData field to structureData
+	std::map<std::string, msgpack::object> extra_data_map, extra_data_map_out;
+	msgpack::zone zone;
+
+	std::vector<int> clist, clist_in;
+	for (std::size_t i=0; i<256; ++i) {
+		clist.push_back((int)i);
+	}
+	extra_data_map["256_atomColorList"] = msgpack::object(clist, zone);
+
+	sd.extraData = msgpack::object(extra_data_map, zone);
+
+	mmtf::encodeToFile(sd, "test_extraData.mmtf");
+	mmtf::decodeFromFile(sd2, "test_extraData.mmtf");
+
+	// convert extraData into extra_data_map
+	sd2.extraData.convert(extra_data_map_out);
+
+	// Retrieve our 256 color list via convert
+	extra_data_map_out["256_atomColorList"].convert(clist_in);
+	REQUIRE(clist == clist_in);
+
+}
+
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 

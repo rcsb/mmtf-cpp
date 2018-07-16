@@ -158,10 +158,9 @@ struct convert<mmtf::StructureData> {
         // We must treat extraData differently because it stays as a
         // msgpack::object and converting only creates a shallow copy.
         md.decode("extraData", false, data.extraData);
-        msgpack::zone z;
-        data.extraData  = msgpack::object(data.extraData, z);
+        data.extraData  = msgpack::object(data.extraData, data.msgpack_zone);
         md.checkExtraKeys();
-        return obj;
+       return obj;
     }
 };
 

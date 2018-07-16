@@ -189,6 +189,8 @@ struct StructureData {
     std::vector<int32_t>             groupsPerChain;
     std::vector<int32_t>             chainsPerModel;
     msgpack::object                  extraData;
+    // extraData requires msgpack_zone for copy constructor
+    msgpack::zone                    msgpack_zone;
 
     /**
      * @brief Construct object with default values set.
