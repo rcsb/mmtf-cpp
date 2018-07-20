@@ -156,10 +156,12 @@ struct convert<mmtf::StructureData> {
         md.decode("groupsPerChain", true, data.groupsPerChain);
         md.decode("chainsPerModel", true, data.chainsPerModel);
         // extraProperties (application specific stuff)
+        md.decode("bondProperties", false, data.bondProperties);
         md.decode("atomProperties", false, data.atomProperties);
         md.decode("groupProperties", false, data.groupProperties);
         md.decode("chainProperties", false, data.chainProperties);
         md.decode("modelProperties", false, data.modelProperties);
+        md.decode("structureProperties", false, data.structureProperties);
         md.decode("extraProperties", false, data.extraProperties);
         md.checkExtraKeys();
         return obj;
