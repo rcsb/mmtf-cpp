@@ -12,6 +12,9 @@
 #ifndef MMTF_BINARY_ENCODER_H
 #define MMTF_BINARY_ENCODER_H
 #include <math.h>
+#include <vector>
+#include <string>
+#include <sstream>
 
 // byteorder functions
 #ifdef WIN32

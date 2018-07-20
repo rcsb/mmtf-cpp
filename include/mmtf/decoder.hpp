@@ -13,9 +13,9 @@
 #ifndef MMTF_DECODER_H
 #define MMTF_DECODER_H
 
-#include "structure_data.hpp"
-#include "errors.hpp"
-#include "msgpack_decoder.hpp"
+#include <mmtf/structure_data.hpp>
+#include <mmtf/errors.hpp>
+#include <mmtf/msgpack_decoder.hpp>
 
 #include <msgpack.hpp>
 #include <fstream>

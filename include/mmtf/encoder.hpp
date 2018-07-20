@@ -12,11 +12,12 @@
 #ifndef MMTF_ENCODER_H
 #define MMTF_ENCODER_H
 
-#include "structure_data.hpp"
-#include "errors.hpp"
-#include "object_encoders.hpp"
-#include "binary_encoder.hpp"
+#include <mmtf/structure_data.hpp>
+#include <mmtf/errors.hpp>
+#include <mmtf/object_encoders.hpp>
+#include <mmtf/binary_encoder.hpp>
 #include <string>
+#include <fstream>
 
 namespace mmtf {
 
@@ -199,9 +200,21 @@ encodeToMap(const StructureData& data, msgpack::zone& m_zone,
   if (!mmtf::isDefaultValue(data.ncsOperatorList)) {
     data_map["ncsOperatorList"] = msgpack::object(data.ncsOperatorList, m_zone);
   }
-  // msgpack::object
-  if (!mmtf::isDefaultValue(data.extraData)) {
-    data_map["extraData"] = msgpack::object(data.extraData, m_zone);
+  // extraProperties
+  if (!mmtf::isDefaultValue(data.atomProperties)) {
+    data_map["atomProperties"] = msgpack::object(data.atomProperties, m_zone);
+  }
+  if (!mmtf::isDefaultValue(data.groupProperties)) {
+    data_map["groupProperties"] = msgpack::object(data.groupProperties, m_zone);
+  }
+  if (!mmtf::isDefaultValue(data.chainProperties)) {
+    data_map["chainProperties"] = msgpack::object(data.chainProperties, m_zone);
+  }
+  if (!mmtf::isDefaultValue(data.modelProperties)) {
+    data_map["modelProperties"] = msgpack::object(data.modelProperties, m_zone);
+  }
+  if (!mmtf::isDefaultValue(data.extraProperties)) {
+    data_map["extraProperties"] = msgpack::object(data.extraProperties, m_zone);
   }
   return data_map;
 }

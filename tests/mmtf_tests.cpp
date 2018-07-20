@@ -496,44 +496,41 @@ TEST_CASE("Test bondOrderList vs bondAtomList") {
 }
 
 
-TEST_CASE("extraData field") {
+TEST_CASE("atomProperties field") {
 	std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
 	mmtf::StructureData sd, sd2;
 	mmtf::decodeFromFile(sd, working_mmtf);
 	/// Pack
 
-	// Add an extraData field to structureData
-	std::map<std::string, msgpack::object> extra_data_map, extra_data_map_out;
+	// Add an atomProperties field to structureData
+	std::map<std::string, msgpack::object> atom_data_map;
 
-	std::vector<int> clist, clist_in;
+	std::vector<int> clist;
+	std::vector<int> clist_in, clist_in_decoded;
 	for (std::size_t i=0; i<256; ++i) {
 		clist.push_back((int)i);
 	}
 	// msgpack zones have weird lifetimes, make sure you use the zone
 	// in StructureData to avoid any weird errors
-	extra_data_map["256_atomColorList"] = msgpack::object(clist, sd.msgpack_zone);
+	sd.atomProperties["256_atomColorList"] = msgpack::object(clist, sd.msgpack_zone);
+	sd.atomProperties["256_atomColorList_encoded"] = msgpack::object(mmtf::encodeRunLengthDeltaInt(clist), sd.msgpack_zone);
 
-	sd.extraData = msgpack::object(extra_data_map, sd.msgpack_zone);
+	mmtf::encodeToFile(sd, "test_atomProperties.mmtf");
 
-	mmtf::encodeToFile(sd, "test_extraData.mmtf");
 	/// Done Pack
 	/// Start Unpack
-	mmtf::decodeFromFile(sd2, "test_extraData.mmtf");
-
-	// convert extraData into extra_data_map
-	// To be safe, first check if it is a map. this is just an example.
-	if (sd2.extraData.type == msgpack::type::object_type::MAP) {
-		sd2.extraData.convert(extra_data_map_out);
-	} else {
-		std::cerr << "DO NOT HAVE msgpack type of MAP" << std::endl;
-		// let user handle this 
-	}
+	mmtf::decodeFromFile(sd2, "test_atomProperties.mmtf");
 
 	// Retrieve our 256 color list via convert
-	// if you want you can check the type again here! just like above
-	extra_data_map_out["256_atomColorList"].convert(clist_in);
+	sd.atomProperties["256_atomColorList"].convert(clist_in);
+
+	// If we encode our 256 color list we can use a binary decoder to get it
+	mmtf::BinaryDecoder bd(sd.atomProperties["256_atomColorList_encoded"]);
+	bd.decode(clist_in_decoded);
+
 	/// Done Unpack
 	REQUIRE(clist == clist_in);
+	REQUIRE(clist_in == clist_in_decoded);
 }
 
 #ifdef __EMSCRIPTEN__

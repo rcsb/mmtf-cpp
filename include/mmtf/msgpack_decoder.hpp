@@ -13,9 +13,9 @@
 #ifndef MMTF_MSGPACK_DECODER_H
 #define MMTF_MSGPACK_DECODER_H
 
-#include "structure_data.hpp"
-#include "map_decoder.hpp"
-#include "errors.hpp"
+#include <mmtf/structure_data.hpp>
+#include <mmtf/map_decoder.hpp>
+#include <mmtf/errors.hpp>
 
 #include <msgpack.hpp>
 
@@ -155,10 +155,12 @@ struct convert<mmtf::StructureData> {
         md.decode("chainNameList", false, data.chainNameList);
         md.decode("groupsPerChain", true, data.groupsPerChain);
         md.decode("chainsPerModel", true, data.chainsPerModel);
-        // We must treat extraData differently because converting only creates
-        // a shallow copy.
-        md.decode("extraData", false, data.extraData);
-        data.extraData  = msgpack::object(data.extraData, data.msgpack_zone);
+        // extraProperties (application specific stuff)
+        md.decode("atomProperties", false, data.atomProperties);
+        md.decode("groupProperties", false, data.groupProperties);
+        md.decode("chainProperties", false, data.chainProperties);
+        md.decode("modelProperties", false, data.modelProperties);
+        md.decode("extraProperties", false, data.extraProperties);
         md.checkExtraKeys();
         return obj;
     }

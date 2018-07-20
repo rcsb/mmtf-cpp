@@ -188,9 +188,12 @@ struct StructureData {
     std::vector<std::string>         chainNameList;
     std::vector<int32_t>             groupsPerChain;
     std::vector<int32_t>             chainsPerModel;
-    msgpack::object                  extraData;
-    // extraData requires msgpack_zone for copy constructor
-    msgpack::zone                    msgpack_zone;
+    msgpack::zone                     msgpack_zone;
+    std::map<std::string, msgpack::object>   atomProperties;
+    std::map<std::string, msgpack::object>   groupProperties;
+    std::map<std::string, msgpack::object>   chainProperties;
+    std::map<std::string, msgpack::object>   modelProperties;
+    std::map<std::string, msgpack::object>   extraProperties;
 
     /**
      * @brief Construct object with default values set.
@@ -283,7 +286,7 @@ inline bool isDefaultValue(const std::vector<T>& value);
 template <>
 inline bool isDefaultValue(const std::string& value);
 template <>
-inline bool isDefaultValue(const msgpack::object& value);
+inline bool isDefaultValue(const std::map<std::string, msgpack::object>& value);
 
 
 /**
@@ -387,8 +390,8 @@ inline bool isDefaultValue(const std::string& value) {
   return value.empty();
 }
 template <>
-inline bool isDefaultValue(const msgpack::object& value) {
-  return value.is_nil();
+inline bool isDefaultValue(const std::map<std::string, msgpack::object>& value) {
+  return value.empty();
 }
 
 template <typename T>
