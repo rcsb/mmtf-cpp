@@ -188,14 +188,14 @@ struct StructureData {
     std::vector<std::string>         chainNameList;
     std::vector<int32_t>             groupsPerChain;
     std::vector<int32_t>             chainsPerModel;
-    msgpack::zone                     msgpack_zone;
-    std::map<std::string, msgpack::object>   bondProperties;
-    std::map<std::string, msgpack::object>   atomProperties;
-    std::map<std::string, msgpack::object>   groupProperties;
-    std::map<std::string, msgpack::object>   chainProperties;
-    std::map<std::string, msgpack::object>   modelProperties;
-    std::map<std::string, msgpack::object>   structureProperties;
-    std::map<std::string, msgpack::object>   extraProperties;
+    msgpack::zone                    msgpack_zone;
+    msgpack::object                  bondProperties;
+    msgpack::object                  atomProperties;
+    msgpack::object                  groupProperties;
+    msgpack::object                  chainProperties;
+    msgpack::object                  modelProperties;
+    msgpack::object                  structureProperties;
+    msgpack::object                  extraProperties;
 
     /**
      * @brief Construct object with default values set.

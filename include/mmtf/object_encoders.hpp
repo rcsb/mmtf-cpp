@@ -11,7 +11,7 @@
 #ifndef MMTF_OBJECT_ENCODERS_H
 #define MMTF_OBJECT_ENCODERS_H
 
-#include <mmtf/structure_data.hpp>
+#include "structure_data.hpp"
 #include <msgpack.hpp>
 
 namespace msgpack {

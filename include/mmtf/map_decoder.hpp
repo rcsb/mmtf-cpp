@@ -13,9 +13,9 @@
 #ifndef MMTF_MAP_DECODER_H
 #define MMTF_MAP_DECODER_H
 
-#include <mmtf/structure_data.hpp>
-#include <mmtf/binary_decoder.hpp>
-#include <mmtf/errors.hpp>
+#include "structure_data.hpp"
+#include "binary_decoder.hpp"
+#include "errors.hpp"
 
 #include <msgpack.hpp>
 #include <map>
@@ -77,7 +77,7 @@ private:
                     const std::string& target);
     void checkType_(const std::string& key,
                     msgpack::type::object_type type,
-                    const std::map<std::string, msgpack::object>& target);
+                    const msgpack::object& target);
     template <typename T>
     void checkType_(const std::string& key, msgpack::type::object_type type,
                     const std::vector<T>& target);
@@ -181,7 +181,7 @@ inline void MapDecoder::checkType_(const std::string& key,
 }
 inline void MapDecoder::checkType_(const std::string& key,
                                    msgpack::type::object_type type,
-                                   const std::map<std::string, msgpack::object>& target) {
+                                   const msgpack::object&)  {
     // Should we check Type of msgpack object? I don't think there's many
     // checks to be done here
 }

@@ -13,8 +13,8 @@
 #ifndef MMTF_BINARY_DECODER_H
 #define MMTF_BINARY_DECODER_H
 
-#include <mmtf/structure_data.hpp>
-#include <mmtf/errors.hpp>
+#include "mmtf/structure_data.hpp"
+#include "mmtf/errors.hpp"
 
 #include <msgpack.hpp>
 #include <cstring> // low level mem

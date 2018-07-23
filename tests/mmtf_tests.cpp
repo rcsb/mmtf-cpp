@@ -502,18 +502,21 @@ TEST_CASE("atomProperties field") {
 	mmtf::decodeFromFile(sd, working_mmtf);
 	/// Pack
 
-	// Add an atomProperties field to structureData
-	std::map<std::string, msgpack::object> atom_data_map;
+	// 1. Add an atomProperties field to structureData
+	std::map<std::string, msgpack::object> atom_data_map_in;
 
-	std::vector<int> clist;
-	std::vector<int> clist_in, clist_in_decoded;
+	std::vector<int> clist_out;
+	std::vector<int> clist_in, clist_in_decoded, nothing;
 	for (std::size_t i=0; i<256; ++i) {
-		clist.push_back((int)i);
+		clist_out.push_back((int)i);
 	}
-	// msgpack zones have weird lifetimes, make sure you use the zone
+	// 2. msgpack zones have weird lifetimes, make sure you use the zone
 	// in StructureData to avoid any weird errors
-	sd.atomProperties["256_atomColorList"] = msgpack::object(clist, sd.msgpack_zone);
-	sd.atomProperties["256_atomColorList_encoded"] = msgpack::object(mmtf::encodeRunLengthDeltaInt(clist), sd.msgpack_zone);
+	atom_data_map_in["256_atomColorList"] = msgpack::object(clist_out, sd.msgpack_zone);
+	atom_data_map_in["256_atomColorList_encoded"] = msgpack::object(mmtf::encodeRunLengthDeltaInt(clist_out), sd.msgpack_zone);
+
+	// 3. pack into final object
+	sd.atomProperties = msgpack::object(atom_data_map_in, sd.msgpack_zone);
 
 	mmtf::encodeToFile(sd, "test_atomProperties.mmtf");
 
@@ -522,15 +525,17 @@ TEST_CASE("atomProperties field") {
 	mmtf::decodeFromFile(sd2, "test_atomProperties.mmtf");
 
 	// Retrieve our 256 color list via convert
-	sd.atomProperties["256_atomColorList"].convert(clist_in);
-
-	// If we encode our 256 color list we can use a binary decoder to get it
-	mmtf::BinaryDecoder bd(sd.atomProperties["256_atomColorList_encoded"]);
-	bd.decode(clist_in_decoded);
+	mmtf::MapDecoder atomProperties_MD(sd2.atomProperties);
+	atomProperties_MD.decode("256_atomColorList", true, clist_in);
+	atomProperties_MD.decode("256_atomColorList_encoded", true, clist_in_decoded);
 
 	/// Done Unpack
-	REQUIRE(clist == clist_in);
+	REQUIRE(clist_out == clist_in);
 	REQUIRE(clist_in == clist_in_decoded);
+
+	// you would catch mmtf::DecodeError if you wanted continue even after using
+	// required=true.
+	REQUIRE_THROWS_AS(atomProperties_MD.decode("NONEXISTANT", true, nothing), mmtf::DecodeError);
 }
 
 #ifdef __EMSCRIPTEN__
