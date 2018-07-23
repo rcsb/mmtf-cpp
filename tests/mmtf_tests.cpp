@@ -514,7 +514,7 @@ TEST_CASE("Test export_helpers") {
 		for (size_t j = 0; j < i; ++j) {
 			if (sd.groupTypeList[i] == sd.groupTypeList[j]) {
 				sd.groupTypeList[i] = sd.groupList.size();
-				sd.groupList.emplace_back(sd.groupList[sd.groupTypeList[j]]);
+				sd.groupList.push_back(sd.groupList[sd.groupTypeList[j]]);
 				break;
 			}
 		}
