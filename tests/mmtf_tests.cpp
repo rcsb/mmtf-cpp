@@ -8,6 +8,7 @@
 #include "catch.hpp"
 
 #include <mmtf.hpp>
+#include <mmtf/export_helpers.hpp>
 
 
 // NOTE!!! Margin is set to 0.00001
@@ -495,6 +496,85 @@ TEST_CASE("Test bondOrderList vs bondAtomList") {
 	}
 }
 
+TEST_CASE("Test export_helpers") {
+	std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/3NJW.mmtf";
+	mmtf::StructureData sd;
+	mmtf::decodeFromFile(sd, working_mmtf);
+	size_t numbonds_ref = sd.numBonds;
+	std::vector<int32_t> bonddata;
+
+	// test requirement: groupTypeList has duplicates
+	REQUIRE(sd.groupTypeList.size() != sd.groupList.size());
+
+	// must throw with duplicates
+	REQUIRE_THROWS_AS(mmtf::BondAdder(sd), mmtf::EncodeError);
+
+	// make groupTypeList non-duplicate
+	for (size_t i = 1; i < sd.groupTypeList.size(); ++i) {
+		for (size_t j = 0; j < i; ++j) {
+			if (sd.groupTypeList[i] == sd.groupTypeList[j]) {
+				sd.groupTypeList[i] = sd.groupList.size();
+				sd.groupList.push_back(sd.groupList[sd.groupTypeList[j]]);
+				break;
+			}
+		}
+	}
+
+	// test assert: groupTypeList has no duplicates anymore
+	REQUIRE(sd.groupTypeList.size() == sd.groupList.size());
+
+	// remove group bonds
+	size_t offset = 0;
+	for (auto groupType : sd.groupTypeList) {
+		auto & group = sd.groupList[groupType];
+		for (size_t i = 0; i < group.bondOrderList.size(); ++i) {
+			bonddata.push_back(group.bondAtomList[i * 2] + offset);
+			bonddata.push_back(group.bondAtomList[i * 2 + 1] + offset);
+			bonddata.push_back(group.bondOrderList[i]);
+			--sd.numBonds;
+		}
+		offset += group.atomNameList.size();
+		group.bondAtomList.clear();
+		group.bondOrderList.clear();
+	}
+
+	// remove global bonds
+	for (size_t i = 0; i < sd.bondOrderList.size(); ++i) {
+		bonddata.push_back(sd.bondAtomList[i * 2]);
+		bonddata.push_back(sd.bondAtomList[i * 2 + 1]);
+		bonddata.push_back(sd.bondOrderList[i]);
+		--sd.numBonds;
+	}
+	sd.bondAtomList.clear();
+	sd.bondOrderList.clear();
+
+	// test assert: all bonds have been transferred to `bonddata`
+	REQUIRE(bonddata.size() == numbonds_ref * 3);
+	REQUIRE(sd.numBonds == 0);
+	REQUIRE(sd.hasConsistentData(true));
+
+	// re-add bonds
+	mmtf::BondAdder bondadder(sd);
+	for (size_t i = 0; i < bonddata.size(); i += 3) {
+		REQUIRE(bondadder(bonddata[i], bonddata[i + 1], bonddata[i + 2]));
+	}
+	REQUIRE(sd.numBonds == numbonds_ref);
+	REQUIRE(sd.hasConsistentData(true));
+
+	// re-compress groupTypeList
+	mmtf::compressGroupList(sd);
+	REQUIRE(sd.groupTypeList.size() != sd.groupList.size());
+	REQUIRE(sd.hasConsistentData(true));
+
+	// compare with original data
+	mmtf::StructureData sd_ref;
+	mmtf::decodeFromFile(sd_ref, working_mmtf);
+	REQUIRE(sd_ref.bondAtomList == sd.bondAtomList);
+	REQUIRE(sd_ref.bondOrderList == sd.bondOrderList);
+	REQUIRE(sd_ref.groupTypeList == sd.groupTypeList);
+	REQUIRE(sd_ref.groupList == sd.groupList);
+}
+
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 
@@ -509,3 +589,5 @@ int main(int argc, char* argv[]) {
     return Catch::Session().run(argc, argv);
 }
 #endif
+
+// vi:noexpandtab:sw=4:ts=4

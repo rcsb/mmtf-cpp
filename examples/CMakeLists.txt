@@ -1,7 +1,7 @@
 
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 
-SET(executables mmtf_demo traverse print_as_pdb)
+SET(executables mmtf_demo traverse print_as_pdb tableexport)
 
 foreach(exe ${executables})
 	add_executable(${exe} ${exe}.cpp)
