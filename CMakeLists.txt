@@ -6,6 +6,8 @@ project(mmtf-cpp VERSION 1.0.0 LANGUAGES CXX)
 option(mmtf_build_local "Use the submodule dependencies for building" OFF)
 option(mmtf_build_examples "Build the examples" OFF)
 
+option(mmtf_install_system "Install mmtf to ${CMAKE_INSTALL_PREFIX}/include" OFF)
+
 add_library(MMTFcpp INTERFACE)
 target_compile_features(MMTFcpp INTERFACE cxx_auto_type)
 
@@ -38,4 +40,11 @@ endif()
 
 if (mmtf_build_examples)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/examples)
+endif()
+
+if (mmtf_install_system)
+    install(
+        DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
+        DESTINATION  "/include"
+        FILES_MATCHING PATTERN "*.hpp")
 endif()

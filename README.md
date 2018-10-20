@@ -41,6 +41,30 @@ Here, `<MSGPACK_INCLUDE_PATH>` and `<MMTF_INCLUDE_PATH>` are the paths to the
 
 For your more complicated projects, a `CMakeLists.txt` is included for you.
 
+## Installation
+This is a header only project, there is no compilation necessary.  If you want to use it in your project you can
+download this repo and add `-I/full/path/to/mmtf-cpp/include` to your `g++` or `clang++` command.  
+*REMINDER* This project depends on [msgpack-c](https://github.com/msgpack/msgpack-c), you must also install that to your system
+or add the `msgpack-c` include directory to your g++ command as well.  
+
+You can also perform a system wide installation with `cmake` and `ninja` (or `make`).  This is generally how you would
+install something for a `Docker` image.
+to do so:
+```bash
+mkdir build
+cd build
+cmake -G Ninja -Dmmtf_install_system=ON ..
+sudo ninja install
+```
+
+`cmake` automatically sets the installation directory to `/usr/local/include`, if you want to install it to another `*include/` directory
+run `cmake` with the command:
+```bash
+cmake -G Ninja -Dmmtf_install_system=ON -DCMAKE_INSTALL_PREFIX=/home/me/local ..
+```
+Be aware that `/include` is added to the end of `DCMAKE_INSTALL_PREFIX` and that is where your files are installed. ie the above would install at `/home/me/local/include/`
+
+
 ## Examples and tests
 
 To build the tests + examples we recommend using the following lines:
