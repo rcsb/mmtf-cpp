@@ -3,7 +3,7 @@
 // Licensed under the MIT License (see accompanying LICENSE file).
 //
 // The author of this code is: Daniel Farrell
-//
+// 
 // Based on mmtf_python, adapted to c++ standards 2018
 //
 // *************************************************************************
@@ -15,7 +15,7 @@
 
 // byteorder functions
 #ifdef WIN32
-#include <winsock2.h>
+#include <Winsock2.h>
 #else
 #include <arpa/inet.h>
 #endif
@@ -139,6 +139,12 @@ inline std::vector<char> encodeRunLengthFloat(std::vector<float> floats_in, int3
  */
 inline std::vector<char> encodeDeltaRecursiveFloat(std::vector<float> floats_in, int32_t multiplier);
 
+/** encode Run-Length 8bit int encoding (type 16)
+ * @param[in] floats_in     vector of ints
+ * @return cv               char vector of encoded bytes
+ */
+inline std::vector<char> encodeRunLengthInt8(std::vector<int8_t> int8_vec);
+
 // *************************************************************************
 // IMPLEMENTATION
 // *************************************************************************
@@ -160,7 +166,7 @@ inline std::vector<int32_t> deltaEncode(std::vector<int32_t> const & vec_in) {
   if (vec_in.size() == 0) return vec_out;
   vec_out.push_back(vec_in[0]);
   for (int32_t i=1; i< (int)vec_in.size(); ++i) {
-    vec_out.push_back(vec_in[i]-vec_in[i-1]);
+    vec_out.push_back(vec_in[i]-vec_in[i-1]); 
   }
   return vec_out;
 }
@@ -218,7 +224,7 @@ inline std::vector<int32_t> convertCharsToInts(std::vector<char> const & vec_in)
   return vec_out;
 }
 
-inline void add_header(std::stringstream & ss, uint32_t array_size, uint32_t codec, uint32_t param /* =0 */) {
+inline void add_header(std::stringstream & ss, uint32_t array_size, uint32_t codec, uint32_t param /* =0 */) { 
     uint32_t be_codec = htonl(codec);
     uint32_t be_array_size = htonl(array_size);
     uint32_t be_param = htonl(param);
@@ -310,10 +316,9 @@ inline std::vector<char> encodeRunLengthFloat(std::vector<float> floats_in, int3
   for (size_t i=0; i<int_vec.size(); ++i) {
     int32_t temp = htonl(int_vec[i]);
     ss.write(reinterpret_cast< char * >(&temp), sizeof(temp));
-  }
+  } 
   return stringstreamToCharVector(ss);
 }
-
 
 
 inline std::vector<char> encodeDeltaRecursiveFloat(std::vector<float> floats_in, int32_t multiplier) {
@@ -329,5 +334,18 @@ inline std::vector<char> encodeDeltaRecursiveFloat(std::vector<float> floats_in,
   return stringstreamToCharVector(ss);
 }
 
+
+inline std::vector<char> encodeRunLengthInt8(std::vector<int8_t> int8_vec) {
+  std::stringstream ss;
+  add_header(ss, int8_vec.size(), 16, 0);
+  std::vector<int32_t> int_vec = runLengthEncode(int8_vec);
+  for (size_t i=0; i<int_vec.size(); ++i) {
+    int32_t temp = htonl(int_vec[i]);
+    ss.write(reinterpret_cast< char * >(&temp), sizeof(temp));
+  } 
+  return stringstreamToCharVector(ss);
+}
+
 } // mmtf namespace
 #endif
+

@@ -28,7 +28,7 @@ namespace mmtf {
  * @brief MMTF spec version which this library implements
  */
 #define MMTF_SPEC_VERSION_MAJOR 1
-#define MMTF_SPEC_VERSION_MINOR 0
+#define MMTF_SPEC_VERSION_MINOR 1
 
 /**
  * @brief Get string representation of MMTF spec version implemented here
@@ -52,6 +52,7 @@ struct GroupType { // NOTE: can't use MSGPACK_DEFINE_MAP due to char
     std::vector<std::string>  elementList;
     std::vector<int32_t>      bondAtomList;
     std::vector<int8_t>       bondOrderList;
+    std::vector<int8_t>       bondResonanceList;
     std::string               groupName;
     char                      singleLetterCode;
     std::string               chemCompType;
@@ -63,9 +64,55 @@ struct GroupType { // NOTE: can't use MSGPACK_DEFINE_MAP due to char
         elementList == c.elementList &&
         bondAtomList == c.bondAtomList &&
         bondOrderList == c.bondOrderList &&
+        bondResonanceList == c.bondResonanceList &&
         groupName == c.groupName &&
         singleLetterCode == c.singleLetterCode &&
         chemCompType == c.chemCompType);
+    }
+   
+    std::string
+    as_string() const {
+      ostringstream ss;
+      ss << "groupName: " << groupName << " ";
+      ss << "singleLetterCode: " << singleLetterCode << " ";
+      ss << "chemCompType: " << chemCompType << "\n";
+      ss << "AtomNameList: [";
+      for (std::size_t i=0; i=<atomNameList.size(); ++i) {
+        if (i == atomNameList.size()-1) ss << atomNameList[i];
+        else ss << atomNameList[i] << ", ";
+      }
+      ss << "]\n";
+      ss << "elementList: [";
+      for (std::size_t i=0; i=<elementList.size(); ++i) {
+        if (i == elementList.size()-1) ss << elementList[i];
+        else ss << elementList[i] << ", ";
+      }
+      ss << "]\n";
+      ss << "formalChargeList: [";
+      for (std::size_t i=0; i=<formalChargeList.size(); ++i) {
+        if (i == formalChargeList.size()-1) ss << formalChargeList[i];
+        else ss << formalChargeList[i] << ", ";
+      }
+      ss << "]\n";
+      ss << "bondAtomList: [";
+      for (std::size_t i=0; i=<bondAtomList.size(); ++i) {
+        if (i == bondAtomList.size()-1) ss << bondAtomList[i];
+        else ss << bondAtomList[i] << ", ";
+      }
+      ss << "]\n";
+      ss << "bondOrderList: [";
+      for (std::size_t i=0; i=<bondOrderList.size(); ++i) {
+        if (i == bondOrderList.size()-1) ss << bondOrderList[i];
+        else ss << bondOrderList[i] << ", ";
+      }
+      ss << "]\n";
+      ss << "bondResonanceList: [";
+      for (std::size_t i=0; i=<bondResonanceList.size(); ++i) {
+        if (i == bondResonanceList.size()-1) ss << bondResonanceList[i];
+        else ss << bondResonanceList[i] << ", ";
+      }
+      ss << "]\n";
+      return ss.str();
     }
 };
 
@@ -88,6 +135,22 @@ struct Entity {
         sequence == c.sequence);
     }
 
+    std::string
+    as_string() const {
+      ostringstream ss;
+      ss << "description: " << description;
+      ss << "type: " << type;
+      ss << "sequence:\n" << sequence;
+      ss << "chainIndexList: [";
+      for (std::size_t i=0; i=<chainIndexList.size(); ++i) {
+        if (i == chainIndexList.size()-1) ss << chainIndexList[i];
+        else ss << chainIndexList[i] << ", ";
+      }
+      ss << "]\n";
+      return ss.str();
+    }
+
+
     MSGPACK_DEFINE_MAP(
       chainIndexList,
       description,
@@ -101,18 +164,38 @@ struct Entity {
  * https://github.com/rcsb/mmtf/blob/HEAD/spec.md#bioassemblylist
  */
 struct Transform {
-    std::vector<int32_t> chainIndexList;
-    float                matrix[16];
+    std::vector<int32_t>            chainIndexList;
+    std::vector<std::vector<float>> matrices;
 
     bool operator==(Transform const & c) const {
       bool comp = true;
-      for(size_t i = 16; i--;) {
-        if ( matrix[i] != c.matrix[i] ) {
-          comp = false;
-          break;
+      for (std::size_t matrix_num=0; matrix_num<matrices.size(); ++matrix_num) {
+        for(size_t i = 16; i--;) {
+          if ( matrices[matrix_num][i] != c.matrices[matrix_num][i] ) {
+            comp = false;
+            break;
+          }
         }
       }
       return (chainIndexList == c.chainIndexList && comp);
+    }
+
+    std::string
+    as_string() {
+      stringstream ss;
+      ss << "matrices: \n";
+      ss << "[\n";
+      for (std::size_t matrix_num=0; matrix_num<matrices.size(); ++matrix_num) {
+        ss << "  [\n    ";
+        for(size_t i = 16; i--;) {
+          if (i % 4 == 0 && i != 0) ss << "\n    ";
+          else ss << matrices[matrix_num][i] << ", ";
+        }
+        ss << "\n  ]";
+        if (matrix_num != matrices.size()-1) ss << ",\n";
+      }
+      ss << "\n]";
+      return ss.str();
     }
 
     MSGPACK_DEFINE_MAP(chainIndexList, matrix);
@@ -131,6 +214,14 @@ struct BioAssembly {
         return (
             transformList == c.transformList &&
             name == c.name);
+    }
+
+    std::string
+    as_string() {
+      ostringstream ss;
+      ss << "transform name: " << name << "\n";
+      ss << "transform:\n" << transform.as_string();
+      return ss.str();
     }
 
     MSGPACK_DEFINE_MAP(transformList, name);
@@ -172,6 +263,7 @@ struct StructureData {
     std::vector<GroupType>           groupList;
     std::vector<int32_t>             bondAtomList;
     std::vector<int8_t>              bondOrderList;
+    std::vector<int8_t>              bondResonanceList;
     std::vector<float>               xCoordList;
     std::vector<float>               yCoordList;
     std::vector<float>               zCoordList;
@@ -242,6 +334,7 @@ struct StructureData {
         groupList == c.groupList &&
         bondAtomList == c.bondAtomList &&
         bondOrderList == c.bondOrderList &&
+        bondResonanceList == c.bondResonanceList &&
         xCoordList == c.xCoordList &&
         yCoordList == c.yCoordList &&
         zCoordList == c.zCoordList &&
@@ -279,6 +372,8 @@ template <typename T>
 inline bool isDefaultValue(const std::vector<T>& value);
 template <>
 inline bool isDefaultValue(const std::string& value);
+template <>
+inline bool isDefaultValue(const msgpack::object& value);
 
 
 /**
@@ -380,6 +475,10 @@ inline bool isDefaultValue(const std::vector<T>& value) {
 template <>
 inline bool isDefaultValue(const std::string& value) {
   return value.empty();
+}
+template <>
+inline bool isDefaultValue(const msgpack::object& value) {
+  return value.is_nil();
 }
 
 template <typename T>
@@ -539,6 +638,23 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
         return false;
       }
     }
+    if (!isDefaultValue(g.bondResonanceList)) {
+      if (isDefaultValue(g.bondOrderList) || isDefaultValue(g.bondAtomList)) {
+        if (verbose) {
+          std::cout << "Cannot have bondResonanceList without both " <<
+              "bondOrderList and bondAtomList! at idx: " << i << std::endl;
+        }
+        return false;
+      }
+      if (g.bondAtomList.size() != g.bondResonanceList.size() * 2) {
+        if (verbose) {
+          std::cout << "inconsistent group::bondAtomList size: " <<
+              g.bondAtomList.size() << " != group::bondResonanceList size(*2): " <<
+              g.bondResonanceList.size()*2 << " at idx: " << i << std::endl;
+        }
+        return false;
+      }
+    }
     if (!hasValidIndices(g.bondAtomList, num_atoms)) {
       if (verbose) {
         std::cout << "inconsistent group::bondAtomList indices (not all in [0, "
@@ -554,6 +670,16 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
           std::cout << "inconsistent bondAtomList size: " <<
               bondAtomList.size() << " != bondOrderList size(*2): " <<
               bondOrderList.size()*2 << std::endl;
+      }
+      return false;
+    }
+  }
+  if (!isDefaultValue(bondResonanceList)) {
+    if (bondAtomList.size() != bondResonanceList.size() * 2) {
+      if (verbose) {
+          std::cout << "inconsistent bondAtomList size: " <<
+              bondAtomList.size() << " != bondResonanceList size(*2): " <<
+              bondResonanceList.size()*2 << std::endl;
       }
       return false;
     }
@@ -681,11 +807,17 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
   // traverse structure for more checks
   int bond_count_from_atom = 0;
   int bond_count_from_order = 0;
+  int bond_count_from_resonance = 0;
   bool all_bond_orderLists_are_default = true;
+  bool all_bond_resonanceLists_are_default = true;
   bool all_bond_atomLists_are_default = true;
   if (!isDefaultValue(bondOrderList)) {
     all_bond_orderLists_are_default = false;
     bond_count_from_order = bondOrderList.size();
+  }
+  if (!isDefaultValue(bondResonanceList)) {
+    all_bond_resonanceLists_are_default = false;
+    bond_count_from_resonance = bondOrderList.size();
   }
   if (!isDefaultValue(bondAtomList)) {
     all_bond_atomLists_are_default = false;
@@ -738,6 +870,10 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
           all_bond_orderLists_are_default = false;
           bond_count_from_order += group.bondOrderList.size();
         }
+        if (!isDefaultValue(group.bondResonanceList)) {
+          all_bond_resonanceLists_are_default = false;
+          bond_count_from_resonance += group.bondResonanceList.size();
+        }
         if (!isDefaultValue(group.bondAtomList)) {
           all_bond_atomLists_are_default = false;
           bond_count_from_atom += group.bondAtomList.size()/2;
@@ -751,6 +887,14 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
     if (bond_count_from_order != numBonds) {
       if (verbose) {
         std::cout << "inconsistent numBonds vs bond order count" << std::endl;
+      }
+      return false;
+    }
+  }
+  if (!all_bond_resonanceLists_are_default) {
+    if (bond_count_from_resonance != numBonds) {
+      if (verbose) {
+        std::cout << "inconsistent numBonds vs bond resonance count" << std::endl;
       }
       return false;
     }
@@ -792,11 +936,11 @@ inline std::string StructureData::print(std::string delim) {
   int groupIndex = 0;
   int atomIndex = 0;
 
-  //# traverse models
+  // traverse models
   for (int i = 0; i < numModels; i++, modelIndex++) {
-    //    # traverse chains
+    // traverse chains
     for (int j = 0; j < chainsPerModel[modelIndex]; j++, chainIndex++) {
-      //        # traverse groups
+      // traverse groups
       for (int k = 0; k < groupsPerChain[chainIndex]; k++, groupIndex++) {
         const mmtf::GroupType& group =
             groupList[groupTypeList[groupIndex]];

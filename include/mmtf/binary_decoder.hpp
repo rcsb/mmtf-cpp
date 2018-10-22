@@ -3,7 +3,7 @@
 // Licensed under the MIT License (see accompanying LICENSE file).
 //
 // The authors of this code are: Gerardo Tauriello
-//
+// 
 // Based on mmtf_c developed by Julien Ferte (http://www.julienferte.com/),
 // Anthony Bradley, Thomas Holder with contributions from Yana Valasatava,
 // Gazal Kalyan, Alexander Rose.
@@ -45,12 +45,12 @@ public:
      *
      * @tparam T Can be one of:
      *           - std::vector<float>       (strategies: 1, 9, 10, 11, 12, 13)
-     *           - std::vector<int8_t>      (strategies: 2)
+     *           - std::vector<int8_t>      (strategies: 2, 16)
      *           - std::vector<int16_t>     (strategies: 3)
      *           - std::vector<int32_t>     (strategies: 4, 7, 8, 14, 15)
      *           - std::vector<std::string> (strategies: 5)
      *           - std::vector<char>        (strategies: 6)
-     *
+     * 
      * @throw mmtf::DecodeError if we fail to decode.
      */
     template<typename T>
@@ -113,7 +113,7 @@ namespace {
 
 // byteorder functions ("ntohl" etc.)
 #ifdef WIN32
-#include <winsock2.h>
+#include <Winsock2.h>
 #else
 #include <arpa/inet.h>
 #endif
@@ -253,6 +253,10 @@ inline void BinaryDecoder::decode(std::vector<int8_t>& output) {
     switch (strategy_) {
     case 2: {
         decodeFromBytes_(output);
+        break;
+    }
+    case 16: {
+        runLengthDecode_(output);
         break;
     }
     default: {

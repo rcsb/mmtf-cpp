@@ -52,8 +52,9 @@ struct convert<mmtf::GroupType> {
         md.decode("formalChargeList", true, group.formalChargeList);
         md.decode("atomNameList", true, group.atomNameList);
         md.decode("elementList", true, group.elementList);
-        md.decode("bondAtomList", true, group.bondAtomList);
-        md.decode("bondOrderList", true, group.bondOrderList);
+        md.decode("bondAtomList", false, group.bondAtomList);
+        md.decode("bondOrderList", false, group.bondOrderList);
+        md.decode("bondResonanceList", false, group.bondResonanceList);
         md.decode("groupName", true, group.groupName);
         md.decode("singleLetterCode", true, group.singleLetterCode);
         md.decode("chemCompType", true, group.chemCompType);
@@ -139,6 +140,7 @@ struct convert<mmtf::StructureData> {
         md.decode("groupList", true, data.groupList);
         md.decode("bondAtomList", false, data.bondAtomList);
         md.decode("bondOrderList", false, data.bondOrderList);
+        md.decode("bondResonanceList", false, data.bondResonanceList);
         md.decode("xCoordList", true, data.xCoordList);
         md.decode("yCoordList", true, data.yCoordList);
         md.decode("zCoordList", true, data.zCoordList);
@@ -155,6 +157,7 @@ struct convert<mmtf::StructureData> {
         md.decode("chainNameList", false, data.chainNameList);
         md.decode("groupsPerChain", true, data.groupsPerChain);
         md.decode("chainsPerModel", true, data.chainsPerModel);
+        md.decode("extraData", false, data.extraData);
         md.checkExtraKeys();
         return obj;
     }
