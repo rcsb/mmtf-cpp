@@ -216,9 +216,6 @@ encodeToMap(const StructureData& data, msgpack::zone& m_zone,
   if (!mmtf::isDefaultValue(data.modelProperties)) {
     data_map["modelProperties"] = msgpack::object(data.modelProperties, m_zone);
   }
-  if (!mmtf::isDefaultValue(data.structureProperties)) {
-    data_map["structureProperties"] = msgpack::object(data.structureProperties, m_zone);
-  }
   if (!mmtf::isDefaultValue(data.extraProperties)) {
     data_map["extraProperties"] = msgpack::object(data.extraProperties, m_zone);
   }

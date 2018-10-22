@@ -168,8 +168,6 @@ struct convert<mmtf::StructureData> {
         data.chainProperties = msgpack::object(data.chainProperties, data.msgpack_zone);
         md.decode("modelProperties", false, data.modelProperties);
         data.modelProperties = msgpack::object(data.modelProperties, data.msgpack_zone);
-        md.decode("structureProperties", false, data.structureProperties);
-        data.structureProperties = msgpack::object(data.structureProperties, data.msgpack_zone);
         md.decode("extraProperties", false, data.extraProperties);
         data.extraProperties = msgpack::object(data.extraProperties, data.msgpack_zone);
         md.checkExtraKeys();

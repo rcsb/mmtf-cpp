@@ -194,7 +194,6 @@ struct StructureData {
     msgpack::object                  groupProperties;
     msgpack::object                  chainProperties;
     msgpack::object                  modelProperties;
-    msgpack::object                  structureProperties;
     msgpack::object                  extraProperties;
 
     /**
