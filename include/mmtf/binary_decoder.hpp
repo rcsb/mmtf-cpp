@@ -3,7 +3,7 @@
 // Licensed under the MIT License (see accompanying LICENSE file).
 //
 // The authors of this code are: Gerardo Tauriello
-// 
+//
 // Based on mmtf_c developed by Julien Ferte (http://www.julienferte.com/),
 // Anthony Bradley, Thomas Holder with contributions from Yana Valasatava,
 // Gazal Kalyan, Alexander Rose.
@@ -51,7 +51,7 @@ public:
      *           - std::vector<int32_t>     (strategies: 4, 7, 8, 14, 15)
      *           - std::vector<std::string> (strategies: 5)
      *           - std::vector<char>        (strategies: 6)
-     * 
+     *
      * @throw mmtf::DecodeError if we fail to decode.
      */
     template<typename T>
@@ -114,7 +114,7 @@ namespace {
 
 // byteorder functions ("ntohl" etc.)
 #ifdef WIN32
-#include <Winsock2.h>
+#include <winsock2.h>
 #else
 #include <arpa/inet.h>
 #endif
