@@ -157,7 +157,6 @@ struct convert<mmtf::StructureData> {
         md.decode("chainNameList", false, data.chainNameList);
         md.decode("groupsPerChain", true, data.groupsPerChain);
         md.decode("chainsPerModel", true, data.chainsPerModel);
-        md.decode("extraData", false, data.extraData);
         md.checkExtraKeys();
         return obj;
     }

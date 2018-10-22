@@ -69,7 +69,7 @@ struct GroupType { // NOTE: can't use MSGPACK_DEFINE_MAP due to char
         singleLetterCode == c.singleLetterCode &&
         chemCompType == c.chemCompType);
     }
-   
+
     std::string
     as_string() const {
       ostringstream ss;
