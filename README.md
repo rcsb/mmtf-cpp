@@ -49,7 +49,7 @@ or add the `msgpack-c` include directory to your g++ command as well.
 
 You can also perform a system wide installation with `cmake` and `ninja` (or `make`).  This is generally how you would
 install something for a `Docker` image.
-to do so:
+To do so:
 ```bash
 mkdir build
 cd build
