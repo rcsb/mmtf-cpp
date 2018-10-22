@@ -62,7 +62,7 @@ run `cmake` with the command:
 ```bash
 cmake -G Ninja -Dmmtf_install_system=ON -DCMAKE_INSTALL_PREFIX=/home/me/local ..
 ```
-Be aware that `/include` is added to the end of `DCMAKE_INSTALL_PREFIX` and that is where your files are installed. ie the above would install at `/home/me/local/include/`
+Be aware that `/include` is added to the end of `DCMAKE_INSTALL_PREFIX` and that is where your files are installed (i.e. the above would install at `/home/me/local/include/`).
 
 
 ## Examples and tests
