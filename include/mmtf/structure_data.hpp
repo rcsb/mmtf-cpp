@@ -164,17 +164,15 @@ struct Entity {
  * https://github.com/rcsb/mmtf/blob/HEAD/spec.md#bioassemblylist
  */
 struct Transform {
-    std::vector<int32_t>            chainIndexList;
-    std::vector<std::vector<float>> matrices;
+    std::vector<int32_t>      chainIndexList;
+    float                     matrix[16];
 
     bool operator==(Transform const & c) const {
       bool comp = true;
-      for (std::size_t matrix_num=0; matrix_num<matrices.size(); ++matrix_num) {
-        for(size_t i = 16; i--;) {
-          if ( matrices[matrix_num][i] != c.matrices[matrix_num][i] ) {
-            comp = false;
-            break;
-          }
+      for(size_t i = 16; i--;) {
+        if ( matrix[i] != c.matrix[i] ) {
+          comp = false;
+          break;
         }
       }
       return (chainIndexList == c.chainIndexList && comp);
@@ -183,16 +181,18 @@ struct Transform {
     std::string
     as_string() {
       stringstream ss;
-      ss << "matrices: \n";
+      ss << "struct: Transform\n" <<;
+      ss << "chainIndexList: [";
+      for (std::size_t i=0; i=<chainIndexList.size(); ++i) {
+        if (i == chainIndexList.size()-1) ss << chainIndexList[i];
+        else ss << chainIndexList[i] << ", ";
+      }
+      ss << "]\n";
+      ss << "matrix:\n";
       ss << "[\n";
-      for (std::size_t matrix_num=0; matrix_num<matrices.size(); ++matrix_num) {
-        ss << "  [\n    ";
-        for(size_t i = 16; i--;) {
-          if (i % 4 == 0 && i != 0) ss << "\n    ";
-          else ss << matrices[matrix_num][i] << ", ";
-        }
-        ss << "\n  ]";
-        if (matrix_num != matrices.size()-1) ss << ",\n";
+      for(size_t i = 16; i--;) {
+        if (i % 4 == 0 && i != 0) ss << "\n    ";
+        else ss << matrix[matrix_num][i] << ", ";
       }
       ss << "\n]";
       return ss.str();
