@@ -2,7 +2,8 @@
 //
 // Licensed under the MIT License (see accompanying LICENSE file).
 //
-// The authors of this code are: Gabriel Studer, Gerardo Tauriello
+// The authors of this code are: Gabriel Studer, Gerardo Tauriello, and
+// Daniel Farrell.
 // 
 // Based on mmtf_c developed by Julien Ferte (http://www.julienferte.com/),
 // Anthony Bradley, Thomas Holder with contributions from Yana Valasatava,
