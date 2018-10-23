@@ -42,5 +42,5 @@ endif()
 
 install(
     DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
-    DESTINATION  "/include"
+    DESTINATION  "include"
     FILES_MATCHING PATTERN "*.hpp")
