@@ -53,14 +53,14 @@ To do so:
 ```bash
 mkdir build
 cd build
-cmake -G Ninja -Dmmtf_install_system=ON ..
+cmake -G Ninja ..
 sudo ninja install
 ```
 
 `cmake` automatically sets the installation directory to `/usr/local/include`, if you want to install it to another `*include/` directory
 run `cmake` with the command:
 ```bash
-cmake -G Ninja -Dmmtf_install_system=ON -DCMAKE_INSTALL_PREFIX=/home/me/local ..
+cmake -G Ninja -DCMAKE_INSTALL_PREFIX=/home/me/local ..
 ```
 Be aware that `/include` is added to the end of `DCMAKE_INSTALL_PREFIX` and that is where your files are installed (i.e. the above would install at `/home/me/local/include/`).
 
