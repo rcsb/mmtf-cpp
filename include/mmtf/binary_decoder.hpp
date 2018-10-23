@@ -256,7 +256,9 @@ inline void BinaryDecoder::decode(std::vector<int8_t>& output) {
         break;
     }
     case 16: {
-        runLengthDecode_(output);
+        std::vector<int32_t> step1;
+        decodeFromBytes_(step1);
+        runLengthDecode_(step1, output);
         break;
     }
     default: {

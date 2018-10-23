@@ -12,6 +12,9 @@
 #ifndef MMTF_BINARY_ENCODER_H
 #define MMTF_BINARY_ENCODER_H
 #include <math.h>
+#include <vector>
+#include <string>
+#include <sstream>
 
 // byteorder functions
 #ifdef WIN32
@@ -51,6 +54,13 @@ inline std::vector<int32_t> deltaEncode(std::vector<int32_t> const & vec_in);
  * @return vec_out          run length encoded int vector
  */
 inline std::vector<int32_t> runLengthEncode(std::vector<int32_t> const & vec_in );
+
+/**
+ * @brief mmtf run length encode a vector of ints.
+ * @param[in] vec_in        vector of ints
+ * @return vec_out          run length encoded int vector
+ */
+inline std::vector<int32_t> runLengthEncode(std::vector<int8_t> const & vec_in );
 
 /**
  * @brief mmtf recursive index encode a vector of ints.
@@ -178,12 +188,33 @@ inline std::vector<int32_t> runLengthEncode(std::vector<int32_t> const & vec_in 
   int32_t curr = vec_in[0];
   ret.push_back(curr);
   int32_t counter = 1;
-  for (int32_t i = 1; i < (int)vec_in.size(); ++i) {
+  for (std::size_t i = 1; i < vec_in.size(); ++i) {
     if ( vec_in[i] == curr ) {
       ++counter;
     } else {
       ret.push_back(counter);
       ret.push_back(vec_in[i]);
+      curr = vec_in[i];
+      counter = 1;
+    }
+  }
+  ret.push_back(counter);
+  return ret;
+}
+
+
+inline std::vector<int32_t> runLengthEncode(std::vector<int8_t> const & vec_in ) {
+  std::vector<int32_t> ret;
+  if (vec_in.size()==0) return ret;
+  int32_t curr = vec_in[0];
+  ret.push_back(curr);
+  int32_t counter = 1;
+  for (std::size_t i = 1; i < vec_in.size(); ++i) {
+    if ( (int32_t)vec_in[i] == curr ) {
+      ++counter;
+    } else {
+      ret.push_back(counter);
+      ret.push_back((int32_t)vec_in[i]);
       curr = vec_in[i];
       counter = 1;
     }

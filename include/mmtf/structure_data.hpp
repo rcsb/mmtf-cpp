@@ -73,42 +73,42 @@ struct GroupType { // NOTE: can't use MSGPACK_DEFINE_MAP due to char
 
     std::string
     as_string() const {
-      ostringstream ss;
+      std::ostringstream ss;
       ss << "groupName: " << groupName << " ";
       ss << "singleLetterCode: " << singleLetterCode << " ";
       ss << "chemCompType: " << chemCompType << "\n";
       ss << "AtomNameList: [";
-      for (std::size_t i=0; i=<atomNameList.size(); ++i) {
+      for (std::size_t i=0; i<atomNameList.size(); ++i) {
         if (i == atomNameList.size()-1) ss << atomNameList[i];
         else ss << atomNameList[i] << ", ";
       }
       ss << "]\n";
       ss << "elementList: [";
-      for (std::size_t i=0; i=<elementList.size(); ++i) {
+      for (std::size_t i=0; i<elementList.size(); ++i) {
         if (i == elementList.size()-1) ss << elementList[i];
         else ss << elementList[i] << ", ";
       }
       ss << "]\n";
       ss << "formalChargeList: [";
-      for (std::size_t i=0; i=<formalChargeList.size(); ++i) {
+      for (std::size_t i=0; i<formalChargeList.size(); ++i) {
         if (i == formalChargeList.size()-1) ss << formalChargeList[i];
         else ss << formalChargeList[i] << ", ";
       }
       ss << "]\n";
       ss << "bondAtomList: [";
-      for (std::size_t i=0; i=<bondAtomList.size(); ++i) {
+      for (std::size_t i=0; i<bondAtomList.size(); ++i) {
         if (i == bondAtomList.size()-1) ss << bondAtomList[i];
         else ss << bondAtomList[i] << ", ";
       }
       ss << "]\n";
       ss << "bondOrderList: [";
-      for (std::size_t i=0; i=<bondOrderList.size(); ++i) {
+      for (std::size_t i=0; i<bondOrderList.size(); ++i) {
         if (i == bondOrderList.size()-1) ss << bondOrderList[i];
         else ss << bondOrderList[i] << ", ";
       }
       ss << "]\n";
       ss << "bondResonanceList: [";
-      for (std::size_t i=0; i=<bondResonanceList.size(); ++i) {
+      for (std::size_t i=0; i<bondResonanceList.size(); ++i) {
         if (i == bondResonanceList.size()-1) ss << bondResonanceList[i];
         else ss << bondResonanceList[i] << ", ";
       }
@@ -138,12 +138,12 @@ struct Entity {
 
     std::string
     as_string() const {
-      ostringstream ss;
+      std::ostringstream ss;
       ss << "description: " << description;
       ss << "type: " << type;
       ss << "sequence:\n" << sequence;
       ss << "chainIndexList: [";
-      for (std::size_t i=0; i=<chainIndexList.size(); ++i) {
+      for (std::size_t i=0; i<chainIndexList.size(); ++i) {
         if (i == chainIndexList.size()-1) ss << chainIndexList[i];
         else ss << chainIndexList[i] << ", ";
       }
@@ -181,10 +181,10 @@ struct Transform {
 
     std::string
     as_string() {
-      stringstream ss;
-      ss << "struct: Transform\n" <<;
+      std::ostringstream ss;
+      ss << "struct: Transform\n";
       ss << "chainIndexList: [";
-      for (std::size_t i=0; i=<chainIndexList.size(); ++i) {
+      for (std::size_t i=0; i<chainIndexList.size(); ++i) {
         if (i == chainIndexList.size()-1) ss << chainIndexList[i];
         else ss << chainIndexList[i] << ", ";
       }
@@ -193,7 +193,7 @@ struct Transform {
       ss << "[\n";
       for(size_t i = 16; i--;) {
         if (i % 4 == 0 && i != 0) ss << "\n    ";
-        else ss << matrix[matrix_num][i] << ", ";
+        else ss << matrix[i] << ", ";
       }
       ss << "\n]";
       return ss.str();
@@ -219,9 +219,12 @@ struct BioAssembly {
 
     std::string
     as_string() {
-      ostringstream ss;
-      ss << "transform name: " << name << "\n";
-      ss << "transform:\n" << transform.as_string();
+      std::ostringstream ss;
+      ss << "BioAssembly -- start" << name << "\n";
+      for (std::size_t i=0; i<transformList.size(); ++i) {
+        ss << "\n" << transformList[i].as_string() << "\n";
+      }
+      ss << "BioAssembly -- stop";
       return ss.str();
     }
 
