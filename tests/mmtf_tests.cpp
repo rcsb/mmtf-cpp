@@ -501,11 +501,9 @@ TEST_CASE("atomProperties field") {
 	std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
 	mmtf::StructureData sd, sd2;
 	mmtf::decodeFromFile(sd, working_mmtf);
+
 	/// Pack
-
-	// 1. Add an atomProperties field to structureData
-	std::map<std::string, msgpack::object> atom_data_map_in;
-
+	// 1. Make your input data
 	std::vector<int> clist_out;
 	std::vector<int> clist_in, clist_in_decoded, nothing;
 	for (std::size_t i=0; i<256; ++i) {
@@ -513,11 +511,8 @@ TEST_CASE("atomProperties field") {
 	}
 	// 2. msgpack zones have weird lifetimes, make sure you use the zone
 	// in StructureData to avoid any weird errors
-	atom_data_map_in["256_atomColorList"] = msgpack::object(clist_out, sd.msgpack_zone);
-	atom_data_map_in["256_atomColorList_encoded"] = msgpack::object(mmtf::encodeRunLengthDeltaInt(clist_out), sd.msgpack_zone);
-
-	// 3. pack into final object
-	sd.atomProperties = msgpack::object(atom_data_map_in, sd.msgpack_zone);
+	sd.atomProperties["256_atomColorList"] = msgpack::object(clist_out, sd.msgpack_zone);
+	sd.atomProperties["256_atomColorList_encoded"] = msgpack::object(mmtf::encodeRunLengthDeltaInt(clist_out), sd.msgpack_zone);
 
 	mmtf::encodeToFile(sd, "test_atomProperties.mmtf");
 

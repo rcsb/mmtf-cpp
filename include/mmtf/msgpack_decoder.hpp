@@ -159,17 +159,11 @@ struct convert<mmtf::StructureData> {
         // decoding only creates a shallow copy, make sure you pack everything
         // onto the StructureData's Zone
         md.decode("bondProperties", false, data.bondProperties);
-        data.bondProperties = msgpack::object(data.bondProperties, data.msgpack_zone);
         md.decode("atomProperties", false, data.atomProperties);
-        data.atomProperties = msgpack::object(data.atomProperties, data.msgpack_zone);
         md.decode("groupProperties", false, data.groupProperties);
-        data.groupProperties = msgpack::object(data.groupProperties, data.msgpack_zone);
         md.decode("chainProperties", false, data.chainProperties);
-        data.chainProperties = msgpack::object(data.chainProperties, data.msgpack_zone);
         md.decode("modelProperties", false, data.modelProperties);
-        data.modelProperties = msgpack::object(data.modelProperties, data.msgpack_zone);
         md.decode("extraProperties", false, data.extraProperties);
-        data.extraProperties = msgpack::object(data.extraProperties, data.msgpack_zone);
         md.checkExtraKeys();
         return obj;
     }

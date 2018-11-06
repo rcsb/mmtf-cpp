@@ -37,6 +37,13 @@ public:
     MapDecoder(const msgpack::object& obj);
 
     /**
+     * @brief Initialize object given a string to msgpack::object map.
+     * Reads out all key-value pairs and converts key to string if possible
+     * (warns otherwise).
+     */
+    MapDecoder(std::map<std::string, msgpack::object>& map_in);
+
+    /**
      * @brief Extract value from map and decode into target.
      *
      * @param[in]  key      Key into msgpack map.
@@ -78,6 +85,9 @@ private:
     void checkType_(const std::string& key,
                     msgpack::type::object_type type,
                     const msgpack::object& target);
+    void checkType_(const std::string& key,
+                    msgpack::type::object_type type,
+                    const std::map<std::string, msgpack::object>& target);
     template <typename T>
     void checkType_(const std::string& key, msgpack::type::object_type type,
                     const std::vector<T>& target);
@@ -108,6 +118,13 @@ inline MapDecoder::MapDecoder(const msgpack::object& obj) {
             std::cerr << "Warning: Found non-string key type " << key->type
                       << "! Skipping..." << std::endl;
         }
+    }
+}
+
+inline MapDecoder::MapDecoder(std::map<std::string, msgpack::object>& map_in) {
+    std::map<std::string, msgpack::object>::iterator it;
+    for (it=map_in.begin(); it!= map_in.end(); ++it) {
+        data_map_[it->first] = &(it->second);
     }
 }
 
@@ -179,12 +196,23 @@ inline void MapDecoder::checkType_(const std::string& key,
                      "entry " << key << std::endl;
     }
 }
+
 inline void MapDecoder::checkType_(const std::string& key,
                                    msgpack::type::object_type type,
-                                   const msgpack::object&)  {
+                                   const msgpack::object&  target)  {
     // Should we check Type of msgpack object? I don't think there's many
     // checks to be done here
 }
+
+inline void MapDecoder::checkType_(const std::string& key,
+                                   msgpack::type::object_type type,
+                                   const std::map<std::string, msgpack::object>& target)  {
+    if (type != msgpack::type::MAP) {
+        std::cerr << "Warning: Non-map type " << type << " found for "
+                     "entry " << key << std::endl;
+    }
+}
+
 
 template <typename T>
 void MapDecoder::checkType_(const std::string& key,

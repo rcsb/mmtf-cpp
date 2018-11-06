@@ -2,11 +2,12 @@
 //
 // Licensed under the MIT License (see accompanying LICENSE file).
 //
-// The authors of this code are: Gabriel Studer, Gerardo Tauriello
+// The authors of this code are: Gabriel Studer, Gerardo Tauriello,
+// Daniel Farrell.
 // 
 // Based on mmtf_c developed by Julien Ferte (http://www.julienferte.com/),
 // Anthony Bradley, Thomas Holder with contributions from Yana Valasatava,
-// Gazal Kalyan, Alexander Rose. Updated 2018 by Daniel Farrell.
+// Gazal Kalyan, Alexander Rose.
 //
 // *************************************************************************
 
@@ -149,52 +150,52 @@ struct BioAssembly {
  * https://github.com/rcsb/mmtf/blob/HEAD/spec.md#fields
  */
 struct StructureData {
-    std::string                      mmtfVersion;
-    std::string                      mmtfProducer;
-    std::vector<float>               unitCell;
-    std::string                      spaceGroup;
-    std::string                      structureId;
-    std::string                      title;
-    std::string                      depositionDate;
-    std::string                      releaseDate;
-    std::vector<std::vector<float> > ncsOperatorList;
-    std::vector<BioAssembly>         bioAssemblyList;
-    std::vector<Entity>              entityList;
-    std::vector<std::string>         experimentalMethods;
-    float                            resolution;
-    float                            rFree;
-    float                            rWork;
-    int32_t                          numBonds;
-    int32_t                          numAtoms;
-    int32_t                          numGroups;
-    int32_t                          numChains;
-    int32_t                          numModels;
-    std::vector<GroupType>           groupList;
-    std::vector<int32_t>             bondAtomList;
-    std::vector<int8_t>              bondOrderList;
-    std::vector<float>               xCoordList;
-    std::vector<float>               yCoordList;
-    std::vector<float>               zCoordList;
-    std::vector<float>               bFactorList;
-    std::vector<int32_t>             atomIdList;
-    std::vector<char>                altLocList;
-    std::vector<float>               occupancyList;
-    std::vector<int32_t>             groupIdList;
-    std::vector<int32_t>             groupTypeList;
-    std::vector<int8_t>              secStructList;
-    std::vector<char>                insCodeList;
-    std::vector<int32_t>             sequenceIndexList;
-    std::vector<std::string>         chainIdList;
-    std::vector<std::string>         chainNameList;
-    std::vector<int32_t>             groupsPerChain;
-    std::vector<int32_t>             chainsPerModel;
-    msgpack::zone                    msgpack_zone;
-    msgpack::object                  bondProperties;
-    msgpack::object                  atomProperties;
-    msgpack::object                  groupProperties;
-    msgpack::object                  chainProperties;
-    msgpack::object                  modelProperties;
-    msgpack::object                  extraProperties;
+    std::string                              mmtfVersion;
+    std::string                              mmtfProducer;
+    std::vector<float>                       unitCell;
+    std::string                              spaceGroup;
+    std::string                              structureId;
+    std::string                              title;
+    std::string                              depositionDate;
+    std::string                              releaseDate;
+    std::vector<std::vector<float> >         ncsOperatorList;
+    std::vector<BioAssembly>                 bioAssemblyList;
+    std::vector<Entity>                      entityList;
+    std::vector<std::string>                 experimentalMethods;
+    float                                    resolution;
+    float                                    rFree;
+    float                                    rWork;
+    int32_t                                  numBonds;
+    int32_t                                  numAtoms;
+    int32_t                                  numGroups;
+    int32_t                                  numChains;
+    int32_t                                  numModels;
+    std::vector<GroupType>                   groupList;
+    std::vector<int32_t>                     bondAtomList;
+    std::vector<int8_t>                      bondOrderList;
+    std::vector<float>                       xCoordList;
+    std::vector<float>                       yCoordList;
+    std::vector<float>                       zCoordList;
+    std::vector<float>                       bFactorList;
+    std::vector<int32_t>                     atomIdList;
+    std::vector<char>                        altLocList;
+    std::vector<float>                       occupancyList;
+    std::vector<int32_t>                     groupIdList;
+    std::vector<int32_t>                     groupTypeList;
+    std::vector<int8_t>                      secStructList;
+    std::vector<char>                        insCodeList;
+    std::vector<int32_t>                     sequenceIndexList;
+    std::vector<std::string>                 chainIdList;
+    std::vector<std::string>                 chainNameList;
+    std::vector<int32_t>                     groupsPerChain;
+    std::vector<int32_t>                     chainsPerModel;
+    msgpack::zone                            msgpack_zone;
+    std::map<std::string, msgpack::object>   bondProperties;
+    std::map<std::string, msgpack::object>   atomProperties;
+    std::map<std::string, msgpack::object>   groupProperties;
+    std::map<std::string, msgpack::object>   chainProperties;
+    std::map<std::string, msgpack::object>   modelProperties;
+    std::map<std::string, msgpack::object>   extraProperties;
 
     /**
      * @brief Construct object with default values set.
