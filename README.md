@@ -42,7 +42,7 @@ Here, `<MSGPACK_INCLUDE_PATH>` and `<MMTF_INCLUDE_PATH>` are the paths to the
 For your more complicated projects, a `CMakeLists.txt` is included for you.
 
 ## Installation
-You can also perform a system wide installation with `cmake` and `ninja` (or `make`).
+You can also perform a system wide installation with `cmake` and `ninja` (or `make`).  
 To do so:
 ```bash
 mkdir build
