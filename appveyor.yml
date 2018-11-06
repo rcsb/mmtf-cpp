@@ -20,8 +20,10 @@ clone_folder: c:\mmtf-cpp
 # Uncomment the following lines to enable remote desktop access to Appveyor
 # after a failed build.
 
-init:
-  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+# init:
+#   - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+# on_failure:
+#   - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 install:
   - git submodule update --init --recursive
@@ -34,7 +36,6 @@ build_script:
   - ps: echo $env:CMAKE_ARGUMENTS
   - cmake %CMAKE_ARGUMENTS% ..
   - cmake --build . --config Debug -- %BUILD_ARGUMENTS%
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 test_script:
   - ctest --build-config Debug --timeout 300 --output-on-failure
