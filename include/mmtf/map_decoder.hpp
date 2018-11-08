@@ -199,7 +199,7 @@ inline void MapDecoder::checkType_(const std::string& key,
 
 inline void MapDecoder::checkType_(const std::string& key,
                                    msgpack::type::object_type type,
-                                   const msgpack::object&  target)  {
+                                   const msgpack::object&)  {
     // Should we check Type of msgpack object? I don't think there's many
     // checks to be done here
 }
