@@ -331,6 +331,52 @@ TEST_CASE("Test RunLengthChar enc/dec") {
 }
 
 
+TEST_CASE("Test RunLengthInt8 enc/dec") {
+	std::vector<char> encoded_data;
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x10);
+	// h2
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x04);
+	// h3
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x00);
+	// data
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x02);
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x04);
+
+	msgpack::zone m_zone;
+	msgpack::object msgp_obj(encoded_data, m_zone);
+
+	mmtf::BinaryDecoder bd(msgp_obj, "a_test");
+	std::vector<int8_t> decoded_input;
+	bd.decode(decoded_input);
+
+	std::vector<int8_t> decoded_data;
+	decoded_data.push_back(2);
+	decoded_data.push_back(2);
+	decoded_data.push_back(2);
+	decoded_data.push_back(2);
+
+	std::vector<char> encoded_output = mmtf::encodeRunLengthInt8(decoded_data);
+	REQUIRE(encoded_data == encoded_output);
+	REQUIRE(decoded_data.size() ==  decoded_input.size());
+	REQUIRE(decoded_data == decoded_input);
+}
+
+
 TEST_CASE("Test encodeStringVector enc/dec") {
 	std::vector<char> encoded_data;
 	encoded_data.push_back(0x00);

@@ -141,7 +141,7 @@ encodeToMap(const StructureData& data, msgpack::zone& m_zone,
   // std::vector<int8_t>
   if (!mmtf::isDefaultValue(data.bondResonanceList)) {
     data_map["bondResonanceList"] =
-      msgpack::object(mmtf::encodeInt8ToByte(data.bondResonanceList), m_zone);
+      msgpack::object(mmtf::encodeRunLengthInt8(data.bondResonanceList), m_zone);
   }
   if (!mmtf::isDefaultValue(data.secStructList)) {
     data_map["secStructList"] =
