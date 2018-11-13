@@ -71,51 +71,6 @@ struct GroupType { // NOTE: can't use MSGPACK_DEFINE_MAP due to char
         singleLetterCode == c.singleLetterCode &&
         chemCompType == c.chemCompType);
     }
-
-    std::string
-    as_string() const {
-      std::ostringstream ss;
-      ss << "groupName: " << groupName << " ";
-      ss << "singleLetterCode: " << singleLetterCode << " ";
-      ss << "chemCompType: " << chemCompType << "\n";
-      ss << "AtomNameList: [";
-      for (std::size_t i=0; i<atomNameList.size(); ++i) {
-        if (i == atomNameList.size()-1) ss << atomNameList[i];
-        else ss << atomNameList[i] << ", ";
-      }
-      ss << "]\n";
-      ss << "elementList: [";
-      for (std::size_t i=0; i<elementList.size(); ++i) {
-        if (i == elementList.size()-1) ss << elementList[i];
-        else ss << elementList[i] << ", ";
-      }
-      ss << "]\n";
-      ss << "formalChargeList: [";
-      for (std::size_t i=0; i<formalChargeList.size(); ++i) {
-        if (i == formalChargeList.size()-1) ss << formalChargeList[i];
-        else ss << formalChargeList[i] << ", ";
-      }
-      ss << "]\n";
-      ss << "bondAtomList: [";
-      for (std::size_t i=0; i<bondAtomList.size(); ++i) {
-        if (i == bondAtomList.size()-1) ss << bondAtomList[i];
-        else ss << bondAtomList[i] << ", ";
-      }
-      ss << "]\n";
-      ss << "bondOrderList: [";
-      for (std::size_t i=0; i<bondOrderList.size(); ++i) {
-        if (i == bondOrderList.size()-1) ss << bondOrderList[i];
-        else ss << bondOrderList[i] << ", ";
-      }
-      ss << "]\n";
-      ss << "bondResonanceList: [";
-      for (std::size_t i=0; i<bondResonanceList.size(); ++i) {
-        if (i == bondResonanceList.size()-1) ss << bondResonanceList[i];
-        else ss << bondResonanceList[i] << ", ";
-      }
-      ss << "]\n";
-      return ss.str();
-    }
 };
 
 /**
@@ -137,22 +92,6 @@ struct Entity {
         sequence == c.sequence);
     }
 
-    std::string
-    as_string() const {
-      std::ostringstream ss;
-      ss << "description: " << description;
-      ss << "type: " << type;
-      ss << "sequence:\n" << sequence;
-      ss << "chainIndexList: [";
-      for (std::size_t i=0; i<chainIndexList.size(); ++i) {
-        if (i == chainIndexList.size()-1) ss << chainIndexList[i];
-        else ss << chainIndexList[i] << ", ";
-      }
-      ss << "]\n";
-      return ss.str();
-    }
-
-
     MSGPACK_DEFINE_MAP(
       chainIndexList,
       description,
@@ -166,8 +105,8 @@ struct Entity {
  * https://github.com/rcsb/mmtf/blob/HEAD/spec.md#bioassemblylist
  */
 struct Transform {
-    std::vector<int32_t>      chainIndexList;
-    float                     matrix[16];
+    std::vector<int32_t> chainIndexList;
+    float                matrix[16];
 
     bool operator==(Transform const & c) const {
       bool comp = true;
@@ -178,26 +117,6 @@ struct Transform {
         }
       }
       return (chainIndexList == c.chainIndexList && comp);
-    }
-
-    std::string
-    as_string() {
-      std::ostringstream ss;
-      ss << "struct: Transform\n";
-      ss << "chainIndexList: [";
-      for (std::size_t i=0; i<chainIndexList.size(); ++i) {
-        if (i == chainIndexList.size()-1) ss << chainIndexList[i];
-        else ss << chainIndexList[i] << ", ";
-      }
-      ss << "]\n";
-      ss << "matrix:\n";
-      ss << "[\n";
-      for(size_t i = 16; i--;) {
-        if (i % 4 == 0 && i != 0) ss << "\n    ";
-        else ss << matrix[i] << ", ";
-      }
-      ss << "\n]";
-      return ss.str();
     }
 
     MSGPACK_DEFINE_MAP(chainIndexList, matrix);
@@ -216,17 +135,6 @@ struct BioAssembly {
         return (
             transformList == c.transformList &&
             name == c.name);
-    }
-
-    std::string
-    as_string() {
-      std::ostringstream ss;
-      ss << "BioAssembly -- start" << name << "\n";
-      for (std::size_t i=0; i<transformList.size(); ++i) {
-        ss << "\n" << transformList[i].as_string() << "\n";
-      }
-      ss << "BioAssembly -- stop";
-      return ss.str();
     }
 
     MSGPACK_DEFINE_MAP(transformList, name);
@@ -315,137 +223,6 @@ struct StructureData {
      * @param c what to compare to
      */
     bool operator==(StructureData const & c) const {
-      if (mmtfVersion != c.mmtfVersion) {
-        std::cout << "not equal at: " << "mmtfVersion" << std::endl;
-      }
-      if (mmtfProducer != c.mmtfProducer) {
-        std::cout << "not equal at: " << "mmtfProducer" << std::endl;
-      }
-      if (unitCell != c.unitCell) {
-        std::cout << "not equal at: " << "unitCell" << std::endl;
-      }
-      if (spaceGroup != c.spaceGroup) {
-        std::cout << "not equal at: " << "spaceGroup" << std::endl;
-      }
-      if (structureId != c.structureId) {
-        std::cout << "not equal at: " << "structureId" << std::endl;
-      }
-      if (title != c.title) {
-        std::cout << "not equal at: " << "title" << std::endl;
-      }
-      if (depositionDate != c.depositionDate) {
-        std::cout << "not equal at: " << "depositionDate" << std::endl;
-      }
-      if (releaseDate != c.releaseDate) {
-        std::cout << "not equal at: " << "releaseDate" << std::endl;
-      }
-      if (ncsOperatorList != c.ncsOperatorList) {
-        std::cout << "not equal at: " << "ncsOperatorList" << std::endl;
-      }
-      if (bioAssemblyList != c.bioAssemblyList) {
-        std::cout << "not equal at: " << "bioAssemblyList" << std::endl;
-      }
-      if (entityList != c.entityList) {
-        std::cout << "not equal at: " << "entityList" << std::endl;
-      }
-      if (experimentalMethods != c.experimentalMethods) {
-        std::cout << "not equal at: " << "experimentalMethods" << std::endl;
-      }
-      if (resolution != c.resolution) {
-        std::cout << "not equal at: " << "resolution" << std::endl;
-      }
-      if (rFree != c.rFree) {
-        std::cout << "not equal at: " << "rFree" << std::endl;
-      }
-      if (rWork != c.rWork) {
-        std::cout << "not equal at: " << "rWork" << std::endl;
-      }
-      if (numBonds != c.numBonds) {
-        std::cout << "not equal at: " << "numBonds" << std::endl;
-      }
-      if (numAtoms != c.numAtoms) {
-        std::cout << "not equal at: " << "numAtoms" << std::endl;
-      }
-      if (numGroups != c.numGroups) {
-        std::cout << "not equal at: " << "numGroups" << std::endl;
-      }
-      if (numChains != c.numChains) {
-        std::cout << "not equal at: " << "numChains" << std::endl;
-      }
-      if (numModels != c.numModels) {
-        std::cout << "not equal at: " << "numModels" << std::endl;
-      }
-      if (groupList != c.groupList) {
-        std::cout << "not equal at: " << "groupList" << std::endl;
-				for (int x=0; x<groupList.size(); ++x) {
-					std::cout << "[" << std::endl;
-					std::cout << groupList[x].as_string() << std::endl;
-					std::cout << "]," << std::endl;
-				}
-				std::cout << "[[NOTOTOOT" << std::endl;
-				for (int x=0; x<c.groupList.size(); ++x) {
-					std::cout << "[" << std::endl;
-					std::cout << c.groupList[x].as_string() << std::endl;
-					std::cout << "]," << std::endl;
-				}
-      }
-      if (bondAtomList != c.bondAtomList) {
-        std::cout << "not equal at: " << "bondAtomList" << std::endl;
-      }
-      if (bondOrderList != c.bondOrderList) {
-        std::cout << "not equal at: " << "bondOrderList" << std::endl;
-      }
-      if (bondResonanceList != c.bondResonanceList) {
-        std::cout << "not equal at: " << "bondResonanceList" << std::endl;
-      }
-      if (xCoordList != c.xCoordList) {
-        std::cout << "not equal at: " << "xCoordList" << std::endl;
-      }
-      if (yCoordList != c.yCoordList) {
-        std::cout << "not equal at: " << "yCoordList" << std::endl;
-      }
-      if (zCoordList != c.zCoordList) {
-        std::cout << "not equal at: " << "zCoordList" << std::endl;
-      }
-      if (bFactorList != c.bFactorList) {
-        std::cout << "not equal at: " << "bFactorList" << std::endl;
-      }
-      if (atomIdList != c.atomIdList) {
-        std::cout << "not equal at: " << "atomIdList" << std::endl;
-      }
-      if (altLocList != c.altLocList) {
-        std::cout << "not equal at: " << "altLocList" << std::endl;
-      }
-      if (occupancyList != c.occupancyList) {
-        std::cout << "not equal at: " << "occupancyList" << std::endl;
-      }
-      if (groupIdList != c.groupIdList) {
-        std::cout << "not equal at: " << "groupIdList" << std::endl;
-      }
-      if (groupTypeList != c.groupTypeList) {
-        std::cout << "not equal at: " << "groupTypeList" << std::endl;
-      }
-      if (secStructList != c.secStructList) {
-        std::cout << "not equal at: " << "secStructList" << std::endl;
-      }
-      if (insCodeList != c.insCodeList) {
-        std::cout << "not equal at: " << "insCodeList" << std::endl;
-      }
-      if (sequenceIndexList != c.sequenceIndexList) {
-        std::cout << "not equal at: " << "sequenceIndexList" << std::endl;
-      }
-      if (chainIdList != c.chainIdList) {
-        std::cout << "not equal at: " << "chainIdList" << std::endl;
-      }
-      if (chainNameList != c.chainNameList) {
-        std::cout << "not equal at: " << "chainNameList" << std::endl;
-      }
-      if (groupsPerChain != c.groupsPerChain) {
-        std::cout << "not equal at: " << "groupsPerChain" << std::endl;
-      }
-      if (chainsPerModel != c.chainsPerModel) {
-        std::cout << "not equal at: " << "chainsPerModel" << std::endl;
-      }
       return (
         mmtfVersion == c.mmtfVersion &&
         mmtfProducer == c.mmtfProducer &&
