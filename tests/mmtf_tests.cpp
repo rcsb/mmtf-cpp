@@ -24,6 +24,25 @@ bool approx_equal_vector(const T& a, const T& b, float eps = 0.00001) {
 }
 
 
+std::map<std::string, msgpack::object*>
+msgpack_obj_to_map(const msgpack::object& obj) {
+	std::map<std::string, msgpack::object*> data_map;
+	msgpack::object_kv* current_key_value = obj.via.map.ptr;
+	msgpack::object_kv* last_key_value = current_key_value + obj.via.map.size;
+	for (; current_key_value != last_key_value; ++current_key_value) { 
+		msgpack::object* key = &(current_key_value->key); 
+		msgpack::object* value = &(current_key_value->val); 
+		if (key->type == msgpack::type::STR) {        
+			std::string data_map_key(key->via.str.ptr, key->via.str.size);
+			data_map[data_map_key] = value;
+		} else {
+			std::cerr << "Warning: Found non-string key type " << key->type
+					  << "! Skipping..." << std::endl;
+		}
+	}
+	return data_map;
+}
+
 // Tests for structure_data.hpp
 TEST_CASE("Test round trip StructureData working") {
 	std::vector<std::string> works;
@@ -53,6 +72,8 @@ TEST_CASE("Test round trip StructureData working") {
 	works.push_back("../mmtf_spec/test-suite/mmtf/empty-all0.mmtf");
 	works.push_back("../mmtf_spec/test-suite/mmtf/empty-numChains1.mmtf");
 	works.push_back("../mmtf_spec/test-suite/mmtf/empty-numModels1.mmtf");
+	works.push_back("../temporary_test_data/all_canoncial.mmtf");
+	works.push_back("../temporary_test_data/1PEF_with_resonance.mmtf");
 	for (size_t i=0; i<works.size(); ++i) {
 		mmtf::StructureData sd1, sd2;
 		mmtf::decodeFromFile(sd1, works[i]);
@@ -493,6 +514,91 @@ TEST_CASE("Test bondOrderList vs bondAtomList") {
 	SECTION("altering sd bondOrderLists") {
 		sd.bondOrderList.push_back(1);
 		REQUIRE(sd.hasConsistentData(true) == false);
+	}
+}
+
+
+TEST_CASE("test valid bonds") {
+	std::string working_mmtf = "../temporary_test_data/all_canoncial.mmtf";
+	mmtf::StructureData sd;
+	mmtf::decodeFromFile(sd, working_mmtf);
+	REQUIRE(sd.hasConsistentData());
+	SECTION("altering group bondOrderLists") {
+		sd.groupList[0].bondResonanceList[0] = -1;
+		sd.groupList[0].bondOrderList[0] = -1;
+		REQUIRE_FALSE(sd.hasConsistentData());
+	}
+	SECTION("altering group bondOrder numbers") {
+		int8_t original = sd.groupList[0].bondResonanceList[0];
+		sd.groupList[0].bondResonanceList[0] = -3;
+		REQUIRE_FALSE(sd.hasConsistentData());
+		sd.groupList[0].bondResonanceList[0] = 2;
+		REQUIRE_FALSE(sd.hasConsistentData());
+		sd.groupList[0].bondResonanceList[0] = original;
+
+		original = sd.groupList[0].bondOrderList[0];
+		sd.groupList[0].bondOrderList[0] = 0;
+		REQUIRE_FALSE(sd.hasConsistentData());
+		sd.groupList[0].bondOrderList[0] = 5;
+		REQUIRE_FALSE(sd.hasConsistentData());
+
+		sd.groupList[0].bondOrderList[0] = -1;
+		sd.groupList[0].bondResonanceList[0] = -1;
+		REQUIRE_FALSE(sd.hasConsistentData());
+	}
+
+	SECTION("altering bondOrder numbers") {
+		int8_t original = sd.bondResonanceList[0];
+		sd.bondResonanceList[0] = -3;
+		REQUIRE_FALSE(sd.hasConsistentData());
+		sd.bondResonanceList[0] = 2;
+		REQUIRE_FALSE(sd.hasConsistentData());
+		sd.bondResonanceList[0] = original;
+
+		original = sd.bondOrderList[0];
+		sd.bondOrderList[0] = 0;
+		REQUIRE_FALSE(sd.hasConsistentData());
+		sd.bondOrderList[0] = 5;
+		REQUIRE_FALSE(sd.hasConsistentData());
+
+		sd.bondOrderList[0] = -1;
+		sd.bondResonanceList[0] = -1;
+		REQUIRE_FALSE(sd.hasConsistentData());
+	}
+
+	SECTION("altering bondOrderLists") {
+		sd.bondResonanceList[0] = -1;
+		sd.bondOrderList[0] = -1;
+		REQUIRE_FALSE(sd.hasConsistentData());
+	}
+}
+
+
+TEST_CASE("test group Optional") {
+	std::string working_mmtf = "../temporary_test_data/all_canoncial.mmtf";
+	mmtf::StructureData sd;
+	mmtf::decodeFromFile(sd, working_mmtf);
+	mmtf::GroupType first_group(sd.groupList[0]);
+	SECTION("altering group bondOrderLists") {
+		msgpack::zone my_zone;
+		first_group.bondOrderList = std::vector<int8_t>();
+		msgpack::object obj(first_group, my_zone);
+		std::map<std::string, msgpack::object*> my_map(msgpack_obj_to_map(obj));
+		REQUIRE(my_map.find("bondOrderList") == my_map.end());
+	}
+	SECTION("altering group bondResonanceLists") {
+		msgpack::zone my_zone;
+		first_group.bondResonanceList = std::vector<int8_t>();
+		msgpack::object obj(first_group, my_zone);
+		std::map<std::string, msgpack::object*> my_map(msgpack_obj_to_map(obj));
+		REQUIRE(my_map.find("bondResonanceList") == my_map.end());
+	}
+	SECTION("altering group bondAtomLists") {
+		msgpack::zone my_zone;
+		first_group.bondAtomList = std::vector<int32_t>();
+		msgpack::object obj(first_group, my_zone);
+		std::map<std::string, msgpack::object*> my_map(msgpack_obj_to_map(obj));
+		REQUIRE(my_map.find("bondAtomList") == my_map.end());
 	}
 }
 

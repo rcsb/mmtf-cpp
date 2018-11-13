@@ -16,6 +16,7 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <stdint.h>
 #include <sstream>
 #include <limits>
@@ -314,6 +315,137 @@ struct StructureData {
      * @param c what to compare to
      */
     bool operator==(StructureData const & c) const {
+      if (mmtfVersion != c.mmtfVersion) {
+        std::cout << "not equal at: " << "mmtfVersion" << std::endl;
+      }
+      if (mmtfProducer != c.mmtfProducer) {
+        std::cout << "not equal at: " << "mmtfProducer" << std::endl;
+      }
+      if (unitCell != c.unitCell) {
+        std::cout << "not equal at: " << "unitCell" << std::endl;
+      }
+      if (spaceGroup != c.spaceGroup) {
+        std::cout << "not equal at: " << "spaceGroup" << std::endl;
+      }
+      if (structureId != c.structureId) {
+        std::cout << "not equal at: " << "structureId" << std::endl;
+      }
+      if (title != c.title) {
+        std::cout << "not equal at: " << "title" << std::endl;
+      }
+      if (depositionDate != c.depositionDate) {
+        std::cout << "not equal at: " << "depositionDate" << std::endl;
+      }
+      if (releaseDate != c.releaseDate) {
+        std::cout << "not equal at: " << "releaseDate" << std::endl;
+      }
+      if (ncsOperatorList != c.ncsOperatorList) {
+        std::cout << "not equal at: " << "ncsOperatorList" << std::endl;
+      }
+      if (bioAssemblyList != c.bioAssemblyList) {
+        std::cout << "not equal at: " << "bioAssemblyList" << std::endl;
+      }
+      if (entityList != c.entityList) {
+        std::cout << "not equal at: " << "entityList" << std::endl;
+      }
+      if (experimentalMethods != c.experimentalMethods) {
+        std::cout << "not equal at: " << "experimentalMethods" << std::endl;
+      }
+      if (resolution != c.resolution) {
+        std::cout << "not equal at: " << "resolution" << std::endl;
+      }
+      if (rFree != c.rFree) {
+        std::cout << "not equal at: " << "rFree" << std::endl;
+      }
+      if (rWork != c.rWork) {
+        std::cout << "not equal at: " << "rWork" << std::endl;
+      }
+      if (numBonds != c.numBonds) {
+        std::cout << "not equal at: " << "numBonds" << std::endl;
+      }
+      if (numAtoms != c.numAtoms) {
+        std::cout << "not equal at: " << "numAtoms" << std::endl;
+      }
+      if (numGroups != c.numGroups) {
+        std::cout << "not equal at: " << "numGroups" << std::endl;
+      }
+      if (numChains != c.numChains) {
+        std::cout << "not equal at: " << "numChains" << std::endl;
+      }
+      if (numModels != c.numModels) {
+        std::cout << "not equal at: " << "numModels" << std::endl;
+      }
+      if (groupList != c.groupList) {
+        std::cout << "not equal at: " << "groupList" << std::endl;
+				for (int x=0; x<groupList.size(); ++x) {
+					std::cout << "[" << std::endl;
+					std::cout << groupList[x].as_string() << std::endl;
+					std::cout << "]," << std::endl;
+				}
+				std::cout << "[[NOTOTOOT" << std::endl;
+				for (int x=0; x<c.groupList.size(); ++x) {
+					std::cout << "[" << std::endl;
+					std::cout << c.groupList[x].as_string() << std::endl;
+					std::cout << "]," << std::endl;
+				}
+      }
+      if (bondAtomList != c.bondAtomList) {
+        std::cout << "not equal at: " << "bondAtomList" << std::endl;
+      }
+      if (bondOrderList != c.bondOrderList) {
+        std::cout << "not equal at: " << "bondOrderList" << std::endl;
+      }
+      if (bondResonanceList != c.bondResonanceList) {
+        std::cout << "not equal at: " << "bondResonanceList" << std::endl;
+      }
+      if (xCoordList != c.xCoordList) {
+        std::cout << "not equal at: " << "xCoordList" << std::endl;
+      }
+      if (yCoordList != c.yCoordList) {
+        std::cout << "not equal at: " << "yCoordList" << std::endl;
+      }
+      if (zCoordList != c.zCoordList) {
+        std::cout << "not equal at: " << "zCoordList" << std::endl;
+      }
+      if (bFactorList != c.bFactorList) {
+        std::cout << "not equal at: " << "bFactorList" << std::endl;
+      }
+      if (atomIdList != c.atomIdList) {
+        std::cout << "not equal at: " << "atomIdList" << std::endl;
+      }
+      if (altLocList != c.altLocList) {
+        std::cout << "not equal at: " << "altLocList" << std::endl;
+      }
+      if (occupancyList != c.occupancyList) {
+        std::cout << "not equal at: " << "occupancyList" << std::endl;
+      }
+      if (groupIdList != c.groupIdList) {
+        std::cout << "not equal at: " << "groupIdList" << std::endl;
+      }
+      if (groupTypeList != c.groupTypeList) {
+        std::cout << "not equal at: " << "groupTypeList" << std::endl;
+      }
+      if (secStructList != c.secStructList) {
+        std::cout << "not equal at: " << "secStructList" << std::endl;
+      }
+      if (insCodeList != c.insCodeList) {
+        std::cout << "not equal at: " << "insCodeList" << std::endl;
+      }
+      if (sequenceIndexList != c.sequenceIndexList) {
+        std::cout << "not equal at: " << "sequenceIndexList" << std::endl;
+      }
+      if (chainIdList != c.chainIdList) {
+        std::cout << "not equal at: " << "chainIdList" << std::endl;
+      }
+      if (chainNameList != c.chainNameList) {
+        std::cout << "not equal at: " << "chainNameList" << std::endl;
+      }
+      if (groupsPerChain != c.groupsPerChain) {
+        std::cout << "not equal at: " << "groupsPerChain" << std::endl;
+      }
+      if (chainsPerModel != c.chainsPerModel) {
+        std::cout << "not equal at: " << "chainsPerModel" << std::endl;
+      }
       return (
         mmtfVersion == c.mmtfVersion &&
         mmtfProducer == c.mmtfProducer &&
@@ -559,6 +691,13 @@ inline StructureData::StructureData() {
 }
 
 inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_max_length) const {
+  std::vector<int8_t> allowed_bond_orders;
+  allowed_bond_orders.push_back(-1);
+  allowed_bond_orders.push_back(1);
+  allowed_bond_orders.push_back(2);
+  allowed_bond_orders.push_back(3);
+  allowed_bond_orders.push_back(4);
+
   // check unitCell: if given, must be of length 6
   if (!hasRightSizeOptional(unitCell, 6)) {
     if (verbose) {
@@ -641,12 +780,30 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
         }
         return false;
       }
+      for (size_t j = 0; j < g.bondOrderList.size(); ++j) {
+        if (std::find(allowed_bond_orders.begin(), allowed_bond_orders.end(),
+              g.bondOrderList[j]) == allowed_bond_orders.end()) {
+          if (verbose) {
+            std::cout << "Cannot have bond order of: " << g.bondOrderList[j]
+                << " allowed bond orders are: -1, 1, 2, 3 or 4.  at idx: " << j << std::endl;
+          }
+          return false;
+        }
+      }
     }
     if (!isDefaultValue(g.bondResonanceList)) {
       if (isDefaultValue(g.bondOrderList) || isDefaultValue(g.bondAtomList)) {
         if (verbose) {
           std::cout << "Cannot have bondResonanceList without both " <<
               "bondOrderList and bondAtomList! at idx: " << i << std::endl;
+        }
+        return false;
+      }
+      if (g.bondOrderList.size() != g.bondResonanceList.size()) {
+        if (verbose) {
+          std::cout << "inconsistent group::bondOrderSize size: " <<
+              g.bondOrderList.size() << " != group::bondResonanceList size(*2): " <<
+              g.bondResonanceList.size()*2 << " at idx: " << i << std::endl;
         }
         return false;
       }
@@ -657,6 +814,26 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
               g.bondResonanceList.size()*2 << " at idx: " << i << std::endl;
         }
         return false;
+      }
+      // Check bond resonance matches
+      for (size_t j = 0; j < g.bondResonanceList.size(); ++j) {
+        if (g.bondResonanceList[j] < -1 || g.bondResonanceList[j] > 1) {
+          if (verbose) {
+            std::cout << "group::bondResonanceList had a Resonance of: "
+              << g.bondResonanceList[j] << " and only -1, 0, or 1 are allowed"
+              << std::endl;
+          }
+          return false;
+        }
+        if (g.bondOrderList[j] == -1 && g.bondResonanceList[j] != 1) {
+          if (verbose) {
+            std::cout << "group::bondResonanceList had a Resonance of: "
+              << g.bondResonanceList[j] << " and group::bondOrderList had an order of "
+              << g.bondOrderList[j] << " we require unknown bondOrders to have resonance"
+              << std::endl;
+          }
+          return false;
+        }
       }
     }
     if (!hasValidIndices(g.bondAtomList, num_atoms)) {
@@ -677,6 +854,16 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
       }
       return false;
     }
+    for (size_t i = 0; i < bondOrderList.size(); ++i) {
+      if (std::find(allowed_bond_orders.begin(), allowed_bond_orders.end(),
+            bondOrderList[i]) == allowed_bond_orders.end()) {
+        if (verbose) {
+          std::cout << "Cannot have bond order of: " << bondOrderList[i]
+              << " allowed bond orders are: -1, 1, 2, 3 or 4.  at idx: " << i << std::endl;
+        }
+        return false;
+      }
+    }
   }
   if (!isDefaultValue(bondResonanceList)) {
     if (bondAtomList.size() != bondResonanceList.size() * 2) {
@@ -686,6 +873,25 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
               bondResonanceList.size()*2 << std::endl;
       }
       return false;
+    }
+    for (size_t i = 0; i < bondResonanceList.size(); ++i) {
+      if (bondResonanceList[i] < -1 || bondResonanceList[i] > 1) {
+        if (verbose) {
+          std::cout << "group::bondResonanceList had a Resonance of: "
+            << bondResonanceList[i] << " and only -1, 0, or 1 are allowed"
+            << std::endl;
+        }
+        return false;
+      }
+      if (bondOrderList[i] == -1 && bondResonanceList[i] != 1) {
+        if (verbose) {
+          std::cout << "group::bondResonanceList had a Resonance of: "
+            << bondResonanceList[i] << " and group::bondOrderList had an order of "
+            << bondOrderList[i] << " we require unknown bondOrders to have resonance"
+            << std::endl;
+        }
+        return false;
+      }
     }
   }
   if (!hasValidIndices(bondAtomList, numAtoms)) {
