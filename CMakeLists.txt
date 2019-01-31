@@ -39,3 +39,8 @@ endif()
 if (mmtf_build_examples)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/examples)
 endif()
+
+install(
+    DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
+    DESTINATION  "include"
+    FILES_MATCHING PATTERN "*.hpp")

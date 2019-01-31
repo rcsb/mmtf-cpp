@@ -41,6 +41,24 @@ Here, `<MSGPACK_INCLUDE_PATH>` and `<MMTF_INCLUDE_PATH>` are the paths to the
 
 For your more complicated projects, a `CMakeLists.txt` is included for you.
 
+## Installation
+You can also perform a system wide installation with `cmake` and `ninja` (or `make`).  
+To do so:
+```bash
+mkdir build
+cd build
+cmake -G Ninja ..
+sudo ninja install
+```
+
+`cmake` automatically sets the installation directory to `/usr/local/include`, if you want to install it to another `*include/` directory
+run `cmake` with the command:
+```bash
+cmake -G Ninja -DCMAKE_INSTALL_PREFIX=/home/me/local ..
+```
+Be aware that `/include` is added to the end of `DCMAKE_INSTALL_PREFIX` and that is where your files are installed (i.e. the above would install at `/home/me/local/include/`).
+
+
 ## Examples and tests
 
 To build the tests + examples we recommend using the following lines:
