@@ -84,8 +84,7 @@ template <typename Stream>
 inline void encodeToStream(const StructureData& data, Stream& stream,
     int32_t coord_divider, int32_t occupancy_b_factor_divider,
     int32_t chain_name_max_length) {
-  msgpack::zone _zone;
-  msgpack::pack(stream, encodeToMap(data, _zone, coord_divider,
+  msgpack::pack(stream, encodeToMap(data, data.msgpack_zone, coord_divider,
               occupancy_b_factor_divider, chain_name_max_length));
 }
 

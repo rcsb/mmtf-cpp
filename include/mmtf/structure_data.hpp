@@ -189,7 +189,7 @@ struct StructureData {
     std::vector<std::string>                 chainNameList;
     std::vector<int32_t>                     groupsPerChain;
     std::vector<int32_t>                     chainsPerModel;
-    msgpack::zone                            msgpack_zone;
+    mutable msgpack::zone                    msgpack_zone;
     std::map<std::string, msgpack::object>   bondProperties;
     std::map<std::string, msgpack::object>   atomProperties;
     std::map<std::string, msgpack::object>   groupProperties;
