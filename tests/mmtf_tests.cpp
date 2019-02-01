@@ -504,10 +504,10 @@ TEST_CASE("atomProperties field") {
 
 	/// Pack
 	// 1. Make your input data
-	std::vector<int> clist_out;
-	std::vector<int> clist_in, clist_in_decoded, nothing;
-	for (std::size_t i=0; i<256; ++i) {
-		clist_out.push_back((int)i);
+	std::vector<int32_t> clist_out;
+	std::vector<int32_t> clist_in, clist_in_decoded, nothing;
+	for (int32_t i = 0; i < 256; ++i) {
+		clist_out.push_back(i);
 	}
 	// 2. msgpack zones have weird lifetimes, make sure you use the zone
 	// in StructureData to avoid any weird errors
