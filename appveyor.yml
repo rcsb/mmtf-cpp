@@ -10,10 +10,6 @@ environment:
     - generator: MinGW Makefiles
       CXX_PATH: 'C:\mingw-w64\i686-6.3.0-posix-dwarf-rt_v5-rev1\mingw32\bin'
       ARCH: x86
-    - generator: Visual Studio 14 2015 Win64
-      ARCH: x64
-    - generator: Visual Studio 14 2015
-      ARCH: x86
 
 clone_folder: c:\mmtf-cpp
 
