@@ -63,7 +63,7 @@ inline void decodeFromBuffer(StructureData& data, const char* buffer,
     // load msgpack object and directly convert it
     msgpack::unpacked upd;
     msgpack::unpack(upd, buffer, size);
-    msgpack::object obj(upd.get(), data.msgpack_zone);
+    msgpack::object obj(upd.get());
     obj.convert(data);
 }
 
