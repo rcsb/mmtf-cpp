@@ -59,6 +59,26 @@ public:
     void decode(const std::string& key, bool required, T& target);
 
     /**
+     * @brief Don't decode, but instead just copy map-contents onto a zone
+     *        for later decoding/processing you should use this when you have
+     *        nested msgpack objects.
+     *        Note: There is some copy overhead here. If speed becomes an issue
+     *              we should come up with a way to keep the original handle alive.
+     * @param[in]  key      Key into msgpack map.
+     * @param[in]  required True if field is required by MMTF specs or you
+     * @param[out] target   std::map<std::string, msgpack::object> that holds access to data on zone.
+     * @param[in]  zone     msgpack::zone to copy data onto
+     *
+     * If msgpack type is not as expected, we write a warning to stderr.
+     * If conversion to the target type fails, msgpack throws an exception.
+     * If a required field is missing in the map or if binary decoding fails,
+     * we throw an mmtf::DecodeError.
+     */
+    void
+    copy_decode(const std::string& key, bool required,
+                std::map<std::string, msgpack::object> & target, msgpack::zone & zone);
+
+    /**
      * @brief Check if there are any keys, that were not decoded.
      * This is to be called after all expected fields have been decoded.
      * A warning is written to stderr for each non-decoded key.
@@ -125,6 +145,24 @@ inline MapDecoder::MapDecoder(std::map<std::string, msgpack::object>& map_in) {
     std::map<std::string, msgpack::object>::iterator it;
     for (it=map_in.begin(); it!= map_in.end(); ++it) {
         data_map_[it->first] = &(it->second);
+    }
+}
+
+void
+MapDecoder::copy_decode(const std::string& key, bool required,
+                        std::map<std::string, msgpack::object> & target, msgpack::zone & zone) {
+    // note: cost of O(M*log(N)) string comparisons (M parsed, N in map)
+    std::map<std::string, msgpack::object*>::iterator it;
+    it = data_map_.find(key);
+    if (it != data_map_.end()) {
+        decoded_keys_.insert(key);
+        // expensive copy here
+        msgpack::object tmp_object(*it->second, zone);
+        tmp_object.convert(target);
+    }
+    else if (required) {
+        throw DecodeError("MsgPack MAP does not contain required entry "
+                          + key);
     }
 }
 

@@ -103,6 +103,7 @@ struct convert<mmtf::BioAssembly> {
     }
 };
 
+
 template <>
 struct convert<mmtf::StructureData> {
     const msgpack::object& operator()(const msgpack::object& obj, 
@@ -156,14 +157,13 @@ struct convert<mmtf::StructureData> {
         md.decode("groupsPerChain", true, data.groupsPerChain);
         md.decode("chainsPerModel", true, data.chainsPerModel);
         // extraProperties (application specific stuff)
-        // decoding only creates a shallow copy, make sure you pack everything
-        // onto the StructureData's Zone
-        md.decode("bondProperties", false, data.bondProperties);
-        md.decode("atomProperties", false, data.atomProperties);
-        md.decode("groupProperties", false, data.groupProperties);
-        md.decode("chainProperties", false, data.chainProperties);
-        md.decode("modelProperties", false, data.modelProperties);
-        md.decode("extraProperties", false, data.extraProperties);
+        // Perform expensive copy if exists.  Implement outside accessor if speed is necessary
+        md.copy_decode("bondProperties", false, data.bondProperties, data.msgpack_zone);
+        md.copy_decode("atomProperties", false, data.atomProperties, data.msgpack_zone);
+        md.copy_decode("groupProperties", false, data.groupProperties, data.msgpack_zone);
+        md.copy_decode("chainProperties", false, data.chainProperties, data.msgpack_zone);
+        md.copy_decode("modelProperties", false, data.modelProperties, data.msgpack_zone);
+        md.copy_decode("extraProperties", false, data.extraProperties, data.msgpack_zone);
         md.checkExtraKeys();
         return obj;
     }
