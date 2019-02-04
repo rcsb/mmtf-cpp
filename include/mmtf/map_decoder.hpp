@@ -149,7 +149,7 @@ inline MapDecoder::MapDecoder(std::map<std::string, msgpack::object>& map_in) {
 }
 
 void
-MapDecoder::copy_decode(const std::string& key, bool required,
+inline MapDecoder::copy_decode(const std::string& key, bool required,
                         std::map<std::string, msgpack::object> & target, msgpack::zone & zone) {
     // note: cost of O(M*log(N)) string comparisons (M parsed, N in map)
     std::map<std::string, msgpack::object*>::iterator it;
@@ -167,7 +167,7 @@ MapDecoder::copy_decode(const std::string& key, bool required,
 }
 
 template<typename T>
-void MapDecoder::decode(const std::string& key, bool required, T& target) {
+inline void MapDecoder::decode(const std::string& key, bool required, T& target) {
     // note: cost of O(M*log(N)) string comparisons (M parsed, N in map)
     std::map<std::string, msgpack::object*>::iterator it;
     it = data_map_.find(key);
