@@ -203,6 +203,11 @@ struct StructureData {
     StructureData();
 
     /**
+     * @brief Construct object with default values set.
+     */
+    StructureData(const StructureData & obj);
+
+    /**
      * @brief Check consistency of structural data.
      * @param verbose                 Print first error encountered (if any)
      * @param chain_name_max_length   Max allowed chain name length
@@ -220,6 +225,85 @@ struct StructureData {
      * @param delim what to split columns with
      */
     std::string print(std::string delim="\t");
+
+    /**
+     * @brief compare two StructureData classes
+     * @param c what to compare to
+     */
+    StructureData& operator=(StructureData const & f) {
+        mmtfVersion = f.mmtfVersion;
+        mmtfProducer = f.mmtfProducer;
+        unitCell = f.unitCell;
+        spaceGroup = f.spaceGroup;
+        structureId = f.structureId;
+        title = f.title;
+        depositionDate = f.depositionDate;
+        releaseDate = f.releaseDate;
+        ncsOperatorList = f.ncsOperatorList;
+        bioAssemblyList = f.bioAssemblyList;
+        entityList = f.entityList;
+        experimentalMethods = f.experimentalMethods;
+        resolution = f.resolution;
+        rFree = f.rFree;
+        rWork = f.rWork;
+        numBonds = f.numBonds;
+        numAtoms = f.numAtoms;
+        numGroups = f.numGroups;
+        numChains = f.numChains;
+        numModels = f.numModels;
+        groupList = f.groupList;
+        bondAtomList = f.bondAtomList;
+        bondOrderList = f.bondOrderList;
+        xCoordList = f.xCoordList;
+        yCoordList = f.yCoordList;
+        zCoordList = f.zCoordList;
+        bFactorList = f.bFactorList;
+        atomIdList = f.atomIdList;
+        altLocList = f.altLocList;
+        occupancyList = f.occupancyList;
+        groupIdList = f.groupIdList;
+        groupTypeList = f.groupTypeList;
+        secStructList = f.secStructList;
+        insCodeList = f.insCodeList;
+        sequenceIndexList = f.sequenceIndexList;
+        chainIdList = f.chainIdList;
+        chainNameList = f.chainNameList;
+        groupsPerChain = f.groupsPerChain;
+        chainsPerModel = f.chainsPerModel;
+        bondProperties = f.bondProperties;
+        atomProperties = f.atomProperties;
+        groupProperties = f.groupProperties;
+        chainProperties = f.chainProperties;
+        modelProperties = f.modelProperties;
+        extraProperties = f.extraProperties;
+        // Deep Copy all data in sub-msgpack::objects to new class
+        std::map<std::string, msgpack::object>::const_iterator it;
+        for (it = f.bondProperties.begin(); it != f.bondProperties.end(); ++it) {
+            msgpack::object tmp_object(it->second, msgpack_zone);
+            bondProperties[it->first] = tmp_object;
+        }
+        for (it = f.atomProperties.begin(); it != f.atomProperties.end(); ++it) {
+            msgpack::object tmp_object(it->second, msgpack_zone);
+            atomProperties[it->first] = tmp_object;
+        }
+        for (it = f.groupProperties.begin(); it != f.groupProperties.end(); ++it) {
+            msgpack::object tmp_object(it->second, msgpack_zone);
+            groupProperties[it->first] = tmp_object;
+        }
+        for (it = f.chainProperties.begin(); it != f.chainProperties.end(); ++it) {
+            msgpack::object tmp_object(it->second, msgpack_zone);
+            chainProperties[it->first] = tmp_object;
+        }
+        for (it = f.modelProperties.begin(); it != f.modelProperties.end(); ++it) {
+            msgpack::object tmp_object(it->second, msgpack_zone);
+            modelProperties[it->first] = tmp_object;
+        }
+        for (it = f.extraProperties.begin(); it != f.extraProperties.end(); ++it) {
+            msgpack::object tmp_object(it->second, msgpack_zone);
+            extraProperties[it->first] = tmp_object;
+        }
+        return *this;
+    }
 
     /**
      * @brief compare two StructureData classes
@@ -265,7 +349,21 @@ struct StructureData {
         chainIdList == c.chainIdList &&
         chainNameList == c.chainNameList &&
         groupsPerChain == c.groupsPerChain &&
-        chainsPerModel == c.chainsPerModel);
+        chainsPerModel == c.chainsPerModel &&
+        bondProperties == c.bondProperties &&
+        atomProperties == c.atomProperties &&
+        groupProperties == c.groupProperties &&
+        chainProperties == c.chainProperties &&
+        modelProperties == c.modelProperties &&
+        extraProperties == c.extraProperties);
+    }
+
+    /**
+     * @brief compare two StructureData classes for inequality
+     * @param c what to compare to
+     */
+    bool operator!=(StructureData const & c) const {
+        return !(*this == c);
     }
 };
 
@@ -467,6 +565,75 @@ inline StructureData::StructureData() {
   // set version and producer
   mmtfVersion = getVersionString();
   mmtfProducer = "mmtf-cpp library (github.com/rcsb/mmtf-cpp)";
+}
+
+inline StructureData::StructureData(const StructureData & obj) {
+    mmtfVersion = obj.mmtfVersion;
+    mmtfProducer = obj.mmtfProducer;
+    unitCell = obj.unitCell;
+    spaceGroup = obj.spaceGroup;
+    structureId = obj.structureId;
+    title = obj.title;
+    depositionDate = obj.depositionDate;
+    releaseDate = obj.releaseDate;
+    ncsOperatorList = obj.ncsOperatorList;
+    bioAssemblyList = obj.bioAssemblyList;
+    entityList = obj.entityList;
+    experimentalMethods = obj.experimentalMethods;
+    resolution = obj.resolution;
+    rFree = obj.rFree;
+    rWork = obj.rWork;
+    numBonds = obj.numBonds;
+    numAtoms = obj.numAtoms;
+    numGroups = obj.numGroups;
+    numChains = obj.numChains;
+    numModels = obj.numModels;
+    groupList = obj.groupList;
+    bondAtomList = obj.bondAtomList;
+    bondOrderList = obj.bondOrderList;
+    xCoordList = obj.xCoordList;
+    yCoordList = obj.yCoordList;
+    zCoordList = obj.zCoordList;
+    bFactorList = obj.bFactorList;
+    atomIdList = obj.atomIdList;
+    altLocList = obj.altLocList;
+    occupancyList = obj.occupancyList;
+    groupIdList = obj.groupIdList;
+    groupTypeList = obj.groupTypeList;
+    secStructList = obj.secStructList;
+    insCodeList = obj.insCodeList;
+    sequenceIndexList = obj.sequenceIndexList;
+    chainIdList = obj.chainIdList;
+    chainNameList = obj.chainNameList;
+    groupsPerChain = obj.groupsPerChain;
+    chainsPerModel = obj.chainsPerModel;
+
+    // Deep Copy all data in sub-msgpack::objects to new class
+    std::map<std::string, msgpack::object>::const_iterator it;
+    for (it = obj.bondProperties.begin(); it != obj.bondProperties.end(); ++it) {
+        msgpack::object tmp_object(it->second, obj.msgpack_zone);
+        bondProperties[it->first] = tmp_object;
+    }
+    for (it = obj.atomProperties.begin(); it != obj.atomProperties.end(); ++it) {
+        msgpack::object tmp_object(it->second, obj.msgpack_zone);
+        atomProperties[it->first] = tmp_object;
+    }
+    for (it = obj.groupProperties.begin(); it != obj.groupProperties.end(); ++it) {
+        msgpack::object tmp_object(it->second, obj.msgpack_zone);
+        groupProperties[it->first] = tmp_object;
+    }
+    for (it = obj.chainProperties.begin(); it != obj.chainProperties.end(); ++it) {
+        msgpack::object tmp_object(it->second, obj.msgpack_zone);
+        chainProperties[it->first] = tmp_object;
+    }
+    for (it = obj.modelProperties.begin(); it != obj.modelProperties.end(); ++it) {
+        msgpack::object tmp_object(it->second, obj.msgpack_zone);
+        modelProperties[it->first] = tmp_object;
+    }
+    for (it = obj.extraProperties.begin(); it != obj.extraProperties.end(); ++it) {
+        msgpack::object tmp_object(it->second, obj.msgpack_zone);
+        extraProperties[it->first] = tmp_object;
+    }
 }
 
 inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_max_length) const {

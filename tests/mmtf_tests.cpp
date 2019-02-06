@@ -24,6 +24,61 @@ bool approx_equal_vector(const T& a, const T& b, float eps = 0.00001) {
 }
 
 
+TEST_CASE("assignment operator") {
+	std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
+	mmtf::StructureData sd;
+	mmtf::decodeFromFile(sd, working_mmtf);
+	SECTION("basic assignment operator") {
+		mmtf::StructureData sd2;
+		sd2 = sd;
+		REQUIRE(sd2 == sd);
+	}
+	SECTION("deep assignment operator") {
+		mmtf::StructureData sd2;
+		std::vector<int32_t> clist;
+		for (int32_t i = 0; i < 256; ++i) {
+			clist.push_back(i);
+		}
+		sd.atomProperties["256l"] = msgpack::object(clist, sd.msgpack_zone);
+		sd2 = sd;
+		REQUIRE(sd2 == sd);
+		REQUIRE(sd2.atomProperties["256l"] == sd.atomProperties["256l"]);
+	}
+	SECTION("deep assignment operator") {
+		mmtf::StructureData sd2;
+		std::vector<int32_t> clist;
+		for (int32_t i = 0; i < 256; ++i) {
+			clist.push_back(i);
+		}
+		sd.atomProperties["256l"] = msgpack::object(clist, sd.msgpack_zone);
+		sd2 = sd;
+		clist.push_back(22);
+		sd.atomProperties["256l"] = msgpack::object(clist, sd.msgpack_zone);
+		REQUIRE(sd2 != sd);
+		REQUIRE(sd2.atomProperties["256l"] != sd.atomProperties["256l"]);
+	}
+}
+
+
+TEST_CASE("copy constructor") {
+	std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
+	mmtf::StructureData sd;
+	mmtf::decodeFromFile(sd, working_mmtf);
+	SECTION("Basic copy constructor") {
+		mmtf::StructureData sd2(sd);
+		REQUIRE(sd2 == sd);
+	}
+	SECTION("Check msgpack::object copying") {
+		std::vector<int32_t> clist;
+		for (int32_t i = 0; i < 256; ++i) {
+			clist.push_back(i);
+		}
+		sd.atomProperties["256l"] = msgpack::object(clist, sd.msgpack_zone);
+		mmtf::StructureData sd2(sd);
+		REQUIRE(sd2.atomProperties["256l"] == sd.atomProperties["256l"]);
+	}
+}
+
 // Tests for structure_data.hpp
 TEST_CASE("Test round trip StructureData working") {
 	std::vector<std::string> works;
