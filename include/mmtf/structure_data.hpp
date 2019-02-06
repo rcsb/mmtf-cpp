@@ -611,27 +611,27 @@ inline StructureData::StructureData(const StructureData & obj) {
     // Deep Copy all data in sub-msgpack::objects to new class
     std::map<std::string, msgpack::object>::const_iterator it;
     for (it = obj.bondProperties.begin(); it != obj.bondProperties.end(); ++it) {
-        msgpack::object tmp_object(it->second, obj.msgpack_zone);
+        msgpack::object tmp_object(it->second, msgpack_zone);
         bondProperties[it->first] = tmp_object;
     }
     for (it = obj.atomProperties.begin(); it != obj.atomProperties.end(); ++it) {
-        msgpack::object tmp_object(it->second, obj.msgpack_zone);
+        msgpack::object tmp_object(it->second, msgpack_zone);
         atomProperties[it->first] = tmp_object;
     }
     for (it = obj.groupProperties.begin(); it != obj.groupProperties.end(); ++it) {
-        msgpack::object tmp_object(it->second, obj.msgpack_zone);
+        msgpack::object tmp_object(it->second, msgpack_zone);
         groupProperties[it->first] = tmp_object;
     }
     for (it = obj.chainProperties.begin(); it != obj.chainProperties.end(); ++it) {
-        msgpack::object tmp_object(it->second, obj.msgpack_zone);
+        msgpack::object tmp_object(it->second, msgpack_zone);
         chainProperties[it->first] = tmp_object;
     }
     for (it = obj.modelProperties.begin(); it != obj.modelProperties.end(); ++it) {
-        msgpack::object tmp_object(it->second, obj.msgpack_zone);
+        msgpack::object tmp_object(it->second, msgpack_zone);
         modelProperties[it->first] = tmp_object;
     }
     for (it = obj.extraProperties.begin(); it != obj.extraProperties.end(); ++it) {
-        msgpack::object tmp_object(it->second, obj.msgpack_zone);
+        msgpack::object tmp_object(it->second, msgpack_zone);
         extraProperties[it->first] = tmp_object;
     }
 }
