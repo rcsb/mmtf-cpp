@@ -150,221 +150,111 @@ struct BioAssembly {
  * https://github.com/rcsb/mmtf/blob/HEAD/spec.md#fields
  */
 struct StructureData {
-    std::string                              mmtfVersion;
-    std::string                              mmtfProducer;
-    std::vector<float>                       unitCell;
-    std::string                              spaceGroup;
-    std::string                              structureId;
-    std::string                              title;
-    std::string                              depositionDate;
-    std::string                              releaseDate;
-    std::vector<std::vector<float> >         ncsOperatorList;
-    std::vector<BioAssembly>                 bioAssemblyList;
-    std::vector<Entity>                      entityList;
-    std::vector<std::string>                 experimentalMethods;
-    float                                    resolution;
-    float                                    rFree;
-    float                                    rWork;
-    int32_t                                  numBonds;
-    int32_t                                  numAtoms;
-    int32_t                                  numGroups;
-    int32_t                                  numChains;
-    int32_t                                  numModels;
-    std::vector<GroupType>                   groupList;
-    std::vector<int32_t>                     bondAtomList;
-    std::vector<int8_t>                      bondOrderList;
-    std::vector<float>                       xCoordList;
-    std::vector<float>                       yCoordList;
-    std::vector<float>                       zCoordList;
-    std::vector<float>                       bFactorList;
-    std::vector<int32_t>                     atomIdList;
-    std::vector<char>                        altLocList;
-    std::vector<float>                       occupancyList;
-    std::vector<int32_t>                     groupIdList;
-    std::vector<int32_t>                     groupTypeList;
-    std::vector<int8_t>                      secStructList;
-    std::vector<char>                        insCodeList;
-    std::vector<int32_t>                     sequenceIndexList;
-    std::vector<std::string>                 chainIdList;
-    std::vector<std::string>                 chainNameList;
-    std::vector<int32_t>                     groupsPerChain;
-    std::vector<int32_t>                     chainsPerModel;
-    mutable msgpack::zone                    msgpack_zone;
-    std::map<std::string, msgpack::object>   bondProperties;
-    std::map<std::string, msgpack::object>   atomProperties;
-    std::map<std::string, msgpack::object>   groupProperties;
-    std::map<std::string, msgpack::object>   chainProperties;
-    std::map<std::string, msgpack::object>   modelProperties;
-    std::map<std::string, msgpack::object>   extraProperties;
+  std::string                              mmtfVersion;
+  std::string                              mmtfProducer;
+  std::vector<float>                       unitCell;
+  std::string                              spaceGroup;
+  std::string                              structureId;
+  std::string                              title;
+  std::string                              depositionDate;
+  std::string                              releaseDate;
+  std::vector<std::vector<float> >         ncsOperatorList;
+  std::vector<BioAssembly>                 bioAssemblyList;
+  std::vector<Entity>                      entityList;
+  std::vector<std::string>                 experimentalMethods;
+  float                                    resolution;
+  float                                    rFree;
+  float                                    rWork;
+  int32_t                                  numBonds;
+  int32_t                                  numAtoms;
+  int32_t                                  numGroups;
+  int32_t                                  numChains;
+  int32_t                                  numModels;
+  std::vector<GroupType>                   groupList;
+  std::vector<int32_t>                     bondAtomList;
+  std::vector<int8_t>                      bondOrderList;
+  std::vector<float>                       xCoordList;
+  std::vector<float>                       yCoordList;
+  std::vector<float>                       zCoordList;
+  std::vector<float>                       bFactorList;
+  std::vector<int32_t>                     atomIdList;
+  std::vector<char>                        altLocList;
+  std::vector<float>                       occupancyList;
+  std::vector<int32_t>                     groupIdList;
+  std::vector<int32_t>                     groupTypeList;
+  std::vector<int8_t>                      secStructList;
+  std::vector<char>                        insCodeList;
+  std::vector<int32_t>                     sequenceIndexList;
+  std::vector<std::string>                 chainIdList;
+  std::vector<std::string>                 chainNameList;
+  std::vector<int32_t>                     groupsPerChain;
+  std::vector<int32_t>                     chainsPerModel;
+  mutable msgpack::zone                    msgpack_zone;
+  std::map<std::string, msgpack::object>   bondProperties;
+  std::map<std::string, msgpack::object>   atomProperties;
+  std::map<std::string, msgpack::object>   groupProperties;
+  std::map<std::string, msgpack::object>   chainProperties;
+  std::map<std::string, msgpack::object>   modelProperties;
+  std::map<std::string, msgpack::object>   extraProperties;
 
-    /**
-     * @brief Construct object with default values set.
-     */
-    StructureData();
+  /**
+   * @brief Construct object with default values set.
+   */
+  StructureData();
 
-    /**
-     * @brief Construct object with default values set.
-     */
-    StructureData(const StructureData & obj);
+  /**
+   * @brief Construct object with default values set.
+   */
+  StructureData(const StructureData & obj);
 
-    /**
-     * @brief Check consistency of structural data.
-     * @param verbose                 Print first error encountered (if any)
-     * @param chain_name_max_length   Max allowed chain name length
-     * @return True if all required fields are set and vector sizes and indices
-     *         are consistent.
-     */
-    bool hasConsistentData(bool verbose=false, uint32_t chain_name_max_length = 4) const;
+  /**
+   * @brief Construct object with default values set.
+   */
+  void
+  copy_standard_data(const StructureData & obj);
 
+  /**
+   * @brief helper for copy constructor and assignment operator
+   */
+  void
+  copy_extra_data(const StructureData & obj);
 
-    /**
-     * @brief Read out the contents of mmtf::StructureData in a PDB-like fashion
-     * Columns are in order:
-     * ATOM/HETATM AtomId Element AtomName AltLoc GroupId GroupType
-     * InsCode ChainName x y z B-factor Occupancy Charge
-     * @param delim what to split columns with
-     */
-    std::string print(std::string delim="\t");
+  /**
+   * @brief Check consistency of structural data.
+   * @param verbose                 Print first error encountered (if any)
+   * @param chain_name_max_length   Max allowed chain name length
+   * @return True if all required fields are set and vector sizes and indices
+   *         are consistent.
+   */
+  bool hasConsistentData(bool verbose=false, uint32_t chain_name_max_length = 4) const;
 
-    /**
-     * @brief compare two StructureData classes
-     * @param c what to compare to
-     */
-    StructureData& operator=(StructureData const & f) {
-        mmtfVersion = f.mmtfVersion;
-        mmtfProducer = f.mmtfProducer;
-        unitCell = f.unitCell;
-        spaceGroup = f.spaceGroup;
-        structureId = f.structureId;
-        title = f.title;
-        depositionDate = f.depositionDate;
-        releaseDate = f.releaseDate;
-        ncsOperatorList = f.ncsOperatorList;
-        bioAssemblyList = f.bioAssemblyList;
-        entityList = f.entityList;
-        experimentalMethods = f.experimentalMethods;
-        resolution = f.resolution;
-        rFree = f.rFree;
-        rWork = f.rWork;
-        numBonds = f.numBonds;
-        numAtoms = f.numAtoms;
-        numGroups = f.numGroups;
-        numChains = f.numChains;
-        numModels = f.numModels;
-        groupList = f.groupList;
-        bondAtomList = f.bondAtomList;
-        bondOrderList = f.bondOrderList;
-        xCoordList = f.xCoordList;
-        yCoordList = f.yCoordList;
-        zCoordList = f.zCoordList;
-        bFactorList = f.bFactorList;
-        atomIdList = f.atomIdList;
-        altLocList = f.altLocList;
-        occupancyList = f.occupancyList;
-        groupIdList = f.groupIdList;
-        groupTypeList = f.groupTypeList;
-        secStructList = f.secStructList;
-        insCodeList = f.insCodeList;
-        sequenceIndexList = f.sequenceIndexList;
-        chainIdList = f.chainIdList;
-        chainNameList = f.chainNameList;
-        groupsPerChain = f.groupsPerChain;
-        chainsPerModel = f.chainsPerModel;
-        bondProperties = f.bondProperties;
-        atomProperties = f.atomProperties;
-        groupProperties = f.groupProperties;
-        chainProperties = f.chainProperties;
-        modelProperties = f.modelProperties;
-        extraProperties = f.extraProperties;
-        // Deep Copy all data in sub-msgpack::objects to new class
-        std::map<std::string, msgpack::object>::const_iterator it;
-        for (it = f.bondProperties.begin(); it != f.bondProperties.end(); ++it) {
-            msgpack::object tmp_object(it->second, msgpack_zone);
-            bondProperties[it->first] = tmp_object;
-        }
-        for (it = f.atomProperties.begin(); it != f.atomProperties.end(); ++it) {
-            msgpack::object tmp_object(it->second, msgpack_zone);
-            atomProperties[it->first] = tmp_object;
-        }
-        for (it = f.groupProperties.begin(); it != f.groupProperties.end(); ++it) {
-            msgpack::object tmp_object(it->second, msgpack_zone);
-            groupProperties[it->first] = tmp_object;
-        }
-        for (it = f.chainProperties.begin(); it != f.chainProperties.end(); ++it) {
-            msgpack::object tmp_object(it->second, msgpack_zone);
-            chainProperties[it->first] = tmp_object;
-        }
-        for (it = f.modelProperties.begin(); it != f.modelProperties.end(); ++it) {
-            msgpack::object tmp_object(it->second, msgpack_zone);
-            modelProperties[it->first] = tmp_object;
-        }
-        for (it = f.extraProperties.begin(); it != f.extraProperties.end(); ++it) {
-            msgpack::object tmp_object(it->second, msgpack_zone);
-            extraProperties[it->first] = tmp_object;
-        }
-        return *this;
-    }
+  /**
+   * @brief Read out the contents of mmtf::StructureData in a PDB-like fashion
+   * Columns are in order:
+   * ATOM/HETATM AtomId Element AtomName AltLoc GroupId GroupType
+   * InsCode ChainName x y z B-factor Occupancy Charge
+   * @param delim what to split columns with
+   */
+  std::string print(std::string delim="\t");
 
-    /**
-     * @brief compare two StructureData classes
-     * @param c what to compare to
-     */
-    bool operator==(StructureData const & c) const {
-      return (
-        mmtfVersion == c.mmtfVersion &&
-        mmtfProducer == c.mmtfProducer &&
-        unitCell == c.unitCell &&
-        spaceGroup == c.spaceGroup &&
-        structureId == c.structureId &&
-        title == c.title &&
-        depositionDate == c.depositionDate &&
-        releaseDate == c.releaseDate &&
-        ncsOperatorList == c.ncsOperatorList &&
-        bioAssemblyList == c.bioAssemblyList &&
-        entityList == c.entityList &&
-        experimentalMethods == c.experimentalMethods &&
-        resolution == c.resolution &&
-        rFree == c.rFree &&
-        rWork == c.rWork &&
-        numBonds == c.numBonds &&
-        numAtoms == c.numAtoms &&
-        numGroups == c.numGroups &&
-        numChains == c.numChains &&
-        numModels == c.numModels &&
-        groupList == c.groupList &&
-        bondAtomList == c.bondAtomList &&
-        bondOrderList == c.bondOrderList &&
-        xCoordList == c.xCoordList &&
-        yCoordList == c.yCoordList &&
-        zCoordList == c.zCoordList &&
-        bFactorList == c.bFactorList &&
-        atomIdList == c.atomIdList &&
-        altLocList == c.altLocList &&
-        occupancyList == c.occupancyList &&
-        groupIdList == c.groupIdList &&
-        groupTypeList == c.groupTypeList &&
-        secStructList == c.secStructList &&
-        insCodeList == c.insCodeList &&
-        sequenceIndexList == c.sequenceIndexList &&
-        chainIdList == c.chainIdList &&
-        chainNameList == c.chainNameList &&
-        groupsPerChain == c.groupsPerChain &&
-        chainsPerModel == c.chainsPerModel &&
-        bondProperties == c.bondProperties &&
-        atomProperties == c.atomProperties &&
-        groupProperties == c.groupProperties &&
-        chainProperties == c.chainProperties &&
-        modelProperties == c.modelProperties &&
-        extraProperties == c.extraProperties);
-    }
+  /**
+   * @brief assignment overload for StructureData
+   */
+  StructureData& operator=(StructureData const & f);
 
-    /**
-     * @brief compare two StructureData classes for inequality
-     * @param c what to compare to
-     */
-    bool operator!=(StructureData const & c) const {
-        return !(*this == c);
-    }
+  /**
+   * @brief compare two StructureData classes for equality
+   * @param c what to compare to
+   */
+  bool operator==(StructureData const & c) const;
+
+  /**
+   * @brief compare two StructureData classes for inequality
+   * @param c what to compare to
+   */
+  bool operator!=(StructureData const & c) const {
+      return !(*this == c);
+  }
 };
 
 
@@ -568,73 +458,136 @@ inline StructureData::StructureData() {
 }
 
 inline StructureData::StructureData(const StructureData & obj) {
-    mmtfVersion = obj.mmtfVersion;
-    mmtfProducer = obj.mmtfProducer;
-    unitCell = obj.unitCell;
-    spaceGroup = obj.spaceGroup;
-    structureId = obj.structureId;
-    title = obj.title;
-    depositionDate = obj.depositionDate;
-    releaseDate = obj.releaseDate;
-    ncsOperatorList = obj.ncsOperatorList;
-    bioAssemblyList = obj.bioAssemblyList;
-    entityList = obj.entityList;
-    experimentalMethods = obj.experimentalMethods;
-    resolution = obj.resolution;
-    rFree = obj.rFree;
-    rWork = obj.rWork;
-    numBonds = obj.numBonds;
-    numAtoms = obj.numAtoms;
-    numGroups = obj.numGroups;
-    numChains = obj.numChains;
-    numModels = obj.numModels;
-    groupList = obj.groupList;
-    bondAtomList = obj.bondAtomList;
-    bondOrderList = obj.bondOrderList;
-    xCoordList = obj.xCoordList;
-    yCoordList = obj.yCoordList;
-    zCoordList = obj.zCoordList;
-    bFactorList = obj.bFactorList;
-    atomIdList = obj.atomIdList;
-    altLocList = obj.altLocList;
-    occupancyList = obj.occupancyList;
-    groupIdList = obj.groupIdList;
-    groupTypeList = obj.groupTypeList;
-    secStructList = obj.secStructList;
-    insCodeList = obj.insCodeList;
-    sequenceIndexList = obj.sequenceIndexList;
-    chainIdList = obj.chainIdList;
-    chainNameList = obj.chainNameList;
-    groupsPerChain = obj.groupsPerChain;
-    chainsPerModel = obj.chainsPerModel;
-
-    // Deep Copy all data in sub-msgpack::objects to new class
-    std::map<std::string, msgpack::object>::const_iterator it;
-    for (it = obj.bondProperties.begin(); it != obj.bondProperties.end(); ++it) {
-        msgpack::object tmp_object(it->second, msgpack_zone);
-        bondProperties[it->first] = tmp_object;
-    }
-    for (it = obj.atomProperties.begin(); it != obj.atomProperties.end(); ++it) {
-        msgpack::object tmp_object(it->second, msgpack_zone);
-        atomProperties[it->first] = tmp_object;
-    }
-    for (it = obj.groupProperties.begin(); it != obj.groupProperties.end(); ++it) {
-        msgpack::object tmp_object(it->second, msgpack_zone);
-        groupProperties[it->first] = tmp_object;
-    }
-    for (it = obj.chainProperties.begin(); it != obj.chainProperties.end(); ++it) {
-        msgpack::object tmp_object(it->second, msgpack_zone);
-        chainProperties[it->first] = tmp_object;
-    }
-    for (it = obj.modelProperties.begin(); it != obj.modelProperties.end(); ++it) {
-        msgpack::object tmp_object(it->second, msgpack_zone);
-        modelProperties[it->first] = tmp_object;
-    }
-    for (it = obj.extraProperties.begin(); it != obj.extraProperties.end(); ++it) {
-        msgpack::object tmp_object(it->second, msgpack_zone);
-        extraProperties[it->first] = tmp_object;
-    }
+  copy_standard_data(obj);
+  copy_extra_data(obj);
 }
+
+inline void StructureData::copy_standard_data(const StructureData & obj) {
+  mmtfVersion = obj.mmtfVersion;
+  mmtfProducer = obj.mmtfProducer;
+  unitCell = obj.unitCell;
+  spaceGroup = obj.spaceGroup;
+  structureId = obj.structureId;
+  title = obj.title;
+  depositionDate = obj.depositionDate;
+  releaseDate = obj.releaseDate;
+  ncsOperatorList = obj.ncsOperatorList;
+  bioAssemblyList = obj.bioAssemblyList;
+  entityList = obj.entityList;
+  experimentalMethods = obj.experimentalMethods;
+  resolution = obj.resolution;
+  rFree = obj.rFree;
+  rWork = obj.rWork;
+  numBonds = obj.numBonds;
+  numAtoms = obj.numAtoms;
+  numGroups = obj.numGroups;
+  numChains = obj.numChains;
+  numModels = obj.numModels;
+  groupList = obj.groupList;
+  bondAtomList = obj.bondAtomList;
+  bondOrderList = obj.bondOrderList;
+  xCoordList = obj.xCoordList;
+  yCoordList = obj.yCoordList;
+  zCoordList = obj.zCoordList;
+  bFactorList = obj.bFactorList;
+  atomIdList = obj.atomIdList;
+  altLocList = obj.altLocList;
+  occupancyList = obj.occupancyList;
+  groupIdList = obj.groupIdList;
+  groupTypeList = obj.groupTypeList;
+  secStructList = obj.secStructList;
+  insCodeList = obj.insCodeList;
+  sequenceIndexList = obj.sequenceIndexList;
+  chainIdList = obj.chainIdList;
+  chainNameList = obj.chainNameList;
+  groupsPerChain = obj.groupsPerChain;
+  chainsPerModel = obj.chainsPerModel;
+}
+
+
+inline void StructureData::copy_extra_data(const StructureData & obj) {
+  std::map<std::string, msgpack::object>::const_iterator it;
+  for (it = obj.bondProperties.begin(); it != obj.bondProperties.end(); ++it) {
+    msgpack::object tmp_object(it->second, msgpack_zone);
+    bondProperties[it->first] = tmp_object;
+  }
+  for (it = obj.atomProperties.begin(); it != obj.atomProperties.end(); ++it) {
+    msgpack::object tmp_object(it->second, msgpack_zone);
+    atomProperties[it->first] = tmp_object;
+  }
+  for (it = obj.groupProperties.begin(); it != obj.groupProperties.end(); ++it) {
+    msgpack::object tmp_object(it->second, msgpack_zone);
+    groupProperties[it->first] = tmp_object;
+  }
+  for (it = obj.chainProperties.begin(); it != obj.chainProperties.end(); ++it) {
+    msgpack::object tmp_object(it->second, msgpack_zone);
+    chainProperties[it->first] = tmp_object;
+  }
+  for (it = obj.modelProperties.begin(); it != obj.modelProperties.end(); ++it) {
+    msgpack::object tmp_object(it->second, msgpack_zone);
+    modelProperties[it->first] = tmp_object;
+  }
+  for (it = obj.extraProperties.begin(); it != obj.extraProperties.end(); ++it) {
+    msgpack::object tmp_object(it->second, msgpack_zone);
+    extraProperties[it->first] = tmp_object;
+  }
+}
+
+inline StructureData& StructureData::operator=(StructureData const & obj) {
+  copy_standard_data(obj);
+  copy_extra_data(obj);
+  return *this;
+}
+
+inline bool StructureData::operator==(const StructureData & c) const {
+  return (
+    mmtfVersion == c.mmtfVersion &&
+    mmtfProducer == c.mmtfProducer &&
+    unitCell == c.unitCell &&
+    spaceGroup == c.spaceGroup &&
+    structureId == c.structureId &&
+    title == c.title &&
+    depositionDate == c.depositionDate &&
+    releaseDate == c.releaseDate &&
+    ncsOperatorList == c.ncsOperatorList &&
+    bioAssemblyList == c.bioAssemblyList &&
+    entityList == c.entityList &&
+    experimentalMethods == c.experimentalMethods &&
+    resolution == c.resolution &&
+    rFree == c.rFree &&
+    rWork == c.rWork &&
+    numBonds == c.numBonds &&
+    numAtoms == c.numAtoms &&
+    numGroups == c.numGroups &&
+    numChains == c.numChains &&
+    numModels == c.numModels &&
+    groupList == c.groupList &&
+    bondAtomList == c.bondAtomList &&
+    bondOrderList == c.bondOrderList &&
+    xCoordList == c.xCoordList &&
+    yCoordList == c.yCoordList &&
+    zCoordList == c.zCoordList &&
+    bFactorList == c.bFactorList &&
+    atomIdList == c.atomIdList &&
+    altLocList == c.altLocList &&
+    occupancyList == c.occupancyList &&
+    groupIdList == c.groupIdList &&
+    groupTypeList == c.groupTypeList &&
+    secStructList == c.secStructList &&
+    insCodeList == c.insCodeList &&
+    sequenceIndexList == c.sequenceIndexList &&
+    chainIdList == c.chainIdList &&
+    chainNameList == c.chainNameList &&
+    groupsPerChain == c.groupsPerChain &&
+    chainsPerModel == c.chainsPerModel &&
+    bondProperties == c.bondProperties &&
+    atomProperties == c.atomProperties &&
+    groupProperties == c.groupProperties &&
+    chainProperties == c.chainProperties &&
+    modelProperties == c.modelProperties &&
+    extraProperties == c.extraProperties);
+}
+
 
 inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_max_length) const {
   // check unitCell: if given, must be of length 6
