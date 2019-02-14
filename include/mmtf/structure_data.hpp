@@ -203,21 +203,14 @@ struct StructureData {
   StructureData();
 
   /**
-   * @brief Construct object with default values set.
+   * @brief Overload for copy constructor.
    */
-  StructureData(const StructureData & obj);
+  StructureData(const StructureData& obj);
 
   /**
-   * @brief Construct object with default values set.
+   * @brief Overload for assignment operator.
    */
-  void
-  copy_standard_data(const StructureData & obj);
-
-  /**
-   * @brief helper for copy constructor and assignment operator
-   */
-  void
-  copy_extra_data(const StructureData & obj);
+  StructureData& operator=(const StructureData& f);
 
   /**
    * @brief Check consistency of structural data.
@@ -238,23 +231,25 @@ struct StructureData {
   std::string print(std::string delim="\t");
 
   /**
-   * @brief assignment overload for StructureData
+   * @brief Compare two StructureData classes for equality
+   * @param c What to compare to
    */
-  StructureData& operator=(StructureData const & f);
+  bool operator==(const StructureData& c) const;
 
   /**
-   * @brief compare two StructureData classes for equality
-   * @param c what to compare to
+   * @brief Compare two StructureData classes for inequality
+   * @param c What to compare to
    */
-  bool operator==(StructureData const & c) const;
-
-  /**
-   * @brief compare two StructureData classes for inequality
-   * @param c what to compare to
-   */
-  bool operator!=(StructureData const & c) const {
-      return !(*this == c);
+  bool operator!=(const StructureData& c) const {
+    return !(*this == c);
   }
+
+private:
+  // Helper to copy map data
+  void copyMapData_(std::map<std::string, msgpack::object>& target,
+                    const std::map<std::string, msgpack::object>& source);
+  // Helper to copy all data
+  void copyAllData_(const StructureData& obj);
 };
 
 
@@ -457,89 +452,16 @@ inline StructureData::StructureData() {
   mmtfProducer = "mmtf-cpp library (github.com/rcsb/mmtf-cpp)";
 }
 
-inline StructureData::StructureData(const StructureData & obj) {
-  copy_standard_data(obj);
-  copy_extra_data(obj);
+inline StructureData::StructureData(const StructureData& obj) {
+  copyAllData_(obj);
 }
 
-inline void StructureData::copy_standard_data(const StructureData & obj) {
-  mmtfVersion = obj.mmtfVersion;
-  mmtfProducer = obj.mmtfProducer;
-  unitCell = obj.unitCell;
-  spaceGroup = obj.spaceGroup;
-  structureId = obj.structureId;
-  title = obj.title;
-  depositionDate = obj.depositionDate;
-  releaseDate = obj.releaseDate;
-  ncsOperatorList = obj.ncsOperatorList;
-  bioAssemblyList = obj.bioAssemblyList;
-  entityList = obj.entityList;
-  experimentalMethods = obj.experimentalMethods;
-  resolution = obj.resolution;
-  rFree = obj.rFree;
-  rWork = obj.rWork;
-  numBonds = obj.numBonds;
-  numAtoms = obj.numAtoms;
-  numGroups = obj.numGroups;
-  numChains = obj.numChains;
-  numModels = obj.numModels;
-  groupList = obj.groupList;
-  bondAtomList = obj.bondAtomList;
-  bondOrderList = obj.bondOrderList;
-  xCoordList = obj.xCoordList;
-  yCoordList = obj.yCoordList;
-  zCoordList = obj.zCoordList;
-  bFactorList = obj.bFactorList;
-  atomIdList = obj.atomIdList;
-  altLocList = obj.altLocList;
-  occupancyList = obj.occupancyList;
-  groupIdList = obj.groupIdList;
-  groupTypeList = obj.groupTypeList;
-  secStructList = obj.secStructList;
-  insCodeList = obj.insCodeList;
-  sequenceIndexList = obj.sequenceIndexList;
-  chainIdList = obj.chainIdList;
-  chainNameList = obj.chainNameList;
-  groupsPerChain = obj.groupsPerChain;
-  chainsPerModel = obj.chainsPerModel;
-}
-
-
-inline void StructureData::copy_extra_data(const StructureData & obj) {
-  std::map<std::string, msgpack::object>::const_iterator it;
-  for (it = obj.bondProperties.begin(); it != obj.bondProperties.end(); ++it) {
-    msgpack::object tmp_object(it->second, msgpack_zone);
-    bondProperties[it->first] = tmp_object;
-  }
-  for (it = obj.atomProperties.begin(); it != obj.atomProperties.end(); ++it) {
-    msgpack::object tmp_object(it->second, msgpack_zone);
-    atomProperties[it->first] = tmp_object;
-  }
-  for (it = obj.groupProperties.begin(); it != obj.groupProperties.end(); ++it) {
-    msgpack::object tmp_object(it->second, msgpack_zone);
-    groupProperties[it->first] = tmp_object;
-  }
-  for (it = obj.chainProperties.begin(); it != obj.chainProperties.end(); ++it) {
-    msgpack::object tmp_object(it->second, msgpack_zone);
-    chainProperties[it->first] = tmp_object;
-  }
-  for (it = obj.modelProperties.begin(); it != obj.modelProperties.end(); ++it) {
-    msgpack::object tmp_object(it->second, msgpack_zone);
-    modelProperties[it->first] = tmp_object;
-  }
-  for (it = obj.extraProperties.begin(); it != obj.extraProperties.end(); ++it) {
-    msgpack::object tmp_object(it->second, msgpack_zone);
-    extraProperties[it->first] = tmp_object;
-  }
-}
-
-inline StructureData& StructureData::operator=(StructureData const & obj) {
-  copy_standard_data(obj);
-  copy_extra_data(obj);
+inline StructureData& StructureData::operator=(const StructureData& obj) {
+  if (this != &obj) copyAllData_(obj);
   return *this;
 }
 
-inline bool StructureData::operator==(const StructureData & c) const {
+inline bool StructureData::operator==(const StructureData& c) const {
   return (
     mmtfVersion == c.mmtfVersion &&
     mmtfProducer == c.mmtfProducer &&
@@ -996,6 +918,65 @@ inline std::string StructureData::print(std::string delim) {
     }
   }
   return out.str();
+}
+
+inline void StructureData::copyMapData_(
+                    std::map<std::string, msgpack::object>& target,
+                    const std::map<std::string, msgpack::object>& source) {
+  target.clear();
+  std::map<std::string, msgpack::object>::const_iterator it;
+  for (it = source.begin(); it != source.end(); ++it) {
+    msgpack::object tmp_object(it->second, msgpack_zone);
+    target[it->first] = tmp_object;
+  }
+}
+
+inline void StructureData::copyAllData_(const StructureData& obj) {
+  mmtfVersion = obj.mmtfVersion;
+  mmtfProducer = obj.mmtfProducer;
+  unitCell = obj.unitCell;
+  spaceGroup = obj.spaceGroup;
+  structureId = obj.structureId;
+  title = obj.title;
+  depositionDate = obj.depositionDate;
+  releaseDate = obj.releaseDate;
+  ncsOperatorList = obj.ncsOperatorList;
+  bioAssemblyList = obj.bioAssemblyList;
+  entityList = obj.entityList;
+  experimentalMethods = obj.experimentalMethods;
+  resolution = obj.resolution;
+  rFree = obj.rFree;
+  rWork = obj.rWork;
+  numBonds = obj.numBonds;
+  numAtoms = obj.numAtoms;
+  numGroups = obj.numGroups;
+  numChains = obj.numChains;
+  numModels = obj.numModels;
+  groupList = obj.groupList;
+  bondAtomList = obj.bondAtomList;
+  bondOrderList = obj.bondOrderList;
+  xCoordList = obj.xCoordList;
+  yCoordList = obj.yCoordList;
+  zCoordList = obj.zCoordList;
+  bFactorList = obj.bFactorList;
+  atomIdList = obj.atomIdList;
+  altLocList = obj.altLocList;
+  occupancyList = obj.occupancyList;
+  groupIdList = obj.groupIdList;
+  groupTypeList = obj.groupTypeList;
+  secStructList = obj.secStructList;
+  insCodeList = obj.insCodeList;
+  sequenceIndexList = obj.sequenceIndexList;
+  chainIdList = obj.chainIdList;
+  chainNameList = obj.chainNameList;
+  groupsPerChain = obj.groupsPerChain;
+  chainsPerModel = obj.chainsPerModel;
+  copyMapData_(bondProperties, obj.bondProperties);
+  copyMapData_(atomProperties, obj.atomProperties);
+  copyMapData_(groupProperties, obj.groupProperties);
+  copyMapData_(chainProperties, obj.chainProperties);
+  copyMapData_(modelProperties, obj.modelProperties);
+  copyMapData_(extraProperties, obj.extraProperties);
 }
 
 } // mmtf namespace
