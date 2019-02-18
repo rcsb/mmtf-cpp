@@ -16,7 +16,6 @@
 template <typename T>
 bool approx_equal_vector(const T& a, const T& b, float eps = 0.00001) {
 	if (a.size() != b.size()) return false;
-	
 	for (std::size_t i=0; i < a.size(); ++i) {
 		if (a[i] != Approx(b[i]).margin(eps)) return false;
 	}
@@ -36,8 +35,7 @@ msgpack_obj_to_map(const msgpack::object& obj) {
 			std::string data_map_key(key->via.str.ptr, key->via.str.size);
 			data_map[data_map_key] = value;
 		} else {
-			std::cerr << "Warning: Found non-string key type " << key->type
-					  << "! Skipping..." << std::endl;
+			throw std::runtime_error("Error: Found non-string key!");
 		}
 	}
 	return data_map;
@@ -620,12 +618,23 @@ TEST_CASE("test valid bonds") {
 }
 
 
-TEST_CASE("test group Optional") {
+TEST_CASE("test group export optional") {
 	std::string working_mmtf = "../temporary_test_data/all_canoncial.mmtf";
 	mmtf::StructureData sd;
 	mmtf::decodeFromFile(sd, working_mmtf);
-	mmtf::GroupType first_group(sd.groupList[0]);
-	SECTION("altering group bondOrderLists") {
+	REQUIRE(sd.hasConsistentData());
+
+	mmtf::GroupType & first_group(sd.groupList[0]);
+
+	SECTION("check that optional fields exist fist") {
+		msgpack::zone my_zone;
+		msgpack::object obj(first_group, my_zone);
+		std::map<std::string, msgpack::object*> my_map(msgpack_obj_to_map(obj));
+		REQUIRE(my_map.find("bondOrderList") != my_map.end());
+		REQUIRE(my_map.find("bondResonanceList") != my_map.end());
+		REQUIRE(my_map.find("bondAtomList") != my_map.end());
+	}
+	SECTION("removing group bondOrderLists") {
 		msgpack::zone my_zone;
 		first_group.bondOrderList = std::vector<int8_t>();
 		msgpack::object obj(first_group, my_zone);
