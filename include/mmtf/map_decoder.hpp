@@ -37,6 +37,13 @@ public:
     MapDecoder(const msgpack::object& obj);
 
     /**
+     * @brief Initialize object given a string to msgpack::object map.
+     * Reads out all key-value pairs and converts key to string if possible
+     * (warns otherwise).
+     */
+    MapDecoder(const std::map<std::string, msgpack::object>& map_in);
+
+    /**
      * @brief Extract value from map and decode into target.
      *
      * @param[in]  key      Key into msgpack map.
@@ -52,6 +59,27 @@ public:
     void decode(const std::string& key, bool required, T& target);
 
     /**
+     * @brief Don't decode, but instead just copy map-contents onto a zone
+     *        for later decoding/processing you should use this when you have
+     *        nested msgpack objects.
+     *        Note: There is some copy overhead here. If speed becomes an issue
+     *              we should come up with a way to keep the original handle alive.
+     * @param[in]  key      Key into msgpack map.
+     * @param[in]  required True if field is required by MMTF specs or you
+     * @param[out] target   std::map<std::string, msgpack::object> that holds access to data on zone.
+     * @param[in]  zone     msgpack::zone to copy data onto
+     *
+     * If msgpack type is not as expected, we write a warning to stderr.
+     * If conversion to the target type fails, msgpack throws an exception.
+     * If a required field is missing in the map or if binary decoding fails,
+     * we throw an mmtf::DecodeError.
+     */
+    void
+    copy_decode(const std::string& key, bool required,
+                std::map<std::string, msgpack::object>& target,
+                msgpack::zone& zone);
+
+    /**
      * @brief Check if there are any keys, that were not decoded.
      * This is to be called after all expected fields have been decoded.
      * A warning is written to stderr for each non-decoded key.
@@ -60,7 +88,8 @@ public:
 
 private:
     // key-value pairs extracted from msgpack map
-    std::map<std::string, msgpack::object*> data_map_;
+    typedef std::map<std::string, const msgpack::object*> data_map_type_;
+    data_map_type_ data_map_;
     // set of keys that were successfully decoded
     std::set<std::string> decoded_keys_;
 
@@ -75,6 +104,12 @@ private:
                     const char& target);
     void checkType_(const std::string& key, msgpack::type::object_type type,
                     const std::string& target);
+    void checkType_(const std::string& key,
+                    msgpack::type::object_type type,
+                    const msgpack::object& target);
+    void checkType_(const std::string& key,
+                    msgpack::type::object_type type,
+                    const std::map<std::string, msgpack::object>& target);
     template <typename T>
     void checkType_(const std::string& key, msgpack::type::object_type type,
                     const std::vector<T>& target);
@@ -108,11 +143,35 @@ inline MapDecoder::MapDecoder(const msgpack::object& obj) {
     }
 }
 
-template<typename T>
-void MapDecoder::decode(const std::string& key, bool required, T& target) {
+inline MapDecoder::MapDecoder(const std::map<std::string, msgpack::object>& map_in) {
+    std::map<std::string, msgpack::object>::const_iterator it;
+    for (it = map_in.begin(); it != map_in.end(); ++it) {
+        data_map_[it->first] = &(it->second);
+    }
+}
+
+void
+inline MapDecoder::copy_decode(const std::string& key, bool required,
+                               std::map<std::string, msgpack::object>& target,
+                               msgpack::zone & zone) {
     // note: cost of O(M*log(N)) string comparisons (M parsed, N in map)
-    std::map<std::string, msgpack::object*>::iterator it;
-    it = data_map_.find(key);
+    data_map_type_::iterator it = data_map_.find(key);
+    if (it != data_map_.end()) {
+        decoded_keys_.insert(key);
+        // expensive copy here
+        msgpack::object tmp_object(*it->second, zone);
+        tmp_object.convert(target);
+    }
+    else if (required) {
+        throw DecodeError("MsgPack MAP does not contain required entry "
+                          + key);
+    }
+}
+
+template<typename T>
+inline void MapDecoder::decode(const std::string& key, bool required, T& target) {
+    // note: cost of O(M*log(N)) string comparisons (M parsed, N in map)
+    data_map_type_::iterator it = data_map_.find(key);
     if (it != data_map_.end()) {
         checkType_(key, it->second->type, target);
         if (it->second->type == msgpack::type::BIN) {
@@ -132,7 +191,7 @@ void MapDecoder::decode(const std::string& key, bool required, T& target) {
 inline void MapDecoder::checkExtraKeys() {
     // note: cost of O(N*log(M))) string comparisons (M parsed, N in map)
     // simple set difference algorithm
-    std::map<std::string, msgpack::object*>::iterator map_it;
+    data_map_type_::iterator map_it;
     std::set<std::string>::iterator parsed_it;
     for (map_it = data_map_.begin(); map_it != data_map_.end(); ++map_it) {
          parsed_it = decoded_keys_.find(map_it->first);
@@ -176,6 +235,24 @@ inline void MapDecoder::checkType_(const std::string& key,
                      "entry " << key << std::endl;
     }
 }
+
+inline void MapDecoder::checkType_(const std::string& key,
+                                   msgpack::type::object_type type,
+                                   const msgpack::object&)  {
+    // Should we check Type of msgpack object? I don't think there's many
+    // checks to be done here
+}
+
+inline void MapDecoder::checkType_(const std::string& key,
+                                   msgpack::type::object_type type,
+                                   const std::map<std::string, msgpack::object>& target)  {
+    if (type != msgpack::type::MAP) {
+        std::cerr << "Warning: Non-map type " << type << " found for "
+                     "entry " << key << std::endl;
+    }
+}
+
+
 template <typename T>
 void MapDecoder::checkType_(const std::string& key,
                             msgpack::type::object_type type,

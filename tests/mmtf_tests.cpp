@@ -24,6 +24,61 @@ bool approx_equal_vector(const T& a, const T& b, float eps = 0.00001) {
 }
 
 
+TEST_CASE("assignment operator") {
+	std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
+	mmtf::StructureData sd;
+	mmtf::decodeFromFile(sd, working_mmtf);
+	SECTION("basic assignment operator") {
+		mmtf::StructureData sd2;
+		sd2 = sd;
+		REQUIRE(sd2 == sd);
+	}
+	SECTION("deep assignment operator") {
+		mmtf::StructureData sd2;
+		std::vector<int32_t> clist;
+		for (int32_t i = 0; i < 256; ++i) {
+			clist.push_back(i);
+		}
+		sd.atomProperties["256l"] = msgpack::object(clist, sd.msgpack_zone);
+		sd2 = sd;
+		REQUIRE(sd2 == sd);
+		REQUIRE(sd2.atomProperties["256l"] == sd.atomProperties["256l"]);
+	}
+	SECTION("deep assignment operator") {
+		mmtf::StructureData sd2;
+		std::vector<int32_t> clist;
+		for (int32_t i = 0; i < 256; ++i) {
+			clist.push_back(i);
+		}
+		sd.atomProperties["256l"] = msgpack::object(clist, sd.msgpack_zone);
+		sd2 = sd;
+		clist.push_back(22);
+		sd.atomProperties["256l"] = msgpack::object(clist, sd.msgpack_zone);
+		REQUIRE(sd2 != sd);
+		REQUIRE(sd2.atomProperties["256l"] != sd.atomProperties["256l"]);
+	}
+}
+
+
+TEST_CASE("copy constructor") {
+	std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
+	mmtf::StructureData sd;
+	mmtf::decodeFromFile(sd, working_mmtf);
+	SECTION("Basic copy constructor") {
+		mmtf::StructureData sd2(sd);
+		REQUIRE(sd2 == sd);
+	}
+	SECTION("Check msgpack::object copying") {
+		std::vector<int32_t> clist;
+		for (int32_t i = 0; i < 256; ++i) {
+			clist.push_back(i);
+		}
+		sd.atomProperties["256l"] = msgpack::object(clist, sd.msgpack_zone);
+		mmtf::StructureData sd2(sd);
+		REQUIRE(sd2.atomProperties["256l"] == sd.atomProperties["256l"]);
+	}
+}
+
 // Tests for structure_data.hpp
 TEST_CASE("Test round trip StructureData working") {
 	std::vector<std::string> works;
@@ -495,6 +550,52 @@ TEST_CASE("Test bondOrderList vs bondAtomList") {
 		REQUIRE(sd.hasConsistentData(true) == false);
 	}
 }
+
+
+TEST_CASE("atomProperties field") {
+	std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
+	mmtf::StructureData sd, sd2, sd3;
+	mmtf::decodeFromFile(sd, working_mmtf);
+
+	/// Pack
+	// 1. Make your input data
+	std::vector<int32_t> clist_out;
+	std::vector<int32_t> clist_in, clist_in_decoded, nothing;
+	for (int32_t i = 0; i < 256; ++i) {
+		clist_out.push_back(i);
+	}
+	// 2. msgpack zones have weird lifetimes, make sure you use the zone
+	// in StructureData to avoid any weird errors
+	sd.atomProperties["256_atomColorList"] = msgpack::object(clist_out, sd.msgpack_zone);
+	sd.atomProperties["256_atomColorList_encoded"] = msgpack::object(mmtf::encodeRunLengthDeltaInt(clist_out), sd.msgpack_zone);
+
+	mmtf::encodeToFile(sd, "test_atomProperties.mmtf");
+	/// Done Pack
+
+	/// Start Unpack
+	mmtf::decodeFromFile(sd2, "test_atomProperties.mmtf");
+	REQUIRE(sd == sd2);
+
+	// Check round-trip after reading extra data
+	// (i.e. we can safely read/write unknown extra data)
+	mmtf::encodeToFile(sd2, "test_atomProperties2.mmtf");
+	mmtf::decodeFromFile(sd3, "test_atomProperties2.mmtf");
+	REQUIRE(sd2 == sd3);
+
+	// Retrieve our 256 color list via convert
+	mmtf::MapDecoder atomProperties_MD(sd3.atomProperties);
+	atomProperties_MD.decode("256_atomColorList", true, clist_in);
+	atomProperties_MD.decode("256_atomColorList_encoded", true, clist_in_decoded);
+
+	/// Done Unpack
+	REQUIRE(clist_out == clist_in);
+	REQUIRE(clist_in == clist_in_decoded);
+
+	// you would catch mmtf::DecodeError if you wanted continue even after using
+	// required=true.
+	REQUIRE_THROWS_AS(atomProperties_MD.decode("NONEXISTANT", true, nothing), mmtf::DecodeError);
+}
+
 
 TEST_CASE("Test export_helpers") {
 	std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/3NJW.mmtf";

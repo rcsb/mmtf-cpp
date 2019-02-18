@@ -17,6 +17,7 @@
 #include "object_encoders.hpp"
 #include "binary_encoder.hpp"
 #include <string>
+#include <fstream>
 
 namespace mmtf {
 
@@ -83,8 +84,7 @@ template <typename Stream>
 inline void encodeToStream(const StructureData& data, Stream& stream,
     int32_t coord_divider, int32_t occupancy_b_factor_divider,
     int32_t chain_name_max_length) {
-  msgpack::zone _zone;
-  msgpack::pack(stream, encodeToMap(data, _zone, coord_divider,
+  msgpack::pack(stream, encodeToMap(data, data.msgpack_zone, coord_divider,
               occupancy_b_factor_divider, chain_name_max_length));
 }
 
@@ -198,6 +198,25 @@ encodeToMap(const StructureData& data, msgpack::zone& m_zone,
   // std::vector<std::vector<float>>
   if (!mmtf::isDefaultValue(data.ncsOperatorList)) {
     data_map["ncsOperatorList"] = msgpack::object(data.ncsOperatorList, m_zone);
+  }
+  // extraProperties
+  if (!mmtf::isDefaultValue(data.bondProperties)) {
+    data_map["bondProperties"] = msgpack::object(data.bondProperties, m_zone);
+  }
+  if (!mmtf::isDefaultValue(data.atomProperties)) {
+    data_map["atomProperties"] = msgpack::object(data.atomProperties, m_zone);
+  }
+  if (!mmtf::isDefaultValue(data.groupProperties)) {
+    data_map["groupProperties"] = msgpack::object(data.groupProperties, m_zone);
+  }
+  if (!mmtf::isDefaultValue(data.chainProperties)) {
+    data_map["chainProperties"] = msgpack::object(data.chainProperties, m_zone);
+  }
+  if (!mmtf::isDefaultValue(data.modelProperties)) {
+    data_map["modelProperties"] = msgpack::object(data.modelProperties, m_zone);
+  }
+  if (!mmtf::isDefaultValue(data.extraProperties)) {
+    data_map["extraProperties"] = msgpack::object(data.extraProperties, m_zone);
   }
   return data_map;
 }

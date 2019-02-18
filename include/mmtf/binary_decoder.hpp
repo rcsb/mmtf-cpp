@@ -14,6 +14,7 @@
 #define MMTF_BINARY_DECODER_H
 
 #include "structure_data.hpp"
+#include "errors.hpp"
 
 #include <msgpack.hpp>
 #include <cstring> // low level mem
