@@ -554,7 +554,7 @@ TEST_CASE("Test bondOrderList vs bondAtomList") {
 
 TEST_CASE("atomProperties field") {
 	std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
-	mmtf::StructureData sd, sd2;
+	mmtf::StructureData sd, sd2, sd3;
 	mmtf::decodeFromFile(sd, working_mmtf);
 
 	/// Pack
@@ -570,13 +570,20 @@ TEST_CASE("atomProperties field") {
 	sd.atomProperties["256_atomColorList_encoded"] = msgpack::object(mmtf::encodeRunLengthDeltaInt(clist_out), sd.msgpack_zone);
 
 	mmtf::encodeToFile(sd, "test_atomProperties.mmtf");
-
 	/// Done Pack
+
 	/// Start Unpack
 	mmtf::decodeFromFile(sd2, "test_atomProperties.mmtf");
+	REQUIRE(sd == sd2);
+
+	// Check round-trip after reading extra data
+	// (i.e. we can safely read/write unknown extra data)
+	mmtf::encodeToFile(sd2, "test_atomProperties2.mmtf");
+	mmtf::decodeFromFile(sd3, "test_atomProperties2.mmtf");
+	REQUIRE(sd2 == sd3);
 
 	// Retrieve our 256 color list via convert
-	mmtf::MapDecoder atomProperties_MD(sd2.atomProperties);
+	mmtf::MapDecoder atomProperties_MD(sd3.atomProperties);
 	atomProperties_MD.decode("256_atomColorList", true, clist_in);
 	atomProperties_MD.decode("256_atomColorList_encoded", true, clist_in_decoded);
 
