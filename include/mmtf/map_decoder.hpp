@@ -41,7 +41,7 @@ public:
      * Reads out all key-value pairs and converts key to string if possible
      * (warns otherwise).
      */
-    MapDecoder(std::map<std::string, msgpack::object>& map_in);
+    MapDecoder(const std::map<std::string, msgpack::object>& map_in);
 
     /**
      * @brief Extract value from map and decode into target.
@@ -76,7 +76,8 @@ public:
      */
     void
     copy_decode(const std::string& key, bool required,
-                std::map<std::string, msgpack::object> & target, msgpack::zone & zone);
+                std::map<std::string, msgpack::object>& target,
+                msgpack::zone& zone);
 
     /**
      * @brief Check if there are any keys, that were not decoded.
@@ -87,7 +88,8 @@ public:
 
 private:
     // key-value pairs extracted from msgpack map
-    std::map<std::string, msgpack::object*> data_map_;
+    typedef std::map<std::string, const msgpack::object*> data_map_type_;
+    data_map_type_ data_map_;
     // set of keys that were successfully decoded
     std::set<std::string> decoded_keys_;
 
@@ -141,19 +143,19 @@ inline MapDecoder::MapDecoder(const msgpack::object& obj) {
     }
 }
 
-inline MapDecoder::MapDecoder(std::map<std::string, msgpack::object>& map_in) {
-    std::map<std::string, msgpack::object>::iterator it;
-    for (it=map_in.begin(); it!= map_in.end(); ++it) {
+inline MapDecoder::MapDecoder(const std::map<std::string, msgpack::object>& map_in) {
+    std::map<std::string, msgpack::object>::const_iterator it;
+    for (it = map_in.begin(); it != map_in.end(); ++it) {
         data_map_[it->first] = &(it->second);
     }
 }
 
 void
 inline MapDecoder::copy_decode(const std::string& key, bool required,
-                        std::map<std::string, msgpack::object> & target, msgpack::zone & zone) {
+                               std::map<std::string, msgpack::object>& target,
+                               msgpack::zone & zone) {
     // note: cost of O(M*log(N)) string comparisons (M parsed, N in map)
-    std::map<std::string, msgpack::object*>::iterator it;
-    it = data_map_.find(key);
+    data_map_type_::iterator it = data_map_.find(key);
     if (it != data_map_.end()) {
         decoded_keys_.insert(key);
         // expensive copy here
@@ -169,8 +171,7 @@ inline MapDecoder::copy_decode(const std::string& key, bool required,
 template<typename T>
 inline void MapDecoder::decode(const std::string& key, bool required, T& target) {
     // note: cost of O(M*log(N)) string comparisons (M parsed, N in map)
-    std::map<std::string, msgpack::object*>::iterator it;
-    it = data_map_.find(key);
+    data_map_type_::iterator it = data_map_.find(key);
     if (it != data_map_.end()) {
         checkType_(key, it->second->type, target);
         if (it->second->type == msgpack::type::BIN) {
@@ -190,7 +191,7 @@ inline void MapDecoder::decode(const std::string& key, bool required, T& target)
 inline void MapDecoder::checkExtraKeys() {
     // note: cost of O(N*log(M))) string comparisons (M parsed, N in map)
     // simple set difference algorithm
-    std::map<std::string, msgpack::object*>::iterator map_it;
+    data_map_type_::iterator map_it;
     std::set<std::string>::iterator parsed_it;
     for (map_it = data_map_.begin(); map_it != data_map_.end(); ++map_it) {
          parsed_it = decoded_keys_.find(map_it->first);
