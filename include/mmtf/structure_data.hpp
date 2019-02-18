@@ -2,7 +2,7 @@
 //
 // Licensed under the MIT License (see accompanying LICENSE file).
 //
-// The authors of this code are: Gabriel Studer, Gerardo Tauriellom and
+// The authors of this code are: Gabriel Studer, Gerardo Tauriello,
 // Daniel Farrell.
 // 
 // Based on mmtf_c developed by Julien Ferte (http://www.julienferte.com/),
@@ -153,118 +153,107 @@ struct BioAssembly {
  * https://github.com/rcsb/mmtf/blob/HEAD/spec.md#fields
  */
 struct StructureData {
-    std::string                      mmtfVersion;
-    std::string                      mmtfProducer;
-    std::vector<float>               unitCell;
-    std::string                      spaceGroup;
-    std::string                      structureId;
-    std::string                      title;
-    std::string                      depositionDate;
-    std::string                      releaseDate;
-    std::vector<std::vector<float> > ncsOperatorList;
-    std::vector<BioAssembly>         bioAssemblyList;
-    std::vector<Entity>              entityList;
-    std::vector<std::string>         experimentalMethods;
-    float                            resolution;
-    float                            rFree;
-    float                            rWork;
-    int32_t                          numBonds;
-    int32_t                          numAtoms;
-    int32_t                          numGroups;
-    int32_t                          numChains;
-    int32_t                          numModels;
-    std::vector<GroupType>           groupList;
-    std::vector<int32_t>             bondAtomList;
-    std::vector<int8_t>              bondOrderList;
-    std::vector<int8_t>              bondResonanceList;
-    std::vector<float>               xCoordList;
-    std::vector<float>               yCoordList;
-    std::vector<float>               zCoordList;
-    std::vector<float>               bFactorList;
-    std::vector<int32_t>             atomIdList;
-    std::vector<char>                altLocList;
-    std::vector<float>               occupancyList;
-    std::vector<int32_t>             groupIdList;
-    std::vector<int32_t>             groupTypeList;
-    std::vector<int8_t>              secStructList;
-    std::vector<char>                insCodeList;
-    std::vector<int32_t>             sequenceIndexList;
-    std::vector<std::string>         chainIdList;
-    std::vector<std::string>         chainNameList;
-    std::vector<int32_t>             groupsPerChain;
-    std::vector<int32_t>             chainsPerModel;
+  std::string                              mmtfVersion;
+  std::string                              mmtfProducer;
+  std::vector<float>                       unitCell;
+  std::string                              spaceGroup;
+  std::string                              structureId;
+  std::string                              title;
+  std::string                              depositionDate;
+  std::string                              releaseDate;
+  std::vector<std::vector<float> >         ncsOperatorList;
+  std::vector<BioAssembly>                 bioAssemblyList;
+  std::vector<Entity>                      entityList;
+  std::vector<std::string>                 experimentalMethods;
+  float                                    resolution;
+  float                                    rFree;
+  float                                    rWork;
+  int32_t                                  numBonds;
+  int32_t                                  numAtoms;
+  int32_t                                  numGroups;
+  int32_t                                  numChains;
+  int32_t                                  numModels;
+  std::vector<GroupType>                   groupList;
+  std::vector<int32_t>                     bondAtomList;
+  std::vector<int8_t>                      bondOrderList;
+  std::vector<int8_t>                      bondResonanceList;
+  std::vector<float>                       xCoordList;
+  std::vector<float>                       yCoordList;
+  std::vector<float>                       zCoordList;
+  std::vector<float>                       bFactorList;
+  std::vector<int32_t>                     atomIdList;
+  std::vector<char>                        altLocList;
+  std::vector<float>                       occupancyList;
+  std::vector<int32_t>                     groupIdList;
+  std::vector<int32_t>                     groupTypeList;
+  std::vector<int8_t>                      secStructList;
+  std::vector<char>                        insCodeList;
+  std::vector<int32_t>                     sequenceIndexList;
+  std::vector<std::string>                 chainIdList;
+  std::vector<std::string>                 chainNameList;
+  std::vector<int32_t>                     groupsPerChain;
+  std::vector<int32_t>                     chainsPerModel;
+  mutable msgpack::zone                    msgpack_zone;
+  std::map<std::string, msgpack::object>   bondProperties;
+  std::map<std::string, msgpack::object>   atomProperties;
+  std::map<std::string, msgpack::object>   groupProperties;
+  std::map<std::string, msgpack::object>   chainProperties;
+  std::map<std::string, msgpack::object>   modelProperties;
+  std::map<std::string, msgpack::object>   extraProperties;
 
-    /**
-     * @brief Construct object with default values set.
-     */
-    StructureData();
+  /**
+   * @brief Construct object with default values set.
+   */
+  StructureData();
 
-    /**
-     * @brief Check consistency of structural data.
-     * @param verbose                 Print first error encountered (if any)
-     * @param chain_name_max_length   Max allowed chain name length
-     * @return True if all required fields are set and vector sizes and indices
-     *         are consistent.
-     */
-    bool hasConsistentData(bool verbose=false, uint32_t chain_name_max_length = 4) const;
+  /**
+   * @brief Overload for copy constructor.
+   */
+  StructureData(const StructureData& obj);
 
+  /**
+   * @brief Overload for assignment operator.
+   */
+  StructureData& operator=(const StructureData& f);
 
-    /**
-     * @brief Read out the contents of mmtf::StructureData in a PDB-like fashion
-     * Columns are in order:
-     * ATOM/HETATM AtomId Element AtomName AltLoc GroupId GroupType
-     * InsCode ChainName x y z B-factor Occupancy Charge
-     * @param delim what to split columns with
-     */
-    std::string print(std::string delim="\t");
+  /**
+   * @brief Check consistency of structural data.
+   * @param verbose                 Print first error encountered (if any)
+   * @param chain_name_max_length   Max allowed chain name length
+   * @return True if all required fields are set and vector sizes and indices
+   *         are consistent.
+   */
+  bool hasConsistentData(bool verbose=false, uint32_t chain_name_max_length = 4) const;
 
-    /**
-     * @brief compare two StructureData classes
-     * @param c what to compare to
-     */
-    bool operator==(StructureData const & c) const {
-      return (
-        mmtfVersion == c.mmtfVersion &&
-        mmtfProducer == c.mmtfProducer &&
-        unitCell == c.unitCell &&
-        spaceGroup == c.spaceGroup &&
-        structureId == c.structureId &&
-        title == c.title &&
-        depositionDate == c.depositionDate &&
-        releaseDate == c.releaseDate &&
-        ncsOperatorList == c.ncsOperatorList &&
-        bioAssemblyList == c.bioAssemblyList &&
-        entityList == c.entityList &&
-        experimentalMethods == c.experimentalMethods &&
-        resolution == c.resolution &&
-        rFree == c.rFree &&
-        rWork == c.rWork &&
-        numBonds == c.numBonds &&
-        numAtoms == c.numAtoms &&
-        numGroups == c.numGroups &&
-        numChains == c.numChains &&
-        numModels == c.numModels &&
-        groupList == c.groupList &&
-        bondAtomList == c.bondAtomList &&
-        bondOrderList == c.bondOrderList &&
-        bondResonanceList == c.bondResonanceList &&
-        xCoordList == c.xCoordList &&
-        yCoordList == c.yCoordList &&
-        zCoordList == c.zCoordList &&
-        bFactorList == c.bFactorList &&
-        atomIdList == c.atomIdList &&
-        altLocList == c.altLocList &&
-        occupancyList == c.occupancyList &&
-        groupIdList == c.groupIdList &&
-        groupTypeList == c.groupTypeList &&
-        secStructList == c.secStructList &&
-        insCodeList == c.insCodeList &&
-        sequenceIndexList == c.sequenceIndexList &&
-        chainIdList == c.chainIdList &&
-        chainNameList == c.chainNameList &&
-        groupsPerChain == c.groupsPerChain &&
-        chainsPerModel == c.chainsPerModel);
-    }
+  /**
+   * @brief Read out the contents of mmtf::StructureData in a PDB-like fashion
+   * Columns are in order:
+   * ATOM/HETATM AtomId Element AtomName AltLoc GroupId GroupType
+   * InsCode ChainName x y z B-factor Occupancy Charge
+   * @param delim what to split columns with
+   */
+  std::string print(std::string delim="\t");
+
+  /**
+   * @brief Compare two StructureData classes for equality
+   * @param c What to compare to
+   */
+  bool operator==(const StructureData& c) const;
+
+  /**
+   * @brief Compare two StructureData classes for inequality
+   * @param c What to compare to
+   */
+  bool operator!=(const StructureData& c) const {
+    return !(*this == c);
+  }
+
+private:
+  // Helper to copy map data
+  void copyMapData_(std::map<std::string, msgpack::object>& target,
+                    const std::map<std::string, msgpack::object>& source);
+  // Helper to copy all data
+  void copyAllData_(const StructureData& obj);
 };
 
 
@@ -286,7 +275,7 @@ inline bool isDefaultValue(const std::vector<T>& value);
 template <>
 inline bool isDefaultValue(const std::string& value);
 template <>
-inline bool isDefaultValue(const msgpack::object& value);
+inline bool isDefaultValue(const std::map<std::string, msgpack::object>& value);
 
 
 /**
@@ -390,8 +379,8 @@ inline bool isDefaultValue(const std::string& value) {
   return value.empty();
 }
 template <>
-inline bool isDefaultValue(const msgpack::object& value) {
-  return value.is_nil();
+inline bool isDefaultValue(const std::map<std::string, msgpack::object>& value) {
+  return value.empty();
 }
 
 template <typename T>
@@ -466,6 +455,65 @@ inline StructureData::StructureData() {
   mmtfVersion = getVersionString();
   mmtfProducer = "mmtf-cpp library (github.com/rcsb/mmtf-cpp)";
 }
+
+inline StructureData::StructureData(const StructureData& obj) {
+  copyAllData_(obj);
+}
+
+inline StructureData& StructureData::operator=(const StructureData& obj) {
+  if (this != &obj) copyAllData_(obj);
+  return *this;
+}
+
+inline bool StructureData::operator==(const StructureData& c) const {
+  return (
+    mmtfVersion == c.mmtfVersion &&
+    mmtfProducer == c.mmtfProducer &&
+    unitCell == c.unitCell &&
+    spaceGroup == c.spaceGroup &&
+    structureId == c.structureId &&
+    title == c.title &&
+    depositionDate == c.depositionDate &&
+    releaseDate == c.releaseDate &&
+    ncsOperatorList == c.ncsOperatorList &&
+    bioAssemblyList == c.bioAssemblyList &&
+    entityList == c.entityList &&
+    experimentalMethods == c.experimentalMethods &&
+    resolution == c.resolution &&
+    rFree == c.rFree &&
+    rWork == c.rWork &&
+    numBonds == c.numBonds &&
+    numAtoms == c.numAtoms &&
+    numGroups == c.numGroups &&
+    numChains == c.numChains &&
+    numModels == c.numModels &&
+    groupList == c.groupList &&
+    bondAtomList == c.bondAtomList &&
+    bondOrderList == c.bondOrderList &&
+    xCoordList == c.xCoordList &&
+    yCoordList == c.yCoordList &&
+    zCoordList == c.zCoordList &&
+    bFactorList == c.bFactorList &&
+    atomIdList == c.atomIdList &&
+    altLocList == c.altLocList &&
+    occupancyList == c.occupancyList &&
+    groupIdList == c.groupIdList &&
+    groupTypeList == c.groupTypeList &&
+    secStructList == c.secStructList &&
+    insCodeList == c.insCodeList &&
+    sequenceIndexList == c.sequenceIndexList &&
+    chainIdList == c.chainIdList &&
+    chainNameList == c.chainNameList &&
+    groupsPerChain == c.groupsPerChain &&
+    chainsPerModel == c.chainsPerModel &&
+    bondProperties == c.bondProperties &&
+    atomProperties == c.atomProperties &&
+    groupProperties == c.groupProperties &&
+    chainProperties == c.chainProperties &&
+    modelProperties == c.modelProperties &&
+    extraProperties == c.extraProperties);
+}
+
 
 inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_max_length) const {
   std::vector<int8_t> allowed_bond_orders;
@@ -993,6 +1041,65 @@ inline std::string StructureData::print(std::string delim) {
     }
   }
   return out.str();
+}
+
+inline void StructureData::copyMapData_(
+                    std::map<std::string, msgpack::object>& target,
+                    const std::map<std::string, msgpack::object>& source) {
+  target.clear();
+  std::map<std::string, msgpack::object>::const_iterator it;
+  for (it = source.begin(); it != source.end(); ++it) {
+    msgpack::object tmp_object(it->second, msgpack_zone);
+    target[it->first] = tmp_object;
+  }
+}
+
+inline void StructureData::copyAllData_(const StructureData& obj) {
+  mmtfVersion = obj.mmtfVersion;
+  mmtfProducer = obj.mmtfProducer;
+  unitCell = obj.unitCell;
+  spaceGroup = obj.spaceGroup;
+  structureId = obj.structureId;
+  title = obj.title;
+  depositionDate = obj.depositionDate;
+  releaseDate = obj.releaseDate;
+  ncsOperatorList = obj.ncsOperatorList;
+  bioAssemblyList = obj.bioAssemblyList;
+  entityList = obj.entityList;
+  experimentalMethods = obj.experimentalMethods;
+  resolution = obj.resolution;
+  rFree = obj.rFree;
+  rWork = obj.rWork;
+  numBonds = obj.numBonds;
+  numAtoms = obj.numAtoms;
+  numGroups = obj.numGroups;
+  numChains = obj.numChains;
+  numModels = obj.numModels;
+  groupList = obj.groupList;
+  bondAtomList = obj.bondAtomList;
+  bondOrderList = obj.bondOrderList;
+  xCoordList = obj.xCoordList;
+  yCoordList = obj.yCoordList;
+  zCoordList = obj.zCoordList;
+  bFactorList = obj.bFactorList;
+  atomIdList = obj.atomIdList;
+  altLocList = obj.altLocList;
+  occupancyList = obj.occupancyList;
+  groupIdList = obj.groupIdList;
+  groupTypeList = obj.groupTypeList;
+  secStructList = obj.secStructList;
+  insCodeList = obj.insCodeList;
+  sequenceIndexList = obj.sequenceIndexList;
+  chainIdList = obj.chainIdList;
+  chainNameList = obj.chainNameList;
+  groupsPerChain = obj.groupsPerChain;
+  chainsPerModel = obj.chainsPerModel;
+  copyMapData_(bondProperties, obj.bondProperties);
+  copyMapData_(atomProperties, obj.atomProperties);
+  copyMapData_(groupProperties, obj.groupProperties);
+  copyMapData_(chainProperties, obj.chainProperties);
+  copyMapData_(modelProperties, obj.modelProperties);
+  copyMapData_(extraProperties, obj.extraProperties);
 }
 
 } // mmtf namespace

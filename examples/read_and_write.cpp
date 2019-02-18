@@ -8,15 +8,10 @@
 
 #include <mmtf.hpp>
 
-// C-style libraries used here to keep it close to traverse.c
-#include <stdio.h>
-#include <string.h>
-#include <assert.h>
-
 int main(int argc, char** argv) {
     // check arguments
     if (argc != 3) {
-      printf("USAGE: traverse <in mmtf file> <out mmtf file>\n");
+      printf("USAGE: read_and_write <in mmtf file> <out mmtf file>\n");
       return 1;
     }
 
