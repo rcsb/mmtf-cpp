@@ -605,6 +605,11 @@ TEST_CASE("Test bondOrderList vs bondAtomList") {
 		}
 		sd.bondOrderList.clear();
 		REQUIRE(sd.hasConsistentData());
+		// we write files without those fields (tested below), can we roundtrip?
+		mmtf::StructureData sd2;
+		mmtf::encodeToFile(sd, "test_mmtf_nobondorder.mmtf");
+		mmtf::decodeFromFile(sd2, "test_mmtf_nobondorder.mmtf");
+		REQUIRE( sd == sd2 );
 	}
 	SECTION("altering group bondOrderLists") {
 		sd.groupList[0].bondOrderList.push_back(1);
