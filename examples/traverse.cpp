@@ -159,8 +159,9 @@ void json_print(const mmtf::GroupType& group) {
     printf("  {\n");
     printreq("   \"formalChargeList\"", "%d", group.formalChargeList);
     printreq("   \"atomNameList\"", "\"%s\"", group.atomNameList);
-    printreq("   \"bondAtomList\"", "%d", group.bondAtomList);
-    printreq("   \"bondOrderList\"", "%d", group.bondOrderList);
+    printopt("   \"bondAtomList\"", "%d", group.bondAtomList);
+    printopt("   \"bondOrderList\"", "%d", group.bondOrderList);
+    printopt("   \"bondResonanceList\"", "%d", group.bondResonanceList);
     printreq("   \"groupName\"", group.groupName);
     printf("   \"singleLetterCode\": \"%c\",\n", group.singleLetterCode);
     printreq("   \"chemCompType\"", group.chemCompType, true);
@@ -202,6 +203,7 @@ void json_print(const mmtf::StructureData& example) {
 
     printopt(" \"bondAtomList\"", "%d", example.bondAtomList);
     printopt(" \"bondOrderList\"", "%d", example.bondOrderList);
+    printopt(" \"bondResonanceList\"", "%d", example.bondResonanceList);
 
     printreq(" \"xCoordList\"", "%g", example.xCoordList);
     printreq(" \"yCoordList\"", "%g", example.yCoordList);
@@ -347,12 +349,15 @@ void traverse_main(const mmtf::StructureData& example) {
                 int atomOffset = atomIndex;
 
                 int l;
-                for (l = 0; l < group.bondOrderList.size(); l++) {
+                for (l = 0; l < group.bondAtomList.size(); l += 2) {
                     printf("    Atom id One: %d\n",
-                           (atomOffset + group.bondAtomList[l * 2]));
+                           (atomOffset + group.bondAtomList[l]));
                     printf("    Atom id Two: %d\n",
-                           (atomOffset + group.bondAtomList[l * 2 + 1]));
-                    printf("    Bond order: %d\n", group.bondOrderList[l]);
+                           (atomOffset + group.bondAtomList[l + 1]));
+                    printvalo("    Bond order: %d\n",
+                              group.bondOrderList, l / 2);
+                    printvalo("    Bond resonance: %d\n",
+                              group.bondResonanceList, l / 2);
                 }
                 int groupAtomCount = group.atomNameList.size();
                 for (l = 0; l < groupAtomCount; l++) {
@@ -383,11 +388,12 @@ void traverse_main(const mmtf::StructureData& example) {
         modelIndex++;
     }
     printf("Number of inter group bonds: %d\n",
-           (int) example.bondOrderList.size());
-    for (i = 0; i < example.bondOrderList.size(); i++) {
-        printf(" Atom One: %d\n", example.bondAtomList[i * 2]);
-        printf(" Atom Two: %d\n", example.bondAtomList[i * 2 + 1]);
-        printf(" Bond order: %d\n", example.bondOrderList[i]);
+           (int) example.bondAtomList.size() / 2);
+    for (i = 0; i < example.bondAtomList.size(); i += 2) {
+        printf(" Atom One: %d\n", example.bondAtomList[i]);
+        printf(" Atom Two: %d\n", example.bondAtomList[i + 1]);
+        printvalo(" Bond order: %d\n", example.bondOrderList, i / 2);
+        printvalo(" Bond resonance: %d\n", example.bondResonanceList, i / 2);
     }
 }
 
