@@ -50,17 +50,11 @@ inline std::vector<int32_t> deltaEncode(std::vector<int32_t> const & vec_in);
 
 /**
  * @brief mmtf run length encode a vector of ints.
- * @param[in] vec_in        vector of ints
+ * @param[in] vec_in        vector of ints convertable to int32_t
  * @return vec_out          run length encoded int vector
  */
-inline std::vector<int32_t> runLengthEncode(std::vector<int32_t> const & vec_in );
-
-/**
- * @brief mmtf run length encode a vector of ints.
- * @param[in] vec_in        vector of ints
- * @return vec_out          run length encoded int vector
- */
-inline std::vector<int32_t> runLengthEncode(std::vector<int8_t> const & vec_in );
+template<typename Int>
+inline std::vector<int32_t> runLengthEncode(std::vector<Int> const & vec_in );
 
 /**
  * @brief mmtf recursive index encode a vector of ints.
@@ -71,14 +65,6 @@ inline std::vector<int32_t> runLengthEncode(std::vector<int8_t> const & vec_in )
  */
 inline std::vector<int32_t> recursiveIndexEncode(std::vector<int32_t> const & vec_in,
                                              int max=32767, int min=-32768);
-
-/**
- * @brief mmtf convert char to int
- * @param[in] vec_in        vector of chars
- * @return vec_out          vector of ints
- */
-inline std::vector<int32_t> convertCharsToInts(std::vector<char> const & vec_in);
-
 
 /**
  * @brief Add mmtf header to a stream
@@ -182,35 +168,15 @@ inline std::vector<int32_t> deltaEncode(std::vector<int32_t> const & vec_in) {
 }
 
 
-inline std::vector<int32_t> runLengthEncode(std::vector<int32_t> const & vec_in ) {
+template<typename Int>
+inline std::vector<int32_t> runLengthEncode(std::vector<Int> const & vec_in ) {
   std::vector<int32_t> ret;
   if (vec_in.size()==0) return ret;
-  int32_t curr = vec_in[0];
-  ret.push_back(curr);
+  Int curr = vec_in[0];
+  ret.push_back((int32_t)curr);
   int32_t counter = 1;
   for (std::size_t i = 1; i < vec_in.size(); ++i) {
     if ( vec_in[i] == curr ) {
-      ++counter;
-    } else {
-      ret.push_back(counter);
-      ret.push_back(vec_in[i]);
-      curr = vec_in[i];
-      counter = 1;
-    }
-  }
-  ret.push_back(counter);
-  return ret;
-}
-
-
-inline std::vector<int32_t> runLengthEncode(std::vector<int8_t> const & vec_in ) {
-  std::vector<int32_t> ret;
-  if (vec_in.size()==0) return ret;
-  int32_t curr = vec_in[0];
-  ret.push_back(curr);
-  int32_t counter = 1;
-  for (std::size_t i = 1; i < vec_in.size(); ++i) {
-    if ( (int32_t)vec_in[i] == curr ) {
       ++counter;
     } else {
       ret.push_back(counter);
@@ -246,14 +212,6 @@ inline std::vector<int32_t> recursiveIndexEncode(
   return vec_out;
 }
 
-
-inline std::vector<int32_t> convertCharsToInts(std::vector<char> const & vec_in) {
-  std::vector<int32_t> vec_out;
-  for (size_t i=0; i<vec_in.size(); ++i) {
-    vec_out.push_back((int)vec_in[i]);
-  }
-  return vec_out;
-}
 
 inline void add_header(std::stringstream & ss, uint32_t array_size, uint32_t codec, uint32_t param /* =0 */) {
     uint32_t be_codec = htonl(codec);
@@ -316,9 +274,7 @@ inline std::vector<char> encodeStringVector(std::vector<std::string> in_sv, int3
 inline std::vector<char> encodeRunLengthChar(std::vector<char> in_cv) {
   std::stringstream ss;
   add_header(ss, in_cv.size(), 6, 0);
-  std::vector<int32_t> int_vec;
-  int_vec = convertCharsToInts(in_cv);
-  int_vec = runLengthEncode(int_vec);
+  std::vector<int32_t> int_vec = runLengthEncode(in_cv);
   for (size_t i=0; i<int_vec.size(); ++i) {
     int32_t temp = htonl(int_vec[i]);
     ss.write(reinterpret_cast< char * >(&temp), sizeof(temp));
