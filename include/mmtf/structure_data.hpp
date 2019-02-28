@@ -609,7 +609,7 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
         if (std::find(allowed_bond_orders.begin(), allowed_bond_orders.end(),
               g.bondOrderList[j]) == allowed_bond_orders.end()) {
           if (verbose) {
-            std::cout << "Cannot have bond order of: " << g.bondOrderList[j]
+            std::cout << "Cannot have bond order of: " << (int)g.bondOrderList[j]
                 << " allowed bond orders are: -1, 1, 2, 3 or 4.  at idx: " << j << std::endl;
           }
           return false;
@@ -627,8 +627,8 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
       if (g.bondOrderList.size() != g.bondResonanceList.size()) {
         if (verbose) {
           std::cout << "inconsistent group::bondOrderSize size: " <<
-              g.bondOrderList.size() << " != group::bondResonanceList size(*2): " <<
-              g.bondResonanceList.size()*2 << " at idx: " << i << std::endl;
+              g.bondOrderList.size() << " != group::bondResonanceList size: " <<
+              g.bondResonanceList.size() << " at idx: " << i << std::endl;
         }
         return false;
       }
@@ -645,7 +645,7 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
         if (g.bondResonanceList[j] < -1 || g.bondResonanceList[j] > 1) {
           if (verbose) {
             std::cout << "group::bondResonanceList had a Resonance of: "
-              << g.bondResonanceList[j] << " and only -1, 0, or 1 are allowed"
+              << (int)g.bondResonanceList[j] << " and only -1, 0, or 1 are allowed"
               << std::endl;
           }
           return false;
@@ -653,8 +653,8 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
         if (g.bondOrderList[j] == -1 && g.bondResonanceList[j] != 1) {
           if (verbose) {
             std::cout << "group::bondResonanceList had a Resonance of: "
-              << g.bondResonanceList[j] << " and group::bondOrderList had an order of "
-              << g.bondOrderList[j] << " we require unknown bondOrders to have resonance"
+              << (int)g.bondResonanceList[j] << " and group::bondOrderList had an order of "
+              << (int)g.bondOrderList[j] << " we require unknown bondOrders to have resonance"
               << std::endl;
           }
           return false;
@@ -683,7 +683,7 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
       if (std::find(allowed_bond_orders.begin(), allowed_bond_orders.end(),
             bondOrderList[i]) == allowed_bond_orders.end()) {
         if (verbose) {
-          std::cout << "Cannot have bond order of: " << bondOrderList[i]
+          std::cout << "Cannot have bond order of: " << (int)bondOrderList[i]
               << " allowed bond orders are: -1, 1, 2, 3 or 4.  at idx: " << i << std::endl;
         }
         return false;
@@ -691,6 +691,13 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
     }
   }
   if (!isDefaultValue(bondResonanceList)) {
+    if (isDefaultValue(bondOrderList) || isDefaultValue(bondAtomList)) {
+      if (verbose) {
+        std::cout << "Cannot have bondResonanceList without both " <<
+            "bondOrderList and bondAtomList!" << std::endl;
+      }
+      return false;
+    }
     if (bondAtomList.size() != bondResonanceList.size() * 2) {
       if (verbose) {
           std::cout << "inconsistent bondAtomList size: " <<
@@ -702,17 +709,17 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
     for (size_t i = 0; i < bondResonanceList.size(); ++i) {
       if (bondResonanceList[i] < -1 || bondResonanceList[i] > 1) {
         if (verbose) {
-          std::cout << "group::bondResonanceList had a Resonance of: "
-            << bondResonanceList[i] << " and only -1, 0, or 1 are allowed"
+          std::cout << "bondResonanceList had a Resonance of: "
+            << (int)bondResonanceList[i] << " and only -1, 0, or 1 are allowed"
             << std::endl;
         }
         return false;
       }
       if (bondOrderList[i] == -1 && bondResonanceList[i] != 1) {
         if (verbose) {
-          std::cout << "group::bondResonanceList had a Resonance of: "
-            << bondResonanceList[i] << " and group::bondOrderList had an order of "
-            << bondOrderList[i] << " we require unknown bondOrders to have resonance"
+          std::cout << "bondResonanceList had a Resonance of: "
+            << (int)bondResonanceList[i] << " and bondOrderList had an order of "
+            << (int)bondOrderList[i] << " we require unknown bondOrders to have resonance"
             << std::endl;
         }
         return false;

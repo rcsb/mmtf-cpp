@@ -604,15 +604,23 @@ TEST_CASE("Test bondOrderList vs bondAtomList") {
 			group.bondOrderList.clear();
 		}
 		sd.bondOrderList.clear();
-		REQUIRE(sd.hasConsistentData(true) == true);
+		REQUIRE(sd.hasConsistentData());
 	}
 	SECTION("altering group bondOrderLists") {
 		sd.groupList[0].bondOrderList.push_back(1);
-		REQUIRE(sd.hasConsistentData(true) == false);
+		REQUIRE_FALSE(sd.hasConsistentData());
 	}
 	SECTION("altering sd bondOrderLists") {
 		sd.bondOrderList.push_back(1);
-		REQUIRE(sd.hasConsistentData(true) == false);
+		REQUIRE_FALSE(sd.hasConsistentData());
+	}
+	SECTION("not ok to have bond orders without atom list in group") {
+		sd.groupList[0].bondAtomList.clear();
+		REQUIRE_FALSE(sd.hasConsistentData());
+	}
+	SECTION("not ok to have bond orders without atom list") {
+		sd.bondAtomList.clear();
+		REQUIRE_FALSE(sd.hasConsistentData());
 	}
 }
 
@@ -622,12 +630,8 @@ TEST_CASE("test valid bonds") {
 	mmtf::StructureData sd;
 	mmtf::decodeFromFile(sd, working_mmtf);
 	REQUIRE(sd.hasConsistentData());
-	SECTION("altering group bondOrderLists") {
-		sd.groupList[0].bondResonanceList[0] = -1;
-		sd.groupList[0].bondOrderList[0] = -1;
-		REQUIRE_FALSE(sd.hasConsistentData());
-	}
-	SECTION("altering group bondOrder numbers") {
+
+	SECTION("invalid bond numbers in group") {
 		int8_t original = sd.groupList[0].bondResonanceList[0];
 		sd.groupList[0].bondResonanceList[0] = -3;
 		REQUIRE_FALSE(sd.hasConsistentData());
@@ -645,8 +649,7 @@ TEST_CASE("test valid bonds") {
 		sd.groupList[0].bondResonanceList[0] = -1;
 		REQUIRE_FALSE(sd.hasConsistentData());
 	}
-
-	SECTION("altering bondOrder numbers") {
+	SECTION("invalid bond numbers") {
 		int8_t original = sd.bondResonanceList[0];
 		sd.bondResonanceList[0] = -3;
 		REQUIRE_FALSE(sd.hasConsistentData());
@@ -665,9 +668,21 @@ TEST_CASE("test valid bonds") {
 		REQUIRE_FALSE(sd.hasConsistentData());
 	}
 
-	SECTION("altering bondOrderLists") {
-		sd.bondResonanceList[0] = -1;
-		sd.bondOrderList[0] = -1;
+	SECTION("invalid bondResonanceList size in group") {
+		sd.groupList[0].bondResonanceList.push_back(1);
+		REQUIRE_FALSE(sd.hasConsistentData());
+	}
+	SECTION("invalid bondResonanceList size") {
+		sd.bondResonanceList.push_back(1);
+		REQUIRE_FALSE(sd.hasConsistentData());
+	}
+
+	SECTION("not ok to have bond resonances without order list in group") {
+		sd.groupList[0].bondOrderList.clear();
+		REQUIRE_FALSE(sd.hasConsistentData());
+	}
+	SECTION("not ok to have bond resonances without order list") {
+		sd.bondOrderList.clear();
 		REQUIRE_FALSE(sd.hasConsistentData());
 	}
 }
@@ -812,7 +827,7 @@ TEST_CASE("Test export_helpers") {
 	// test assert: all bonds have been transferred to `bonddata`
 	REQUIRE(bonddata.size() == numbonds_ref * 3);
 	REQUIRE(sd.numBonds == 0);
-	REQUIRE(sd.hasConsistentData(true));
+	REQUIRE(sd.hasConsistentData());
 
 	// re-add bonds
 	mmtf::BondAdder bondadder(sd);
@@ -820,12 +835,12 @@ TEST_CASE("Test export_helpers") {
 		REQUIRE(bondadder(bonddata[i], bonddata[i + 1], bonddata[i + 2]));
 	}
 	REQUIRE(sd.numBonds == numbonds_ref);
-	REQUIRE(sd.hasConsistentData(true));
+	REQUIRE(sd.hasConsistentData());
 
 	// re-compress groupTypeList
 	mmtf::compressGroupList(sd);
 	REQUIRE(sd.groupTypeList.size() != sd.groupList.size());
-	REQUIRE(sd.hasConsistentData(true));
+	REQUIRE(sd.hasConsistentData());
 
 	// compare with original data
 	mmtf::StructureData sd_ref;
