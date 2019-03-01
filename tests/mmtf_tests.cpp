@@ -16,13 +16,30 @@
 template <typename T>
 bool approx_equal_vector(const T& a, const T& b, float eps = 0.00001) {
 	if (a.size() != b.size()) return false;
-	
 	for (std::size_t i=0; i < a.size(); ++i) {
 		if (a[i] != Approx(b[i]).margin(eps)) return false;
 	}
 	return true;
 }
 
+
+std::map<std::string, msgpack::object*>
+msgpack_obj_to_map(const msgpack::object& obj) {
+	std::map<std::string, msgpack::object*> data_map;
+	msgpack::object_kv* current_key_value = obj.via.map.ptr;
+	msgpack::object_kv* last_key_value = current_key_value + obj.via.map.size;
+	for (; current_key_value != last_key_value; ++current_key_value) { 
+		msgpack::object* key = &(current_key_value->key); 
+		msgpack::object* value = &(current_key_value->val); 
+		if (key->type == msgpack::type::STR) {        
+			std::string data_map_key(key->via.str.ptr, key->via.str.size);
+			data_map[data_map_key] = value;
+		} else {
+			throw std::runtime_error("Error: Found non-string key!");
+		}
+	}
+	return data_map;
+}
 
 TEST_CASE("assignment operator") {
 	std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
@@ -108,6 +125,8 @@ TEST_CASE("Test round trip StructureData working") {
 	works.push_back("../mmtf_spec/test-suite/mmtf/empty-all0.mmtf");
 	works.push_back("../mmtf_spec/test-suite/mmtf/empty-numChains1.mmtf");
 	works.push_back("../mmtf_spec/test-suite/mmtf/empty-numModels1.mmtf");
+	works.push_back("../temporary_test_data/all_canoncial.mmtf");
+	works.push_back("../temporary_test_data/1PEF_with_resonance.mmtf");
 	for (size_t i=0; i<works.size(); ++i) {
 		mmtf::StructureData sd1, sd2;
 		mmtf::decodeFromFile(sd1, works[i]);
@@ -365,6 +384,52 @@ TEST_CASE("Test RunLengthChar enc/dec") {
 }
 
 
+TEST_CASE("Test RunLengthInt8 enc/dec") {
+	std::vector<char> encoded_data;
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x10);
+	// h2
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x04);
+	// h3
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x00);
+	// data
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x02);
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x00);
+	encoded_data.push_back(0x04);
+
+	msgpack::zone m_zone;
+	msgpack::object msgp_obj(encoded_data, m_zone);
+
+	mmtf::BinaryDecoder bd(msgp_obj, "a_test");
+	std::vector<int8_t> decoded_input;
+	bd.decode(decoded_input);
+
+	std::vector<int8_t> decoded_data;
+	decoded_data.push_back(2);
+	decoded_data.push_back(2);
+	decoded_data.push_back(2);
+	decoded_data.push_back(2);
+
+	std::vector<char> encoded_output = mmtf::encodeRunLengthInt8(decoded_data);
+	REQUIRE(encoded_data == encoded_output);
+	REQUIRE(decoded_data.size() ==  decoded_input.size());
+	REQUIRE(decoded_data == decoded_input);
+}
+
+
 TEST_CASE("Test encodeStringVector enc/dec") {
 	std::vector<char> encoded_data;
 	encoded_data.push_back(0x00);
@@ -539,18 +604,133 @@ TEST_CASE("Test bondOrderList vs bondAtomList") {
 			group.bondOrderList.clear();
 		}
 		sd.bondOrderList.clear();
-		REQUIRE(sd.hasConsistentData(true) == true);
+		REQUIRE(sd.hasConsistentData());
+		// we write files without those fields (tested below), can we roundtrip?
+		mmtf::StructureData sd2;
+		mmtf::encodeToFile(sd, "test_mmtf_nobondorder.mmtf");
+		mmtf::decodeFromFile(sd2, "test_mmtf_nobondorder.mmtf");
+		REQUIRE( sd == sd2 );
 	}
 	SECTION("altering group bondOrderLists") {
 		sd.groupList[0].bondOrderList.push_back(1);
-		REQUIRE(sd.hasConsistentData(true) == false);
+		REQUIRE_FALSE(sd.hasConsistentData());
 	}
 	SECTION("altering sd bondOrderLists") {
 		sd.bondOrderList.push_back(1);
-		REQUIRE(sd.hasConsistentData(true) == false);
+		REQUIRE_FALSE(sd.hasConsistentData());
+	}
+	SECTION("not ok to have bond orders without atom list in group") {
+		sd.groupList[0].bondAtomList.clear();
+		REQUIRE_FALSE(sd.hasConsistentData());
+	}
+	SECTION("not ok to have bond orders without atom list") {
+		sd.bondAtomList.clear();
+		REQUIRE_FALSE(sd.hasConsistentData());
 	}
 }
 
+
+TEST_CASE("test valid bonds") {
+	std::string working_mmtf = "../temporary_test_data/all_canoncial.mmtf";
+	mmtf::StructureData sd;
+	mmtf::decodeFromFile(sd, working_mmtf);
+	REQUIRE(sd.hasConsistentData());
+
+	SECTION("invalid bond numbers in group") {
+		int8_t original = sd.groupList[0].bondResonanceList[0];
+		sd.groupList[0].bondResonanceList[0] = -3;
+		REQUIRE_FALSE(sd.hasConsistentData());
+		sd.groupList[0].bondResonanceList[0] = 2;
+		REQUIRE_FALSE(sd.hasConsistentData());
+		sd.groupList[0].bondResonanceList[0] = original;
+
+		original = sd.groupList[0].bondOrderList[0];
+		sd.groupList[0].bondOrderList[0] = 0;
+		REQUIRE_FALSE(sd.hasConsistentData());
+		sd.groupList[0].bondOrderList[0] = 5;
+		REQUIRE_FALSE(sd.hasConsistentData());
+
+		sd.groupList[0].bondOrderList[0] = -1;
+		sd.groupList[0].bondResonanceList[0] = -1;
+		REQUIRE_FALSE(sd.hasConsistentData());
+	}
+	SECTION("invalid bond numbers") {
+		int8_t original = sd.bondResonanceList[0];
+		sd.bondResonanceList[0] = -3;
+		REQUIRE_FALSE(sd.hasConsistentData());
+		sd.bondResonanceList[0] = 2;
+		REQUIRE_FALSE(sd.hasConsistentData());
+		sd.bondResonanceList[0] = original;
+
+		original = sd.bondOrderList[0];
+		sd.bondOrderList[0] = 0;
+		REQUIRE_FALSE(sd.hasConsistentData());
+		sd.bondOrderList[0] = 5;
+		REQUIRE_FALSE(sd.hasConsistentData());
+
+		sd.bondOrderList[0] = -1;
+		sd.bondResonanceList[0] = -1;
+		REQUIRE_FALSE(sd.hasConsistentData());
+	}
+
+	SECTION("invalid bondResonanceList size in group") {
+		sd.groupList[0].bondResonanceList.push_back(1);
+		REQUIRE_FALSE(sd.hasConsistentData());
+	}
+	SECTION("invalid bondResonanceList size") {
+		sd.bondResonanceList.push_back(1);
+		REQUIRE_FALSE(sd.hasConsistentData());
+	}
+
+	SECTION("not ok to have bond resonances without order list in group") {
+		sd.groupList[0].bondOrderList.clear();
+		REQUIRE_FALSE(sd.hasConsistentData());
+	}
+	SECTION("not ok to have bond resonances without order list") {
+		sd.bondOrderList.clear();
+		REQUIRE_FALSE(sd.hasConsistentData());
+	}
+}
+
+
+TEST_CASE("test group export optional") {
+	std::string working_mmtf = "../temporary_test_data/all_canoncial.mmtf";
+	mmtf::StructureData sd;
+	mmtf::decodeFromFile(sd, working_mmtf);
+	REQUIRE(sd.hasConsistentData());
+
+	mmtf::GroupType & first_group(sd.groupList[0]);
+
+	SECTION("check that optional fields exist fist") {
+		msgpack::zone my_zone;
+		msgpack::object obj(first_group, my_zone);
+		std::map<std::string, msgpack::object*> my_map(msgpack_obj_to_map(obj));
+		REQUIRE(my_map.find("bondOrderList") != my_map.end());
+		REQUIRE(my_map.find("bondResonanceList") != my_map.end());
+		REQUIRE(my_map.find("bondAtomList") != my_map.end());
+	}
+	SECTION("removing group bondOrderLists") {
+		msgpack::zone my_zone;
+		first_group.bondOrderList = std::vector<int8_t>();
+		msgpack::object obj(first_group, my_zone);
+		std::map<std::string, msgpack::object*> my_map(msgpack_obj_to_map(obj));
+		REQUIRE(my_map.find("bondOrderList") == my_map.end());
+	}
+	SECTION("altering group bondResonanceLists") {
+		msgpack::zone my_zone;
+		first_group.bondResonanceList = std::vector<int8_t>();
+		msgpack::object obj(first_group, my_zone);
+		std::map<std::string, msgpack::object*> my_map(msgpack_obj_to_map(obj));
+		REQUIRE(my_map.find("bondResonanceList") == my_map.end());
+	}
+	SECTION("altering group bondAtomLists") {
+		msgpack::zone my_zone;
+		first_group.bondAtomList = std::vector<int32_t>();
+		msgpack::object obj(first_group, my_zone);
+		std::map<std::string, msgpack::object*> my_map(msgpack_obj_to_map(obj));
+		REQUIRE(my_map.find("bondAtomList") == my_map.end());
+	}
+}
 
 TEST_CASE("atomProperties field") {
 	std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
@@ -652,7 +832,7 @@ TEST_CASE("Test export_helpers") {
 	// test assert: all bonds have been transferred to `bonddata`
 	REQUIRE(bonddata.size() == numbonds_ref * 3);
 	REQUIRE(sd.numBonds == 0);
-	REQUIRE(sd.hasConsistentData(true));
+	REQUIRE(sd.hasConsistentData());
 
 	// re-add bonds
 	mmtf::BondAdder bondadder(sd);
@@ -660,12 +840,12 @@ TEST_CASE("Test export_helpers") {
 		REQUIRE(bondadder(bonddata[i], bonddata[i + 1], bonddata[i + 2]));
 	}
 	REQUIRE(sd.numBonds == numbonds_ref);
-	REQUIRE(sd.hasConsistentData(true));
+	REQUIRE(sd.hasConsistentData());
 
 	// re-compress groupTypeList
 	mmtf::compressGroupList(sd);
 	REQUIRE(sd.groupTypeList.size() != sd.groupList.size());
-	REQUIRE(sd.hasConsistentData(true));
+	REQUIRE(sd.hasConsistentData());
 
 	// compare with original data
 	mmtf::StructureData sd_ref;
