@@ -297,20 +297,26 @@ inline void setDefaultValue(T& value);
  * Relevant threads:
  * https://github.com/rcsb/mmtf/issues/28
  * http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Items/_chem_comp.type.html
+ *
+ * WARNING: You should not use this unless you don't have info like an 'entity_list'
+ * to work with.  This can return 'false' if you have an amino acid ligand.
  */
 inline bool is_hetatm(const char* type);
 
 /**
  * @brief Check if type is hetatm
  * @param type   unsigned int  chain_index
- * @param type    chain_index
+ * @param type   vector<entity> entity_list
+ * @param type   string type (optional)
  * @return True if is a HETATM
  * Relevant threads:
  * https://github.com/rcsb/mmtf/issues/28
  * http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Items/_chem_comp.type.html
  */
 inline bool is_hetatm(unsigned int const chain_index,
-                      std::vector<Entity> const & type);
+                      std::vector<Entity> const & entity_list,
+                      std::string const type = "");
+
 
 // *************************************************************************
 // IMPLEMENTATION
@@ -405,16 +411,6 @@ inline void setDefaultValue(T& value) {
 
 // HELPERS
 
-/**
- * @brief Check if type is hetatm
- * @param type   cstring of group.chemCompType
- * @return True if is a HETATM 
- * Used when printing this struct, also all chemCompTypes are listed, but
- * the non-HETATM ones are commented out for reference
- * Relevant threads:
- * https://github.com/rcsb/mmtf/issues/28
- * http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Items/_chem_comp.type.html
- */
 bool is_hetatm(const char* type) {
   const char* hetatm_type[] = {
     "D-BETA-PEPTIDE, C-GAMMA LINKING",
@@ -454,7 +450,11 @@ bool is_hetatm(const char* type) {
 }
 
 
-bool is_hetatm(unsigned int const chain_index, std::vector<Entity> const & entity_list) {
+bool is_hetatm(unsigned int const chain_index, std::vector<Entity> const & entity_list,
+               std::string const type) {
+  if (!type.empty()) {
+    if (is_hetatm(type.c_str())) return true;
+  }
   for (std::size_t i=0; i<entity_list.size(); ++i) {
     if ( std::find(entity_list[i].chainIndexList.begin(), entity_list[i].chainIndexList.end(), chain_index)
         != entity_list[i].chainIndexList.end()) {
