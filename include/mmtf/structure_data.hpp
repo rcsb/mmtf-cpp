@@ -14,6 +14,8 @@
 #ifndef MMTF_STRUCTURE_DATA_H
 #define MMTF_STRUCTURE_DATA_H
 
+#include "errors.hpp"
+
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -23,6 +25,7 @@
 #include <msgpack.hpp>
 #include <iostream>
 #include <iomanip>
+#include <algorithm>
 
 namespace mmtf {
 
@@ -297,6 +300,8 @@ inline void setDefaultValue(T& value);
  */
 inline bool is_hetatm(const char* type);
 
+inline bool is_hetatm(unsigned int const chain_index, std::vector<Entity> const & type);
+
 // *************************************************************************
 // IMPLEMENTATION
 // *************************************************************************
@@ -437,6 +442,21 @@ bool is_hetatm(const char* type) {
   }
   return false;
 }
+
+
+bool is_hetatm(unsigned int const chain_index, std::vector<Entity> const & entity_list) {
+	for (std::size_t i=0; i<entity_list.size(); ++i) {
+		if ( std::find(entity_list[i].chainIndexList.begin(), entity_list[i].chainIndexList.end(), chain_index)
+				!= entity_list[i].chainIndexList.end()) {
+			if (entity_list[i].type == "polymer" || entity_list[i].type == "POLYMER") {
+				return false;
+			}
+			return true;
+		}
+	}
+	throw DecodeError("'is_hetatm' unable to find chain_index: " + std::to_string(chain_index) + " in entity list");
+}
+
 
 // CLASS StructureData
 
