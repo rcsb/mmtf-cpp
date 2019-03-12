@@ -300,7 +300,17 @@ inline void setDefaultValue(T& value);
  */
 inline bool is_hetatm(const char* type);
 
-inline bool is_hetatm(unsigned int const chain_index, std::vector<Entity> const & type);
+/**
+ * @brief Check if type is hetatm
+ * @param type   unsigned int  chain_index
+ * @param type    chain_index
+ * @return True if is a HETATM
+ * Relevant threads:
+ * https://github.com/rcsb/mmtf/issues/28
+ * http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Items/_chem_comp.type.html
+ */
+inline bool is_hetatm(unsigned int const chain_index,
+                      std::vector<Entity> const & type);
 
 // *************************************************************************
 // IMPLEMENTATION
@@ -445,16 +455,16 @@ bool is_hetatm(const char* type) {
 
 
 bool is_hetatm(unsigned int const chain_index, std::vector<Entity> const & entity_list) {
-	for (std::size_t i=0; i<entity_list.size(); ++i) {
-		if ( std::find(entity_list[i].chainIndexList.begin(), entity_list[i].chainIndexList.end(), chain_index)
-				!= entity_list[i].chainIndexList.end()) {
-			if (entity_list[i].type == "polymer" || entity_list[i].type == "POLYMER") {
-				return false;
-			}
-			return true;
-		}
-	}
-	throw DecodeError("'is_hetatm' unable to find chain_index: " + std::to_string(chain_index) + " in entity list");
+  for (std::size_t i=0; i<entity_list.size(); ++i) {
+    if ( std::find(entity_list[i].chainIndexList.begin(), entity_list[i].chainIndexList.end(), chain_index)
+        != entity_list[i].chainIndexList.end()) {
+      if (entity_list[i].type == "polymer" || entity_list[i].type == "POLYMER") {
+        return false;
+      }
+      return true;
+    }
+  }
+  throw DecodeError("'is_hetatm' unable to find chain_index: " + std::to_string(chain_index) + " in entity list");
 }
 
 
