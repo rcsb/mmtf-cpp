@@ -861,23 +861,28 @@ TEST_CASE("Test is_hetatm (chain_index version)") {
 	std::string working_mmtf = "../temporary_test_data/3zqs.mmtf";
 	mmtf::StructureData sd;
 	mmtf::decodeFromFile(sd, working_mmtf);
-	std::string expected_sequence = sd.entityList[0].sequence;
-	std::string found_seq = "";
+	SECTION("WORKING REGION") {
+		std::string expected_sequence = sd.entityList[0].sequence;
+		std::string found_seq = "";
 
-	int modelIndex = 0;
-	int chainIndex = 0;
-	int groupIndex = 0;
-	int atomIndex = 0;
-	for (int i = 0; i < sd.numModels; i++, modelIndex++) {
-		for (int j = 0; j < 1; j++, chainIndex++) { // first chain only
-			for (int k = 0; k < sd.groupsPerChain[chainIndex]; k++, groupIndex++) {
-				const mmtf::GroupType& group =
-					sd.groupList[sd.groupTypeList[groupIndex]];
-				if (!is_hetatm(chainIndex, sd.entityList)) found_seq += group.singleLetterCode;
+		int modelIndex = 0;
+		int chainIndex = 0;
+		int groupIndex = 0;
+		int atomIndex = 0;
+		for (int i = 0; i < sd.numModels; i++, modelIndex++) {
+			for (int j = 0; j < 1; j++, chainIndex++) { // first chain only
+				for (int k = 0; k < sd.groupsPerChain[chainIndex]; k++, groupIndex++) {
+					const mmtf::GroupType& group =
+						sd.groupList[sd.groupTypeList[groupIndex]];
+					if (!is_hetatm(chainIndex, sd.entityList)) found_seq += group.singleLetterCode;
+				}
 			}
 		}
+		REQUIRE(expected_sequence == found_seq);
 	}
-	REQUIRE(expected_sequence == found_seq);
+	SECTION("throw check") {
+		REQUIRE_THROWS_AS(is_hetatm(999, sd.entityList), mmtf::DecodeError);
+	}
 }
 
 
