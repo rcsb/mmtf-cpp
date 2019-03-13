@@ -861,43 +861,46 @@ TEST_CASE("Test is_hetatm (chain_index version)") {
 	std::string working_mmtf = "../temporary_test_data/3zqs.mmtf";
 	mmtf::StructureData sd;
 	mmtf::decodeFromFile(sd, working_mmtf);
-	SECTION("WORKING REGION") {
-		std::string expected_sequence = sd.entityList[0].sequence;
-		std::string found_seq = "";
 
+	SECTION("CHECK CHAINS") {
 		int modelIndex = 0;
 		int chainIndex = 0;
-		int groupIndex = 0;
-		int atomIndex = 0;
 		for (int i = 0; i < sd.numModels; i++, modelIndex++) {
-			for (int j = 0; j < 1; j++, chainIndex++) { // first chain only
-				for (int k = 0; k < sd.groupsPerChain[chainIndex]; k++, groupIndex++) {
-					const mmtf::GroupType& group =
-						sd.groupList[sd.groupTypeList[groupIndex]];
-					if (!is_hetatm(chainIndex, sd.entityList)) found_seq += group.singleLetterCode;
+			for (int j = 0; j < sd.chainsPerModel[modelIndex]; j++, chainIndex++) {
+				// chain indices 0 and 1 belong to a polymer entity
+				// all others should be marked as hetatm
+				if (chainIndex < 2) {
+					REQUIRE_FALSE(is_hetatm(chainIndex, sd.entityList));
+				} else {
+					REQUIRE(is_hetatm(chainIndex, sd.entityList));
 				}
 			}
 		}
-		REQUIRE(expected_sequence == found_seq);
 	}
 
-	SECTION("WORKING REGION WITH TYPE") {
+	SECTION("CHECK WITH GROUP") {
+		// chain indices 0 and 1 belong to polymer entity 0
 		std::string expected_sequence = sd.entityList[0].sequence;
-		std::string found_seq = "";
 		int modelIndex = 0;
 		int chainIndex = 0;
 		int groupIndex = 0;
-		int atomIndex = 0;
 		for (int i = 0; i < sd.numModels; i++, modelIndex++) {
-			for (int j = 0; j < 1; j++, chainIndex++) { // first chain only
+			for (int j = 0; j < sd.chainsPerModel[modelIndex]; j++, chainIndex++) {
+				std::string found_seq = "";
 				for (int k = 0; k < sd.groupsPerChain[chainIndex]; k++, groupIndex++) {
 					const mmtf::GroupType& group =
 						sd.groupList[sd.groupTypeList[groupIndex]];
-					if (!is_hetatm(chainIndex, sd.entityList, group.chemCompType)) found_seq += group.singleLetterCode;
+					bool hetatm = is_hetatm(chainIndex, sd.entityList,
+						                    group.chemCompType);
+					if (chainIndex < 2) {
+						if (!hetatm) found_seq += group.singleLetterCode;
+					} else {
+						REQUIRE(hetatm);
+					}
 				}
+				if (chainIndex < 2) REQUIRE(expected_sequence == found_seq);
 			}
 		}
-		REQUIRE(expected_sequence == found_seq);
 	}
 
 	SECTION("throw check") {
