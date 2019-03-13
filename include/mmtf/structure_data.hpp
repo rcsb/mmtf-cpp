@@ -25,7 +25,6 @@
 #include <msgpack.hpp>
 #include <iostream>
 #include <iomanip>
-#include <algorithm>
 
 namespace mmtf {
 
