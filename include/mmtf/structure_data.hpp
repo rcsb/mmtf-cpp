@@ -287,10 +287,21 @@ inline bool isDefaultValue(const std::map<std::string, msgpack::object>& value);
 template <typename T>
 inline void setDefaultValue(T& value);
 
+
 /**
- * @brief Check if type is hetatm
- * @param type   Character string of GroupType.chemCompType
- * @return True if is a HETATM
+ * @brief Check if chain is a polymer chain.
+ * @param chain_index  Chain index of chain.
+ * @param entity_list  StructureData.entityList with info on given chain.
+ * @return True if chain is a polymer chain.
+ * @throw mmtf::DecodeError if chain index doesn't appear in entity list.
+ */
+inline bool is_polymer(const unsigned int chain_index,
+                       const std::vector<Entity>& entity_list);
+
+/**
+ * @brief Check if group type consists of HETATM atoms.
+ * @param type   Character string of GroupType.chemCompType.
+ * @return True if group consists of HETATM atoms.
  *
  * Relevant threads:
  * - https://github.com/rcsb/mmtf/issues/28
@@ -303,22 +314,26 @@ inline void setDefaultValue(T& value);
 inline bool is_hetatm(const char* type);
 
 /**
- * @brief Check if type is hetatm. Used in StructureData.print to mark atoms
-          as HETATM.
+ * @brief Preferred way to check if group consists of hetatm atoms.
  * @param chain_index  Chain index of chain where atom belongs to.
  * @param entity_list  StructureData.entityList with info on given chain.
- * @param type         GroupType.chemCompType of group where atom belongs to
-                       (optional).
- * @return True if is a HETATM. This is the case if either type string is not
- *         peptide-linking or the chain is not a polymer.
+ * @param group_type   GroupType of group where atom belongs to.
+ * @return True if it is a HETATM.
  *
- * Relevant threads:
- * - https://github.com/rcsb/mmtf/issues/28
- * - http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Items/_chem_comp.type.html
+ * Follows discussion in https://github.com/rcsb/mmtf/issues/28.
+ *
+ * Used in StructureData.print to mark atoms as HETATM. This is a shorthand for
+ * `is_hetatm(type) || !is_polymer(chain_index, entity_list)`.
+ *
+ * Efficient code needing this information should preferably use the or
+ * statement above, precompute the `is_polymer` output for each chain and the
+ * `is_hetatm(type)` output for each group instead of calling this on each atom.
+ * 
+ * @see is_polymer, is_hetatm
  */
-inline bool is_hetatm(unsigned int const chain_index,
-                      std::vector<Entity> const & entity_list,
-                      std::string const type = "");
+inline bool is_hetatm(const unsigned int chain_index,
+                      const std::vector<Entity>& entity_list,
+                      const GroupType& group_type);
 
 
 // *************************************************************************
@@ -414,6 +429,23 @@ inline void setDefaultValue(T& value) {
 
 // HELPERS
 
+bool is_polymer(const unsigned int chain_index,
+                const std::vector<Entity>& entity_list) {
+  for (std::size_t i = 0; i < entity_list.size(); ++i) {
+    if ( std::find(entity_list[i].chainIndexList.begin(),
+                   entity_list[i].chainIndexList.end(),
+                   chain_index)
+        != entity_list[i].chainIndexList.end()) {
+      return ( entity_list[i].type == "polymer"
+              || entity_list[i].type == "POLYMER");
+    }
+  }
+  std::stringstream err;
+  err << "'is_polymer' unable to find chain_index: " << chain_index
+      << " in entity list";
+  throw DecodeError(err.str());
+}
+
 bool is_hetatm(const char* type) {
   const char* hetatm_type[] = {
     "D-BETA-PEPTIDE, C-GAMMA LINKING",
@@ -452,25 +484,11 @@ bool is_hetatm(const char* type) {
   return false;
 }
 
-
-bool is_hetatm(unsigned int const chain_index, std::vector<Entity> const & entity_list,
-               std::string const type) {
-  if (!type.empty()) {
-    if (is_hetatm(type.c_str())) return true;
-  }
-  for (std::size_t i=0; i<entity_list.size(); ++i) {
-    if ( std::find(entity_list[i].chainIndexList.begin(), entity_list[i].chainIndexList.end(), chain_index)
-        != entity_list[i].chainIndexList.end()) {
-      if (entity_list[i].type == "polymer" || entity_list[i].type == "POLYMER") {
-        return false;
-      }
-      return true;
-    }
-  }
-  std::stringstream err;
-  err << "'is_hetatm' unable to find chain_index: " << chain_index
-      << " in entity list";
-  throw DecodeError(err.str());
+bool is_hetatm(const unsigned int chain_index,
+               const std::vector<Entity>& entity_list,
+               const GroupType& group_type) {
+  return ( is_hetatm(group_type.chemCompType.c_str())
+          || !is_polymer(chain_index, entity_list));
 }
 
 
@@ -1026,7 +1044,7 @@ inline std::string StructureData::print(std::string delim) {
 
         for (int l = 0; l < groupAtomCount; l++, atomIndex++) {
           // ATOM or HETATM
-          if (is_hetatm(chainIndex, entityList, group.chemCompType))
+          if (is_hetatm(chainIndex, entityList, group))
             out << "HETATM" << delim;
           else
             out << "ATOM" << delim;

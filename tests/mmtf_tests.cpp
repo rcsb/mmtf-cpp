@@ -870,9 +870,9 @@ TEST_CASE("Test is_hetatm (chain_index version)") {
 				// chain indices 0 and 1 belong to a polymer entity
 				// all others should be marked as hetatm
 				if (chainIndex < 2) {
-					REQUIRE_FALSE(is_hetatm(chainIndex, sd.entityList));
+					REQUIRE(is_polymer(chainIndex, sd.entityList));
 				} else {
-					REQUIRE(is_hetatm(chainIndex, sd.entityList));
+					REQUIRE_FALSE(is_polymer(chainIndex, sd.entityList));
 				}
 			}
 		}
@@ -890,8 +890,7 @@ TEST_CASE("Test is_hetatm (chain_index version)") {
 				for (int k = 0; k < sd.groupsPerChain[chainIndex]; k++, groupIndex++) {
 					const mmtf::GroupType& group =
 						sd.groupList[sd.groupTypeList[groupIndex]];
-					bool hetatm = is_hetatm(chainIndex, sd.entityList,
-						                    group.chemCompType);
+					bool hetatm = is_hetatm(chainIndex, sd.entityList, group);
 					if (chainIndex < 2) {
 						if (!hetatm) found_seq += group.singleLetterCode;
 					} else {
@@ -904,7 +903,7 @@ TEST_CASE("Test is_hetatm (chain_index version)") {
 	}
 
 	SECTION("throw check") {
-		REQUIRE_THROWS_AS(is_hetatm(999, sd.entityList), mmtf::DecodeError);
+		REQUIRE_THROWS_AS(is_polymer(999, sd.entityList), mmtf::DecodeError);
 	}
 }
 

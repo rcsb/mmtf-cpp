@@ -428,8 +428,7 @@ void traverse_pdb_like(const mmtf::StructureData& example) {
 
                 for (int l = 0; l < groupAtomCount; l++, atomIndex++) {
                     // ATOM or HETATM
-                    if (mmtf::is_hetatm(chainIndex, example.entityList,
-                                        group.chemCompType))
+                    if (mmtf::is_hetatm(chainIndex, example.entityList, group))
                         printf("HETATM ");
                     else
                         printf("ATOM ");

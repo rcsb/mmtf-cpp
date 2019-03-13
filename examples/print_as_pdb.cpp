@@ -33,7 +33,7 @@ std::string print_sd_as_pdb(mmtf::StructureData const & sd, bool index_at_0) {
 
         for (int l = 0; l < groupAtomCount; l++, atomIndex++) {
           // ATOM or HETATM
-          if (mmtf::is_hetatm(chainIndex, sd.entityList, group.chemCompType))
+          if (mmtf::is_hetatm(chainIndex, sd.entityList, group))
             out << "HETATM";
           else
             out << "ATOM  ";
