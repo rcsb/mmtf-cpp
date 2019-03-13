@@ -402,32 +402,6 @@ void traverse_main(const mmtf::StructureData& example) {
 // *************************************************************************
 
 /**
- * @brief This function tells if the group atoms belong to HETATM
- * @param type The group of type
- *             \link mmtf::GroupType::chemCompType chemCompType \endlink
- * that needs to be checked.
- * @return 0 or 1
- */
-int is_hetatm(const char* type) {
-    const char* hetatm_type[] = {
-        "D-SACCHARIDE",
-        "D-SACCHARIDE 1,4 AND 1,4 LINKING",
-        "D-SACCHARIDE 1,4 AND 1,6 LINKING",
-        "L-SACCHARIDE",
-        "L-SACCHARIDE 1,4 AND 1,4 LINKING",
-        "L-SACCHARIDE 1,4 AND 1,6 LINKING",
-        "SACCHARIDE",
-        "OTHER",
-        "NON-POLYMER",
-        0 };
-    for (int i=0; hetatm_type[i]; ++i) {
-        if (strcmp(type,hetatm_type[i]) == 0)
-            return 1;
-    }
-    return 0;
-}
-
-/**
  * @brief Read out the contents of mmtf::StructureData in a PDB-like fashion
  * Columns are in order:
  * ATOM/HETATM AtomId Element AtomName AltLoc GroupId GroupType
@@ -454,7 +428,8 @@ void traverse_pdb_like(const mmtf::StructureData& example) {
 
                 for (int l = 0; l < groupAtomCount; l++, atomIndex++) {
                     // ATOM or HETATM
-                    if (is_hetatm(group.chemCompType.c_str()))
+                    if (mmtf::is_hetatm(chainIndex, example.entityList,
+                                        group.chemCompType))
                         printf("HETATM ");
                     else
                         printf("ATOM ");

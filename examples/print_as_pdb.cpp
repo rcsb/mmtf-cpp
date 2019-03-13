@@ -11,10 +11,8 @@
 
 #include <mmtf.hpp>
 
-// C-style libraries used here to keep it close to traverse.c
-#include <stdio.h>
-#include <string.h>
-#include <assert.h>
+#include <iostream>
+#include <string>
 
 std::string print_sd_as_pdb(mmtf::StructureData const & sd, bool index_at_0) {
   std::ostringstream out;
@@ -35,7 +33,7 @@ std::string print_sd_as_pdb(mmtf::StructureData const & sd, bool index_at_0) {
 
         for (int l = 0; l < groupAtomCount; l++, atomIndex++) {
           // ATOM or HETATM
-          if (mmtf::is_hetatm(group.chemCompType.c_str()))
+          if (mmtf::is_hetatm(chainIndex, sd.entityList, group.chemCompType))
             out << "HETATM";
           else
             out << "ATOM  ";

@@ -467,7 +467,10 @@ bool is_hetatm(unsigned int const chain_index, std::vector<Entity> const & entit
       return true;
     }
   }
-  throw DecodeError("'is_hetatm' unable to find chain_index: " + std::to_string(chain_index) + " in entity list");
+  std::stringstream err;
+  err << "'is_hetatm' unable to find chain_index: " << chain_index
+      << " in entity list";
+  throw DecodeError(err.str());
 }
 
 
@@ -1023,7 +1026,7 @@ inline std::string StructureData::print(std::string delim) {
 
         for (int l = 0; l < groupAtomCount; l++, atomIndex++) {
           // ATOM or HETATM
-          if (is_hetatm(group.chemCompType.c_str()))
+          if (is_hetatm(chainIndex, entityList, group.chemCompType))
             out << "HETATM" << delim;
           else
             out << "ATOM" << delim;
