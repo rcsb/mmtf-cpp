@@ -289,28 +289,32 @@ inline void setDefaultValue(T& value);
 
 /**
  * @brief Check if type is hetatm
- * @param type   cstring of group.chemCompType
- * @return True if is a HETATM 
- * Used when printing this struct, also all chemCompTypes are listed, but
- * the non-HETATM ones are commented out for reference
- * Relevant threads:
- * https://github.com/rcsb/mmtf/issues/28
- * http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Items/_chem_comp.type.html
+ * @param type   Character string of GroupType.chemCompType
+ * @return True if is a HETATM
  *
- * WARNING: You should not use this unless you don't have info like an 'entity_list'
- * to work with.  This can return 'false' if you have an amino acid ligand.
+ * Relevant threads:
+ * - https://github.com/rcsb/mmtf/issues/28
+ * - http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Items/_chem_comp.type.html
+ *
+ * @warning Use the other is_hetatm function whenever possible. This one should
+ *          only be used if you don't have info like an 'entity_list' to work
+ *          with. This can return 'false' if you have an amino acid ligand.
  */
 inline bool is_hetatm(const char* type);
 
 /**
- * @brief Check if type is hetatm
- * @param type   unsigned int  chain_index
- * @param type   vector<entity> entity_list
- * @param type   string type (optional)
- * @return True if is a HETATM
+ * @brief Check if type is hetatm. Used in StructureData.print to mark atoms
+          as HETATM.
+ * @param chain_index  Chain index of chain where atom belongs to.
+ * @param entity_list  StructureData.entityList with info on given chain.
+ * @param type         GroupType.chemCompType of group where atom belongs to
+                       (optional).
+ * @return True if is a HETATM. This is the case if either type string is not
+ *         peptide-linking or the chain is not a polymer.
+ *
  * Relevant threads:
- * https://github.com/rcsb/mmtf/issues/28
- * http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Items/_chem_comp.type.html
+ * - https://github.com/rcsb/mmtf/issues/28
+ * - http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Items/_chem_comp.type.html
  */
 inline bool is_hetatm(unsigned int const chain_index,
                       std::vector<Entity> const & entity_list,
