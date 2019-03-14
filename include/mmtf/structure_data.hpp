@@ -440,12 +440,10 @@ bool is_polymer(const unsigned int chain_index,
               || entity_list[i].type == "POLYMER");
     }
   }
-  // std::stringstream err;
-  // err << "'is_polymer' unable to find chain_index: " << chain_index
-  //     << " in entity list";
-  // throw DecodeError(err.str());
-  throw DecodeError("'is_polymer' unable to find chain_index: "
-                    + std::to_string(chain_index) + " in entity list");
+  std::stringstream err;
+  err << "'is_polymer' unable to find chain_index: " << chain_index
+      << " in entity list";
+  throw DecodeError(err.str());
 }
 
 bool is_hetatm(const char* type) {
