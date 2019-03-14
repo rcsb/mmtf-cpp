@@ -24,7 +24,7 @@ osx_gcc_addons:
     addons: &osx_gcc
       homebrew:
         packages:
-        - gcc@5
+        - gcc@6
 
 # Set empty values for allow_failures to work
 env:

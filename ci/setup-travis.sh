@@ -33,8 +33,17 @@ fi
 
 if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     if [[ "$CC" == "gcc" ]]; then
-        export CC=gcc-5
-        export CXX=g++-5
+        echo "--------------------------------"
+        echo $CXX
+        which gcc
+        which g++
+        ls -l $(which g++)
+        echo "--------------------------------"
+        which g++-6
+        ls -l $(which g++-6)
+        echo "--------------------------------"
+        export CC=gcc-6
+        export CXX=g++-6
     fi
 fi
 
