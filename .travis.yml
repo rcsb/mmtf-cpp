@@ -55,10 +55,5 @@ script:
   - $CMAKE_CONFIGURE cmake $CMAKE_ARGS $CMAKE_EXTRA ..
   - make -j2
   - ctest -j2 --output-on-failure
-  # Test compilation of example code
-  - cd $TRAVIS_BUILD_DIR
-  - cd examples
-  - echo $CXX03
-  - $CXX -I"../msgpack-c/include" -I"../include" $CXX03 -O2 -o read_and_write read_and_write.cpp
-  - ./read_and_write ../mmtf_spec/test-suite/mmtf/3NJW.mmtf test.mmtf
+  - bash $TRAVIS_BUILD_DIR/ci/travis-test-example.sh
   - cd $TRAVIS_BUILD_DIR

@@ -28,7 +28,6 @@ if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
     if [[ "$CC" == "gcc" ]]; then
         export CC=gcc-4.8
         export CXX=g++-4.8
-        export CXX03=-std=c++03
     fi
 fi
 
