@@ -88,56 +88,56 @@ inline std::vector<char> stringstreamToCharVector(std::stringstream & ss);
 // PUBLIC FUNCTIONS
 // *************************************************************************
 
-/** encode 8 bit int to bytes encoding (type 2)
- * @param[in] vec_in        vector of ints to encode
- * @return cv               char vector of encoded bytes
+/** Encode 8 bit int to bytes encoding (type 2)
+ * @param[in] vec_in        Vector of ints to encode
+ * @return Char vector of encoded bytes
  */
 inline std::vector<char> encodeInt8ToByte(std::vector<int8_t> vec_in);
 
-/** encode 4 bytes to int encoding (type 4)
- * @param[in] vec_in        vector of ints to encode
- * @return cv               char vector of encoded bytes
+/** Encode 4 bytes to int encoding (type 4)
+ * @param[in] vec_in        Vector of ints to encode
+ * @return Char vector of encoded bytes
  */
 inline std::vector<char> encodeFourByteInt(std::vector<int32_t> vec_in);
 
-/** encode string vector encoding (type 5)
- * @param[in] in_sv         vector of strings
- * @param[in] CHAIN_LEN     maximum length of string
- * @return cv               char vector of encoded bytes
+/** Encode string vector encoding (type 5)
+ * @param[in] in_sv         Vector of strings to encode
+ * @param[in] CHAIN_LEN     Maximum length of string
+ * @return Char vector of encoded bytes
  */
 inline std::vector<char> encodeStringVector(std::vector<std::string> in_sv, int32_t CHAIN_LEN);
 
 
-/** encode Run Length Char encoding (type 6)
- * @param[in] in_cv         vector for chars
- * @return cv               char vector of encoded bytes
+/** Encode Run Length Char encoding (type 6)
+ * @param[in] in_cv         Vector of chars to encode
+ * @return Char vector of encoded bytes
  */
 inline std::vector<char> encodeRunLengthChar(std::vector<char> in_cv);
 
 
-/** encode Run Length Delta Int encoding (type 8)
- * @param[in] int_vec       vector of ints
- * @return cv               char vector of encoded bytes
+/** Encode Run Length Delta Int encoding (type 8)
+ * @param[in] int_vec       Vector of ints to encode
+ * @return Char vector of encoded bytes
  */
 inline std::vector<char> encodeRunLengthDeltaInt(std::vector<int32_t> int_vec);
 
-/** encode Run Length Float encoding (type 9)
- * @param[in] floats_in     vector of ints
- * @param[in] multiplier    float multiplier
- * @return cv               char vector of encoded bytes
+/** Encode Run Length Float encoding (type 9)
+ * @param[in] floats_in     Vector of floats to encode
+ * @param[in] multiplier    Multiplier to convert float to int
+ * @return Char vector of encoded bytes
  */
 inline std::vector<char> encodeRunLengthFloat(std::vector<float> floats_in, int32_t multiplier);
 
-/** encode Delta Recursive Float encoding (type 10)
- * @param[in] floats_in     vector of ints
- * @param[in] multiplier    float multiplier
- * @return cv               char vector of encoded bytes
+/** Encode Delta Recursive Float encoding (type 10)
+ * @param[in] floats_in     Vector of floats to encode
+ * @param[in] multiplier    Multiplier to convert float to int
+ * @return Char vector of encoded bytes
  */
 inline std::vector<char> encodeDeltaRecursiveFloat(std::vector<float> floats_in, int32_t multiplier);
 
-/** encode Run-Length 8bit int encoding (type 16)
- * @param[in] floats_in     vector of ints
- * @return cv               char vector of encoded bytes
+/** Encode Run-Length 8bit int encoding (type 16)
+ * @param[in] int8_vec     Vector of ints to encode
+ * @return Char vector of encoded bytes
  */
 inline std::vector<char> encodeRunLengthInt8(std::vector<int8_t> int8_vec);
 
