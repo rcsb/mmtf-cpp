@@ -14,8 +14,9 @@ if [ -z "$EMSCRIPTEN" ]; then
          -o read_and_write read_and_write.cpp
     ./read_and_write ../mmtf_spec/test-suite/mmtf/3NJW.mmtf test.mmtf
 else
-    # Skip running code with emscripten (would need file access)
-    # -> just do .js compilation here
+    # Cannot do C++03 here and need to embed input file for running it with node
+    cp ../mmtf_spec/test-suite/mmtf/3NJW.mmtf .
     $CXX -I"../msgpack-c/include" -I"../include" -O2 \
-         -o read_and_write.js read_and_write.cpp
+         -o read_and_write.js read_and_write.cpp --embed-file 3NJW.mmtf
+    node read_and_write.js 3NJW.mmtf test.mmtf
 fi
