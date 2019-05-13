@@ -733,17 +733,18 @@ TEST_CASE("test group export optional") {
   }
 }
 
+// test/example of how to use extra data
 TEST_CASE("atomProperties field") {
   std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
-  mmtf::StructureData sd, sd2, sd3;
+  mmtf::StructureData sd, sd2;
   mmtf::decodeFromFile(sd, working_mmtf);
 
   /// Pack
   // 1. Make your input data
   std::vector<int32_t> clist_out;
   std::vector<int32_t> clist_in, clist_in_decoded, nothing;
-  for (int32_t i = 0; i < 256; ++i) {
-    clist_out.push_back(i);
+  for (int32_t i = 0; i < sd.numAtoms; ++i) {
+    clist_out.push_back(i % 256);
   }
   // 2. msgpack zones have weird lifetimes, make sure you use the zone
   // in StructureData to avoid any weird errors
@@ -757,16 +758,8 @@ TEST_CASE("atomProperties field") {
 
   /// Start Unpack
   mmtf::decodeFromFile(sd2, "test_atomProperties.mmtf");
-  REQUIRE(sd == sd2);
-
-  // Check round-trip after reading extra data
-  // (i.e. we can safely read/write unknown extra data)
-  mmtf::encodeToFile(sd2, "test_atomProperties2.mmtf");
-  mmtf::decodeFromFile(sd3, "test_atomProperties2.mmtf");
-  REQUIRE(sd2 == sd3);
-
   // Retrieve our 256 color list via convert
-  mmtf::MapDecoder atomProperties_MD(sd3.atomProperties);
+  mmtf::MapDecoder atomProperties_MD(sd2.atomProperties);
   atomProperties_MD.decode("256_atomColorList", true, clist_in);
   atomProperties_MD.decode("256_atomColorList_encoded", true, clist_in_decoded);
 
@@ -780,6 +773,68 @@ TEST_CASE("atomProperties field") {
                     mmtf::DecodeError);
 }
 
+// simple helper adding vector (numbers 0 to num_items-1) of given length both
+// encoded (key "data_encoded") and non-encoded (key "data") to destination_map
+void add_extra_data(std::map<std::string, msgpack::object>& destination_map,
+                    int32_t num_items, mmtf::StructureData& sd) {
+  std::vector<int32_t> v;
+  for (int32_t i = 0; i < num_items; ++i) {
+    v.push_back(i);
+  }
+  destination_map["data"] = msgpack::object(v, sd.msgpack_zone);
+  destination_map["data_encoded"]
+   = msgpack::object(mmtf::encodeRunLengthDeltaInt(v), sd.msgpack_zone);
+}
+// check data stored above
+void check_extra_data(const std::map<std::string, msgpack::object>& sd_map,
+                      int32_t num_items) {
+  std::vector<int32_t> v;
+  for (int32_t i = 0; i < num_items; ++i) {
+    v.push_back(i);
+  }
+  std::vector<int32_t> v_in, v_in_decoded, nothing;
+  mmtf::MapDecoder map_decoder(sd_map);
+  map_decoder.decode("data", true, v_in);
+  map_decoder.decode("data_encoded", true, v_in_decoded);
+  REQUIRE(v_in == v);
+  REQUIRE(v_in_decoded == v);
+  REQUIRE_THROWS_AS(map_decoder.decode("NONEXISTANT", true, nothing),
+                    mmtf::DecodeError);
+}
+
+// test round trips with all extra data set
+TEST_CASE("extra data fields") {
+  // Randomly chosen, small example MMTF
+  std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
+  mmtf::StructureData sd, sd2, sd3;
+  mmtf::decodeFromFile(sd, working_mmtf);
+
+  // Add extra data
+  add_extra_data(sd.bondProperties, sd.numBonds, sd);
+  add_extra_data(sd.atomProperties, sd.numAtoms, sd);
+  add_extra_data(sd.groupProperties, sd.numGroups, sd);
+  add_extra_data(sd.chainProperties, sd.numChains, sd);
+  add_extra_data(sd.modelProperties, sd.numModels, sd);
+  add_extra_data(sd.extraProperties, 42, sd);
+
+  // Encode/decode
+  mmtf::encodeToFile(sd, "test_extra_data.mmtf");
+  mmtf::decodeFromFile(sd2, "test_extra_data.mmtf");
+  REQUIRE(sd == sd2);
+  // Check round-trip after reading extra data
+  // (i.e. we can safely read/write unknown extra data)
+  mmtf::encodeToFile(sd2, "test_extra_data2.mmtf");
+  mmtf::decodeFromFile(sd3, "test_extra_data2.mmtf");
+  REQUIRE(sd2 == sd3);
+
+  // Check data
+  check_extra_data(sd.bondProperties, sd.numBonds);
+  check_extra_data(sd.atomProperties, sd.numAtoms);
+  check_extra_data(sd.groupProperties, sd.numGroups);
+  check_extra_data(sd.chainProperties, sd.numChains);
+  check_extra_data(sd.modelProperties, sd.numModels);
+  check_extra_data(sd.extraProperties, 42);
+}
 
 TEST_CASE("Test export_helpers") {
   std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/3NJW.mmtf";
