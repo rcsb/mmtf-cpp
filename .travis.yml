@@ -21,13 +21,6 @@ linux32_addons:
         - linux-libc-dev:i386
         - libc6-dev-i386
 
-osx_gcc_addons:
-    addons: &osx_gcc
-      homebrew:
-        packages:
-        - gcc@6
-        update: true
-
 # Set empty values for allow_failures to work
 env:
 
@@ -46,9 +39,6 @@ matrix:
       addons: *linux32
     - os: osx
       compiler: clang
-    - os: osx
-      compiler: gcc
-      addons: *osx_gcc
 
 before_install:
   # Setting environement
