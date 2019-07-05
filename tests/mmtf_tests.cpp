@@ -856,6 +856,14 @@ TEST_CASE("Test export_helpers") {
 	REQUIRE(sd_ref.groupList == sd.groupList);
 }
 
+
+TEST_CASE("Test mapdecoder from raw mmtf") {
+	std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
+	mmtf::MapDecoder md(working_mmtf);
+	std::vector<int> bonds;
+	md.decode("bondAtomList", true, bonds);
+}
+
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 

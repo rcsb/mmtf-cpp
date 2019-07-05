@@ -21,6 +21,8 @@
 #include <msgpack.hpp>
 #include <map>
 #include <iostream>
+#include <fstream>
+#include <sstream>
 
 namespace mmtf {
 
@@ -43,6 +45,12 @@ public:
      * (warns otherwise).
      */
     MapDecoder(const std::map<std::string, msgpack::object>& map_in);
+
+    /**
+     * @brief Initialize object given a filename
+     * Useful for direct access to msgpack objects.
+     */
+    MapDecoder(const std::string filename);
 
     /**
      * @brief Extract value from map and decode into target.
@@ -93,6 +101,14 @@ private:
     data_map_type_ data_map_;
     // set of keys that were successfully decoded
     std::set<std::string> decoded_keys_;
+    // Only used when we decode ourselves
+    msgpack::object_handle base_handle_;
+
+    /**
+     * @brief Initialize object given an object
+     * helper function used by constructors
+     */
+    void init_from_msgpack_obj(const msgpack::object& obj);
 
     // type checking (note: doesn't check array elements)
     // -> only writes warning to cerr
@@ -124,6 +140,30 @@ private:
 // *************************************************************************
 
 inline MapDecoder::MapDecoder(const msgpack::object& obj) {
+    init_from_msgpack_obj(obj);
+}
+
+inline MapDecoder::MapDecoder(const std::map<std::string, msgpack::object>& map_in) {
+    std::map<std::string, msgpack::object>::const_iterator it;
+    for (it = map_in.begin(); it != map_in.end(); ++it) {
+        data_map_[it->first] = &(it->second);
+    }
+}
+
+inline MapDecoder::MapDecoder(const std::string filename) {
+    std::ifstream ifs(filename.c_str(), std::ifstream::in | std::ios::binary);
+    if (!ifs.is_open()) {
+        throw DecodeError("Could not open file: " + filename);
+    }
+    std::stringstream buffer;
+    buffer << ifs.rdbuf();
+    msgpack::unpack(base_handle_, buffer.str().data(), buffer.str().size());
+    msgpack::object obj(base_handle_.get());
+    init_from_msgpack_obj(obj);
+}
+
+
+void inline MapDecoder::init_from_msgpack_obj(const msgpack::object& obj) {
     // sanity checks
     if (obj.type != msgpack::type::MAP) {
         throw DecodeError("Expected msgpack type to be MAP");
@@ -144,12 +184,6 @@ inline MapDecoder::MapDecoder(const msgpack::object& obj) {
     }
 }
 
-inline MapDecoder::MapDecoder(const std::map<std::string, msgpack::object>& map_in) {
-    std::map<std::string, msgpack::object>::const_iterator it;
-    for (it = map_in.begin(); it != map_in.end(); ++it) {
-        data_map_[it->first] = &(it->second);
-    }
-}
 
 void
 inline MapDecoder::copy_decode(const std::string& key, bool required,

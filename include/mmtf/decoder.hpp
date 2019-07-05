@@ -58,6 +58,7 @@ inline void decodeFromFile(StructureData& data, const std::string& filename);
 // IMPLEMENTATION
 // *************************************************************************
 
+
 inline void decodeFromBuffer(StructureData& data, const char* buffer,
                              size_t size) {
     // load msgpack object and directly convert it
