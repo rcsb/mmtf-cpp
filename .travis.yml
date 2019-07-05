@@ -34,6 +34,7 @@ matrix:
   include:
     - os: linux
       env: EMSCRIPTEN=ON
+      dist: trusty
     - os: linux
       compiler: clang
       addons: *linux64
