@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   bondResonanceList field and optional groupType.bondAtomList &
   groupType.bondOrderList according to the proposed version 1.1 of the
   [MMTF specification](https://github.com/rcsb/mmtf/pull/35).
+- New methods to find polymer chains and HETATM following discussions in
+  [rcsb/mmtf#28](https://github.com/rcsb/mmtf/issues/28).
 
 ## v1.0.0 - 2019-02-05
 ### Added
