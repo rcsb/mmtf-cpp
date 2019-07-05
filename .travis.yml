@@ -26,7 +26,7 @@ osx_gcc_addons:
       homebrew:
         packages:
         - gcc@6
-        packages: true
+        update: true
 
 # Set empty values for allow_failures to work
 env:
