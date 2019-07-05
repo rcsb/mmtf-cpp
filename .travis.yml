@@ -8,6 +8,7 @@ linux64_addons:
         - ubuntu-toolchain-r-test
         packages:
         - g++-4.8
+      dist: trusty
 
 linux32_addons:
     addons: &linux32
@@ -19,6 +20,7 @@ linux32_addons:
         - g++-4.8-multilib
         - linux-libc-dev:i386
         - libc6-dev-i386
+      dist: trusty
 
 osx_gcc_addons:
     addons: &osx_gcc
@@ -27,13 +29,14 @@ osx_gcc_addons:
         - gcc@6
 
 # Set empty values for allow_failures to work
-# env:
+env:
 
 matrix:
   fast_finish: true
   include:
     - os: linux
       env: EMSCRIPTEN=ON
+      addons: *linux64
     - os: linux
       compiler: clang
       addons: *linux64
