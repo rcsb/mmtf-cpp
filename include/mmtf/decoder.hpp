@@ -70,9 +70,10 @@ inline void decodeFromBuffer(StructureData& data, const char* buffer,
 template <typename Stream>
 inline void decodeFromStream(StructureData& data, Stream& stream) {
     // parse with stringstream
-    std::stringstream buffer;
+    std::ostringstream buffer;
     buffer << stream.rdbuf();
-    decodeFromBuffer(data, buffer.str().data(), buffer.str().size());
+    std::string const tmpstr(buffer.str());
+    decodeFromBuffer(data, tmpstr.data(), tmpstr.size());
 }
 
 inline void decodeFromFile(StructureData& data, const std::string& filename) {

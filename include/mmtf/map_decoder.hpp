@@ -155,10 +155,11 @@ inline MapDecoder::MapDecoder(const std::string filename) {
     if (!ifs.is_open()) {
         throw DecodeError("Could not open file: " + filename);
     }
-    std::stringstream buffer;
+    std::ostringstream buffer;
     buffer << ifs.rdbuf();
-    msgpack::unpack(base_handle_, buffer.str().data(), buffer.str().size());
-    msgpack::object obj(base_handle_.get());
+    std::string const tmpstr(buffer.str());
+    msgpack::unpack(base_handle_, tmpstr.data(), tmpstr.size());
+    msgpack::object const obj(base_handle_.get());
     init_from_msgpack_obj(obj);
 }
 
