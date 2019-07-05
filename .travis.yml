@@ -1,5 +1,6 @@
 language: cpp
 sudo: false
+dist: trusty
 
 linux64_addons:
     addons: &linux64
@@ -8,7 +9,6 @@ linux64_addons:
         - ubuntu-toolchain-r-test
         packages:
         - g++-4.8
-      dist: trusty
 
 linux32_addons:
     addons: &linux32
@@ -20,7 +20,6 @@ linux32_addons:
         - g++-4.8-multilib
         - linux-libc-dev:i386
         - libc6-dev-i386
-      dist: trusty
 
 osx_gcc_addons:
     addons: &osx_gcc
