@@ -27,7 +27,7 @@ osx_gcc_addons:
         - gcc@6
 
 # Set empty values for allow_failures to work
-env:
+# env:
 
 matrix:
   fast_finish: true
