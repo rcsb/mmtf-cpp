@@ -110,9 +110,6 @@ private:
                     const std::vector<T>& target);
     template <typename T>
     void checkType_(const std::string& key, msgpack::type::object_type type,
-                    T* target);
-    template <typename T>
-    void checkType_(const std::string& key, msgpack::type::object_type type,
                     const T& target);
 };
 
@@ -238,16 +235,6 @@ template <typename T>
 void MapDecoder::checkType_(const std::string& key,
                             msgpack::type::object_type type,
                             const std::vector<T>& target) {
-    if (type != msgpack::type::ARRAY && type != msgpack::type::BIN) {
-        std::cerr << "Warning: Non-array type " << type << " found for "
-                     "entry " << key << std::endl;
-    }
-}
-
-template <typename T>
-void MapDecoder::checkType_(const std::string& key,
-                            msgpack::type::object_type type,
-                            T* target) {
     if (type != msgpack::type::ARRAY && type != msgpack::type::BIN) {
         std::cerr << "Warning: Non-array type " << type << " found for "
                      "entry " << key << std::endl;
