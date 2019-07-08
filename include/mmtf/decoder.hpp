@@ -65,26 +65,31 @@ inline void decodeFromFile(StructureData& data, const std::string& filename);
 
 /**
  * @brief Get a mapDecoder for un-decoded MMTF data
- * @param[in]  buffer  File contents
- * @param[in]  size    Size of buffer
- * @return MapDecoder  MapDecoder to hold raw mmtf data
+ * @param[out] mapDecoder  MapDecoder to hold raw mmtf data
+ * @param[in]  buffer      File contents
+ * @param[in]  size        Size of buffer
+ * @throw mmtf::DecodeError if an error occured
  */
-inline MapDecoder mapDecoderFromBuffer(const char* buffer, std::size_t size);
+inline void mapDecoderFromBuffer(MapDecoder& mapDecoder, const char* buffer,
+                                 std::size_t size);
 
 /**
  * @brief Get a mapDecoder into an un-decoded MMTF data
- * @param[in]  stream   Stream that holds mmtf data
- * @return MapDecoder   MapDecoder to hold raw mmtf data
+ * @param[out] mapDecoder  MapDecoder to hold raw mmtf data
+ * @param[in]  stream      Stream that holds mmtf data
+ * @throw mmtf::DecodeError if an error occured
  */
 template <typename Stream>
-inline MapDecoder mapDecoderFromStream(Stream& stream);
+inline void mapDecoderFromStream(MapDecoder& mapDecoder, Stream& stream);
 
 /**
  * @brief Get a mapDecoder into an un-decoded MMTF data
- * @param[in]  filename   Stream that holds mmtf data
- * @return MapDecoder     MapDecoder to hold raw mmtf data
+ * @param[out] mapDecoder  MapDecoder to hold raw mmtf data
+ * @param[in]  filename    Stream that holds mmtf data
+ * @throw mmtf::DecodeError if an error occured
  */
-inline MapDecoder mapDecoderFromFile(const std::string& filename);
+inline void mapDecoderFromFile(MapDecoder& mapDecoder,
+                               const std::string& filename);
 
 // *************************************************************************
 // IMPLEMENTATION
@@ -158,43 +163,48 @@ inline void decodeFromMapDecoder(StructureData& data, MapDecoder& md) {
 
 inline void decodeFromBuffer(StructureData& data, const char* buffer,
                              size_t size) {
-    MapDecoder md = mapDecoderFromBuffer(buffer, size);
+    MapDecoder md;
+    mapDecoderFromBuffer(md, buffer, size);
     decodeFromMapDecoder(data, md);
 }
 
 template <typename Stream>
 inline void decodeFromStream(StructureData& data, Stream& stream) {
-    MapDecoder md = mapDecoderFromStream(stream);
+    MapDecoder md;
+    mapDecoderFromStream(md, stream);
     decodeFromMapDecoder(data, md);
 }
 
 inline void decodeFromFile(StructureData& data, const std::string& filename) {
-    MapDecoder md = mapDecoderFromFile(filename);
+    MapDecoder md;
+    mapDecoderFromFile(md, filename);
     decodeFromMapDecoder(data, md);
 }
 
-inline MapDecoder mapDecoderFromBuffer(const char* buffer, std::size_t size) {
-    return MapDecoder(buffer, size);
+inline void mapDecoderFromBuffer(MapDecoder& mapDecoder, const char* buffer,
+                                 std::size_t size) {
+    mapDecoder.initFromBuffer(buffer, size);
 }
 
 template <typename Stream>
-inline MapDecoder mapDecoderFromStream(Stream& stream) {
+inline void mapDecoderFromStream(MapDecoder& mapDecoder, Stream& stream) {
     // parse straight into string buffer
     std::string buffer;
     stream.seekg(0, std::ios::end);
     buffer.resize(stream.tellg());
     stream.seekg(0, std::ios::beg);
     if (!buffer.empty()) stream.read(&buffer[0], buffer.size());
-    return mapDecoderFromBuffer(buffer.data(), buffer.size());
+    mapDecoderFromBuffer(mapDecoder, buffer.data(), buffer.size());
 }
 
-inline MapDecoder mapDecoderFromFile(const std::string& filename) {
+inline void mapDecoderFromFile(MapDecoder& mapDecoder,
+                               const std::string& filename) {
     // read file as binary
     std::ifstream ifs(filename.c_str(), std::ifstream::in | std::ios::binary);
     if (!ifs.is_open()) {
         throw DecodeError("Could not open file: " + filename);
     }
-    return mapDecoderFromStream(ifs);
+    mapDecoderFromStream(mapDecoder, ifs);
 }
 
 } // mmtf namespace

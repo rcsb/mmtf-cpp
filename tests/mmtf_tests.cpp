@@ -932,13 +932,14 @@ TEST_CASE("Test export_helpers") {
 
 TEST_CASE("Test mapdecoder from raw mmtf") {
   std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
-  mmtf::MapDecoder md(mmtf::mapDecoderFromFile(working_mmtf));
+  mmtf::MapDecoder md;
+  mmtf::mapDecoderFromFile(md, working_mmtf);
   std::vector<int> bonds;
   REQUIRE_NOTHROW(md.decode("bondAtomList", true, bonds));
 
   std::ifstream ifs(working_mmtf.c_str(), std::ifstream::in | std::ios::binary);
-  mmtf::MapDecoder md2(mmtf::mapDecoderFromStream(ifs));
-  REQUIRE_NOTHROW(md2.decode("bondAtomList", true, bonds));
+  REQUIRE_NOTHROW(mmtf::mapDecoderFromStream(md, ifs));
+  REQUIRE_NOTHROW(md.decode("bondAtomList", true, bonds));
 }
 
 TEST_CASE("Test is_hetatm (chain_index version)") {

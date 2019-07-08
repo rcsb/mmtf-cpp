@@ -21,21 +21,20 @@
 #include <msgpack.hpp>
 #include <map>
 #include <iostream>
-#include <fstream>
-#include <sstream>
 
 namespace mmtf {
 
 /**
  * @brief Helper class to decode msgpack maps into object fields.
+ * Class cannot be copied as it contains unique pointers to msgpack data.
  */
 class MapDecoder {
 public:
 
     /**
-     * @brief Initialize empty
+     * @brief Initialize empty. Use init-functions to fill it.
      */
-    MapDecoder(const char* buffer, size_t size);
+    MapDecoder() {}
 
     /**
      * @brief Initialize object given a msgpack object.
@@ -51,6 +50,17 @@ public:
      * (warns otherwise).
      */
     MapDecoder(const std::map<std::string, msgpack::object>& map_in);
+
+    /**
+     * @brief Initialize object given a msgpack object.
+     * Same effect as constructor.
+     */
+    void initFromObject(const msgpack::object& obj);
+    /**
+     * @brief Initialize from byte buffer.
+     * Unpacks data and then same effect as initFromObject.
+     */
+    void initFromBuffer(const char* buffer, size_t size);
 
     /**
      * @brief Extract value from map and decode into target.
@@ -95,15 +105,15 @@ public:
      */
     void checkExtraKeys();
 
-
 private:
+    // when constructed with byte buffer, we keep unpacked object
+    // NOTE: this contains a unique pointer to msgpack data (cannot copy)
+    msgpack::object_handle object_handle_;
     // key-value pairs extracted from msgpack map
     typedef std::map<std::string, const msgpack::object*> data_map_type_;
     data_map_type_ data_map_;
     // set of keys that were successfully decoded
     std::set<std::string> decoded_keys_;
-    // Only used when we decode ourselves
-    msgpack::object_handle object_handle_;
 
     /**
      * @brief Initialize object given an object
@@ -134,11 +144,6 @@ private:
 // IMPLEMENTATION
 // *************************************************************************
 
-inline MapDecoder::MapDecoder(const char* buffer, std::size_t size) {
-    msgpack::unpack(object_handle_, buffer, size);
-    init_from_msgpack_obj(object_handle_.get());
-}
-
 inline MapDecoder::MapDecoder(const msgpack::object& obj) {
     init_from_msgpack_obj(obj);
 }
@@ -148,6 +153,17 @@ inline MapDecoder::MapDecoder(const std::map<std::string, msgpack::object>& map_
     for (it = map_in.begin(); it != map_in.end(); ++it) {
         data_map_[it->first] = &(it->second);
     }
+}
+
+inline void MapDecoder::initFromObject(const msgpack::object& obj) {
+    data_map_.clear();
+    decoded_keys_.clear();
+    init_from_msgpack_obj(obj);
+}
+
+inline void MapDecoder::initFromBuffer(const char* buffer, std::size_t size) {
+    msgpack::unpack(object_handle_, buffer, size);
+    initFromObject(object_handle_.get());
 }
 
 void
