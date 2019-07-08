@@ -8,8 +8,8 @@
 //
 // *************************************************************************
 //
-#ifndef MMTF_OBJECT_ENCODERS_H
-#define MMTF_OBJECT_ENCODERS_H
+#ifndef MMTF_MSGPACK_ENCODERS_H
+#define MMTF_MSGPACK_ENCODERS_H
 
 #include "structure_data.hpp"
 #include <msgpack.hpp>

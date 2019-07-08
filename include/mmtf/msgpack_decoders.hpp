@@ -11,8 +11,8 @@
 //
 // *************************************************************************
 
-#ifndef MMTF_MSGPACK_DECODER_H
-#define MMTF_MSGPACK_DECODER_H
+#ifndef MMTF_MSGPACK_DECODERS_H
+#define MMTF_MSGPACK_DECODERS_H
 
 #include "structure_data.hpp"
 #include "map_decoder.hpp"
