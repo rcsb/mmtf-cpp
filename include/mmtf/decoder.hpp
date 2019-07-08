@@ -49,7 +49,7 @@ inline void decodeFromBuffer(StructureData& data, const char* buffer,
  * Note that the full stream is read until the end before decoding it!
  *
  * @param[out] data   MMTF data structure to be filled
- * @param[in]  stream Any stream type compatible to std::ostream
+ * @param[in]  stream Any stream type compatible to std::istream
  * @throw mmtf::DecodeError if an error occured
  */
 template <typename Stream>
@@ -76,7 +76,7 @@ inline void mapDecoderFromBuffer(MapDecoder& mapDecoder, const char* buffer,
 /**
  * @brief Get a mapDecoder into an un-decoded MMTF data
  * @param[out] mapDecoder  MapDecoder to hold raw mmtf data
- * @param[in]  stream      Stream that holds mmtf data
+ * @param[in]  stream      Any stream type compatible to std::istream
  * @throw mmtf::DecodeError if an error occured
  */
 template <typename Stream>
@@ -85,7 +85,7 @@ inline void mapDecoderFromStream(MapDecoder& mapDecoder, Stream& stream);
 /**
  * @brief Get a mapDecoder into an un-decoded MMTF data
  * @param[out] mapDecoder  MapDecoder to hold raw mmtf data
- * @param[in]  filename    Stream that holds mmtf data
+ * @param[in]  filename    Path to file to load
  * @throw mmtf::DecodeError if an error occured
  */
 inline void mapDecoderFromFile(MapDecoder& mapDecoder,
