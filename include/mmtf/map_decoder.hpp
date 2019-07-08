@@ -162,7 +162,6 @@ inline MapDecoder::MapDecoder(const std::map<std::string, msgpack::object>& map_
     }
 }
 
-
 void
 inline MapDecoder::copy_decode(const std::string& key, bool required,
                                std::map<std::string, msgpack::object>& target,
