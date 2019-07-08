@@ -916,10 +916,10 @@ TEST_CASE("Test export_helpers") {
 }
 
 TEST_CASE("Test mapdecoder from raw mmtf") {
-	std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
-	mmtf::MapDecoder md(working_mmtf);
-	std::vector<int> bonds;
-	md.decode("bondAtomList", true, bonds);
+  std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
+  mmtf::MapDecoder md(mmtf::mapDecoderFromFile(working_mmtf));
+  std::vector<int> bonds;
+  REQUIRE_NOTHROW(md.decode("bondAtomList", true, bonds));
 }
 
 TEST_CASE("Test is_hetatm (chain_index version)") {
