@@ -920,6 +920,10 @@ TEST_CASE("Test mapdecoder from raw mmtf") {
   mmtf::MapDecoder md(mmtf::mapDecoderFromFile(working_mmtf));
   std::vector<int> bonds;
   REQUIRE_NOTHROW(md.decode("bondAtomList", true, bonds));
+
+  std::ifstream ifs(working_mmtf.c_str(), std::ifstream::in | std::ios::binary);
+  mmtf::MapDecoder md2(mmtf::mapDecoderFromStream(ifs));
+  REQUIRE_NOTHROW(md2.decode("bondAtomList", true, bonds));
 }
 
 TEST_CASE("Test is_hetatm (chain_index version)") {
