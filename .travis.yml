@@ -1,5 +1,6 @@
 language: cpp
 sudo: false
+dist: trusty
 
 linux64_addons:
     addons: &linux64
@@ -20,12 +21,6 @@ linux32_addons:
         - linux-libc-dev:i386
         - libc6-dev-i386
 
-osx_gcc_addons:
-    addons: &osx_gcc
-      homebrew:
-        packages:
-        - gcc@6
-
 # Set empty values for allow_failures to work
 env:
 
@@ -34,6 +29,7 @@ matrix:
   include:
     - os: linux
       env: EMSCRIPTEN=ON
+      addons: *linux64
     - os: linux
       compiler: clang
       addons: *linux64
@@ -43,9 +39,6 @@ matrix:
       addons: *linux32
     - os: osx
       compiler: clang
-    - os: osx
-      compiler: gcc
-      addons: *osx_gcc
 
 before_install:
   # Setting environement

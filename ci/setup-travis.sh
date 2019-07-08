@@ -31,13 +31,6 @@ if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
     fi
 fi
 
-if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    if [[ "$CC" == "gcc" ]]; then
-        export CC=gcc-6
-        export CXX=g++-6
-    fi
-fi
-
 if [[ "$ARCH" == "x86" ]]; then
     export CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_CXX_FLAGS=-m32 -DCMAKE_C_FLAGS=-m32"
 fi
