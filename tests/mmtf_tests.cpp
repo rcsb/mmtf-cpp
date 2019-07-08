@@ -733,6 +733,21 @@ TEST_CASE("test group export optional") {
   }
 }
 
+TEST_CASE("mapDecoder types") {
+	std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
+	mmtf::StructureData sd;
+	mmtf::decodeFromFile(sd, working_mmtf);
+
+	std::map< std::string, std::string > map_str_str_out, map_str_str_in;
+	map_str_str_out["test"] = "tset";
+	sd.extraProperties["map_str_str"] = msgpack::object(map_str_str_out, sd.msgpack_zone);
+
+
+	mmtf::MapDecoder extraProperties_MD(sd.extraProperties);
+	extraProperties_MD.decode("map_str_str", true, map_str_str_in);
+	REQUIRE(map_str_str_in == map_str_str_out);
+}
+
 // test/example of how to use extra data
 TEST_CASE("atomProperties field") {
   std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
