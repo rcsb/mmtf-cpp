@@ -108,12 +108,12 @@ private:
     template <typename T>
     void checkType_(const std::string& key, msgpack::type::object_type type,
                     const std::vector<T>& target);
-    template <typename K, typename T>
-    void checkType_(const std::string& key, msgpack::type::object_type type,
-                    const std::map<K, T>& target);
     template <typename T>
     void checkType_(const std::string& key, msgpack::type::object_type type,
                     T* target);
+    template <typename T>
+    void checkType_(const std::string& key, msgpack::type::object_type type,
+                    const T& target);
 };
 
 // *************************************************************************
@@ -244,16 +244,6 @@ void MapDecoder::checkType_(const std::string& key,
     }
 }
 
-template <typename K, typename T>
-void MapDecoder::checkType_(const std::string& key,
-                            msgpack::type::object_type type,
-                            const std::map<K, T>& target) {
-    if (type != msgpack::type::MAP && type != msgpack::type::BIN) {
-        std::cerr << "Warning: Non-map type " << type << " found for "
-                     "entry " << key << std::endl;
-    }
-}
-
 template <typename T>
 void MapDecoder::checkType_(const std::string& key,
                             msgpack::type::object_type type,
@@ -262,6 +252,14 @@ void MapDecoder::checkType_(const std::string& key,
         std::cerr << "Warning: Non-array type " << type << " found for "
                      "entry " << key << std::endl;
     }
+}
+
+
+template <typename T>
+void MapDecoder::checkType_(const std::string& key,
+                            msgpack::type::object_type type,
+                            const T & target) {
+    // Do nothing -- allow all through
 }
 
 } // mmtf namespace
