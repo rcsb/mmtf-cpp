@@ -95,12 +95,6 @@ public:
      */
     void checkExtraKeys();
 
-    /**
-     * @brief Get access to the object handle for unpacking directly
-     * into this class.
-     */
-    msgpack::object_handle& object_handle();
-
 
 private:
     // key-value pairs extracted from msgpack map
@@ -200,8 +194,6 @@ inline void MapDecoder::decode(const std::string& key, bool required, T& target)
     }
 }
 
-
-inline msgpack::object_handle& MapDecoder::object_handle() {return object_handle_;}
 
 inline void MapDecoder::checkExtraKeys() {
     // note: cost of O(N*log(M))) string comparisons (M parsed, N in map)
