@@ -32,12 +32,12 @@ class MapDecoder {
 public:
 
     /**
-     * @brief Initialize empty. Use init-functions to fill it.
+     * @brief Construct empty decoder. Use init-functions to fill it.
      */
     MapDecoder() {}
 
     /**
-     * @brief Initialize object given a msgpack object.
+     * @brief Construct decoder given a msgpack::object.
      * Reads out all key-value pairs and converts key to string if possible
      * (warns otherwise).
      * @throw mmtf::DecodeError if obj is not a map.
@@ -45,20 +45,20 @@ public:
     MapDecoder(const msgpack::object& obj);
 
     /**
-     * @brief Initialize object given a string to msgpack::object map.
+     * @brief Construct decoder given a string to msgpack::object map.
      * Reads out all key-value pairs and converts key to string if possible
      * (warns otherwise).
      */
     MapDecoder(const std::map<std::string, msgpack::object>& map_in);
 
     /**
-     * @brief Initialize object given a msgpack object.
+     * @brief Initialize given a msgpack::object.
      * Clears internal data and has same effect as
      * MapDecoder::MapDecoder(const msgpack::object&).
      */
     void initFromObject(const msgpack::object& obj);
     /**
-     * @brief Initialize from byte buffer.
+     * @brief Initialize from byte buffer of given size.
      * Unpacks data and then same effect as MapDecoder::initFromObject.
      */
     void initFromBuffer(const char* buffer, size_t size);
