@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 ### Added
+- New mapDecoderFrom.. functions to decode only part of an MMTF file
 - Support for extra fields in MMTF files according to the
   [latest MMTF specification](https://github.com/rcsb/mmtf/pull/36).
 - Support for binary strategy 16 (Run-length encoded 8-bit array),

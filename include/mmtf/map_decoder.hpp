@@ -26,11 +26,18 @@ namespace mmtf {
 
 /**
  * @brief Helper class to decode msgpack maps into object fields.
+ * Class cannot be copied as it contains unique pointers to msgpack data.
  */
 class MapDecoder {
 public:
+
     /**
-     * @brief Initialize object given a msgpack object.
+     * @brief Construct empty decoder. Use init-functions to fill it.
+     */
+    MapDecoder() {}
+
+    /**
+     * @brief Construct decoder given a msgpack::object.
      * Reads out all key-value pairs and converts key to string if possible
      * (warns otherwise).
      * @throw mmtf::DecodeError if obj is not a map.
@@ -38,11 +45,23 @@ public:
     MapDecoder(const msgpack::object& obj);
 
     /**
-     * @brief Initialize object given a string to msgpack::object map.
+     * @brief Construct decoder given a string to msgpack::object map.
      * Reads out all key-value pairs and converts key to string if possible
      * (warns otherwise).
      */
     MapDecoder(const std::map<std::string, msgpack::object>& map_in);
+
+    /**
+     * @brief Initialize given a msgpack::object.
+     * Clears internal data and has same effect as
+     * MapDecoder::MapDecoder(const msgpack::object&).
+     */
+    void initFromObject(const msgpack::object& obj);
+    /**
+     * @brief Initialize from byte buffer of given size.
+     * Unpacks data and then same effect as MapDecoder::initFromObject.
+     */
+    void initFromBuffer(const char* buffer, size_t size);
 
     /**
      * @brief Extract value from map and decode into target.
@@ -88,11 +107,20 @@ public:
     void checkExtraKeys();
 
 private:
+    // when constructed with byte buffer, we keep unpacked object
+    // NOTE: this contains a unique pointer to msgpack data (cannot copy)
+    msgpack::object_handle object_handle_;
     // key-value pairs extracted from msgpack map
     typedef std::map<std::string, const msgpack::object*> data_map_type_;
     data_map_type_ data_map_;
     // set of keys that were successfully decoded
     std::set<std::string> decoded_keys_;
+
+    /**
+     * @brief Initialize object given an object
+     * helper function used by constructors
+     */
+    void init_from_msgpack_obj(const msgpack::object& obj);
 
     // type checking (note: doesn't check array elements)
     // -> only writes warning to cerr
@@ -118,24 +146,7 @@ private:
 // *************************************************************************
 
 inline MapDecoder::MapDecoder(const msgpack::object& obj) {
-    // sanity checks
-    if (obj.type != msgpack::type::MAP) {
-        throw DecodeError("Expected msgpack type to be MAP");
-    }
-    // get data
-    msgpack::object_kv* current_key_value = obj.via.map.ptr;
-    msgpack::object_kv* last_key_value = current_key_value + obj.via.map.size;
-    for (; current_key_value != last_key_value; ++current_key_value) { 
-        msgpack::object* key = &(current_key_value->key); 
-        msgpack::object* value = &(current_key_value->val); 
-        if (key->type == msgpack::type::STR) {        
-            std::string data_map_key(key->via.str.ptr, key->via.str.size);
-            data_map_[data_map_key] = value;
-        } else {
-            std::cerr << "Warning: Found non-string key type " << key->type
-                      << "! Skipping..." << std::endl;
-        }
-    }
+    init_from_msgpack_obj(obj);
 }
 
 inline MapDecoder::MapDecoder(const std::map<std::string, msgpack::object>& map_in) {
@@ -143,6 +154,17 @@ inline MapDecoder::MapDecoder(const std::map<std::string, msgpack::object>& map_
     for (it = map_in.begin(); it != map_in.end(); ++it) {
         data_map_[it->first] = &(it->second);
     }
+}
+
+inline void MapDecoder::initFromObject(const msgpack::object& obj) {
+    data_map_.clear();
+    decoded_keys_.clear();
+    init_from_msgpack_obj(obj);
+}
+
+inline void MapDecoder::initFromBuffer(const char* buffer, std::size_t size) {
+    msgpack::unpack(object_handle_, buffer, size);
+    initFromObject(object_handle_.get());
 }
 
 void
@@ -183,6 +205,7 @@ inline void MapDecoder::decode(const std::string& key, bool required, T& target)
     }
 }
 
+
 inline void MapDecoder::checkExtraKeys() {
     // note: cost of O(N*log(M))) string comparisons (M parsed, N in map)
     // simple set difference algorithm
@@ -194,6 +217,27 @@ inline void MapDecoder::checkExtraKeys() {
             std::cerr << "Warning: Found non-parsed key " << map_it->first
                       << " in MsgPack MAP.\n";
          }
+    }
+}
+
+inline void MapDecoder::init_from_msgpack_obj(const msgpack::object& obj) {
+    // sanity checks
+    if (obj.type != msgpack::type::MAP) {
+        throw DecodeError("Expected msgpack type to be MAP");
+    }
+    // get data
+    msgpack::object_kv* current_key_value = obj.via.map.ptr;
+    msgpack::object_kv* last_key_value = current_key_value + obj.via.map.size;
+    for (; current_key_value != last_key_value; ++current_key_value) { 
+        msgpack::object* key = &(current_key_value->key); 
+        msgpack::object* value = &(current_key_value->val); 
+        if (key->type == msgpack::type::STR) {        
+            std::string data_map_key(key->via.str.ptr, key->via.str.size);
+            data_map_[data_map_key] = value;
+        } else {
+            std::cerr << "Warning: Found non-string key type " << key->type
+                      << "! Skipping..." << std::endl;
+        }
     }
 }
 
