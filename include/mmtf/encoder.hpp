@@ -42,6 +42,7 @@ inline void encodeToFile(const StructureData& data,
  * @brief Encode an MMTF data structure into a stream.
  * @param[in] data          MMTF data structure to be stored
  * @param[in] stream        Stream to encode to
+ * @tparam Stream Any stream type compatible to std::ostream
  *
  * Other parameters and behavior are as in ::encodeToFile, but this enables you
  * to store the data to other types of storage.

@@ -53,12 +53,13 @@ public:
 
     /**
      * @brief Initialize object given a msgpack object.
-     * Same effect as constructor.
+     * Clears internal data and has same effect as
+     * MapDecoder::MapDecoder(const msgpack::object&).
      */
     void initFromObject(const msgpack::object& obj);
     /**
      * @brief Initialize from byte buffer.
-     * Unpacks data and then same effect as initFromObject.
+     * Unpacks data and then same effect as MapDecoder::initFromObject.
      */
     void initFromBuffer(const char* buffer, size_t size);
 

@@ -46,10 +46,12 @@ inline void decodeFromBuffer(StructureData& data, const char* buffer,
 /**
  * @brief Decode an MMTF data structure from a stream.
  *
- * Note that the full stream is read until the end before decoding it!
+ * Note that the full stream is read from start to end before decoding it!
+ * Use ::decodeFromBuffer if you wish to use just part of the stream.
  *
  * @param[out] data   MMTF data structure to be filled
- * @param[in]  stream Any stream type compatible to std::istream
+ * @param[in]  stream Stream that holds mmtf data
+ * @tparam Stream Any stream type compatible to std::istream
  * @throw mmtf::DecodeError if an error occured
  */
 template <typename Stream>
@@ -66,9 +68,9 @@ inline void decodeFromFile(StructureData& data, const std::string& filename);
 /**
  * @brief Get a mapDecoder for un-decoded MMTF data
  * @param[out] mapDecoder  MapDecoder to hold raw mmtf data
- * @param[in]  buffer      File contents
- * @param[in]  size        Size of buffer
- * @throw mmtf::DecodeError if an error occured
+ *
+ * Other parameters and behavior are as in ::decodeFromBuffer, but this doesn't
+ * decode the MMTF content.
  */
 inline void mapDecoderFromBuffer(MapDecoder& mapDecoder, const char* buffer,
                                  std::size_t size);
@@ -76,8 +78,9 @@ inline void mapDecoderFromBuffer(MapDecoder& mapDecoder, const char* buffer,
 /**
  * @brief Get a mapDecoder into an un-decoded MMTF data
  * @param[out] mapDecoder  MapDecoder to hold raw mmtf data
- * @param[in]  stream      Any stream type compatible to std::istream
- * @throw mmtf::DecodeError if an error occured
+ *
+ * Other parameters and behavior are as in ::decodeFromStream, but this doesn't
+ * decode the MMTF content.
  */
 template <typename Stream>
 inline void mapDecoderFromStream(MapDecoder& mapDecoder, Stream& stream);
@@ -85,8 +88,9 @@ inline void mapDecoderFromStream(MapDecoder& mapDecoder, Stream& stream);
 /**
  * @brief Get a mapDecoder into an un-decoded MMTF data
  * @param[out] mapDecoder  MapDecoder to hold raw mmtf data
- * @param[in]  filename    Path to file to load
- * @throw mmtf::DecodeError if an error occured
+ *
+ * Other parameters and behavior are as in ::decodeFromFile, but this doesn't
+ * decode the MMTF content.
  */
 inline void mapDecoderFromFile(MapDecoder& mapDecoder,
                                const std::string& filename);
