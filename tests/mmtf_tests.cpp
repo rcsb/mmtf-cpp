@@ -942,6 +942,55 @@ TEST_CASE("Test mapdecoder from raw mmtf") {
   REQUIRE_NOTHROW(md.decode("bondAtomList", true, bonds));
 }
 
+TEST_CASE("Test various encode and decode options") {
+  // fetch reference data
+  std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
+  mmtf::StructureData sd_ref;
+  mmtf::decodeFromFile(sd_ref, working_mmtf);
+  // write into buffer
+  std::ostringstream buffer;
+  mmtf::encodeToStream(sd_ref, buffer);
+  std::string const buffer_str(buffer.str());
+
+  SECTION("decodeFromBuffer") {
+    mmtf::StructureData sd;
+    mmtf::decodeFromBuffer(sd, buffer_str.data(), buffer_str.size());
+    REQUIRE(sd_ref == sd);
+  }
+
+  SECTION("decodeFromStream") {
+    mmtf::StructureData sd;
+    std::istringstream ibuffer(buffer_str);
+    mmtf::decodeFromStream(sd, ibuffer);
+    REQUIRE(sd_ref == sd);
+    // note: as of PR#31 (July 2019), we could also reread the same buffer
+  }
+
+  SECTION("mapDecoderFromBuffer") {
+    mmtf::MapDecoder md;
+    mmtf::mapDecoderFromBuffer(md, buffer_str.data(), buffer_str.size());
+    std::vector<int> bondAtomList;
+    REQUIRE_NOTHROW(md.decode("bondAtomList", true, bondAtomList));
+    REQUIRE(sd_ref.bondAtomList == bondAtomList);
+    mmtf::StructureData sd;
+    mmtf::decodeFromMapDecoder(sd, md);
+    REQUIRE(sd_ref == sd);
+  }
+
+  SECTION("mapDecoderFromStream") {
+    mmtf::MapDecoder md;
+    std::istringstream ibuffer(buffer_str);
+    mmtf::mapDecoderFromStream(md, ibuffer);
+    std::vector<int> bondAtomList;
+    REQUIRE_NOTHROW(md.decode("bondAtomList", true, bondAtomList));
+    REQUIRE(sd_ref.bondAtomList == bondAtomList);
+    mmtf::StructureData sd;
+    mmtf::decodeFromMapDecoder(sd, md);
+    REQUIRE(sd_ref == sd);
+  }
+
+}
+
 TEST_CASE("Test is_hetatm (chain_index version)") {
   std::string working_mmtf = "../temporary_test_data/3zqs.mmtf";
   mmtf::StructureData sd;
