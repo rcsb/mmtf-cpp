@@ -237,6 +237,11 @@ struct StructureData {
   std::string print(std::string delim="\t");
 
   /**
+   */
+  template < typename T >
+  void add_prop(std::string const &prefix, std::string const &key, T const & val);
+
+  /**
    * @brief Compare two StructureData classes for equality
    * @param c What to compare to
    */
@@ -1162,6 +1167,19 @@ inline void StructureData::copyAllData_(const StructureData& obj) {
   copyMapData_(modelProperties, obj.modelProperties);
   copyMapData_(extraProperties, obj.extraProperties);
 }
+  template < typename T >
+  inline void StructureData::add_prop(std::string const &prefix, std::string const &key, T const & val) {
+    if (prefix == "bond") bondProperties[key] = msgpack::object(val, msgpack_zone);
+    else if (prefix == "atom") atomProperties[key] = msgpack::object(val, msgpack_zone);
+    else if (prefix == "group") groupProperties[key] = msgpack::object(val, msgpack_zone);
+    else if (prefix == "chain") chainProperties[key] = msgpack::object(val, msgpack_zone);
+    else if (prefix == "model") modelProperties[key] = msgpack::object(val, msgpack_zone);
+    else if (prefix == "extra") extraProperties[key] = msgpack::object(val, msgpack_zone);
+    else throw std::runtime_error("unable to add prop: " + prefix);
+  }
+
+  template void StructureData::add_prop<int>(std::string const &prefix, std::string const &key, int const& param);
+  template void StructureData::add_prop<std::string>(std::string const &prefix, std::string const &key, std::string const& param);
 
 } // mmtf namespace
 
