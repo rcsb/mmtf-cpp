@@ -76,7 +76,7 @@ public:
      * we throw an mmtf::DecodeError.
      */
     template<typename T>
-    void decode(const std::string& key, bool required, T& target);
+    void decode(const std::string& key, bool required, T& target) const;
 
     /**
      * @brief Don't decode, but instead just copy map-contents onto a zone
@@ -97,14 +97,14 @@ public:
     void
     copy_decode(const std::string& key, bool required,
                 std::map<std::string, msgpack::object>& target,
-                msgpack::zone& zone);
+                msgpack::zone& zone) const;
 
     /**
      * @brief Check if there are any keys, that were not decoded.
      * This is to be called after all expected fields have been decoded.
      * A warning is written to stderr for each non-decoded key.
      */
-    void checkExtraKeys();
+    void checkExtraKeys() const;
 
 private:
     // when constructed with byte buffer, we keep unpacked object
@@ -114,7 +114,7 @@ private:
     typedef std::map<std::string, const msgpack::object*> data_map_type_;
     data_map_type_ data_map_;
     // set of keys that were successfully decoded
-    std::set<std::string> decoded_keys_;
+    mutable std::set<std::string> decoded_keys_;
 
     /**
      * @brief Initialize object given an object
@@ -126,19 +126,19 @@ private:
     // -> only writes warning to cerr
     // -> exception thrown by msgpack if conversion fails
     void checkType_(const std::string& key, msgpack::type::object_type type,
-                    const float& target);
+                    const float& target) const;
     void checkType_(const std::string& key, msgpack::type::object_type type,
-                    const int32_t& target);
+                    const int32_t& target) const;
     void checkType_(const std::string& key, msgpack::type::object_type type,
-                    const char& target);
+                    const char& target) const;
     void checkType_(const std::string& key, msgpack::type::object_type type,
-                    const std::string& target);
+                    const std::string& target) const;
     template <typename T>
     void checkType_(const std::string& key, msgpack::type::object_type type,
-                    const std::vector<T>& target);
+                    const std::vector<T>& target) const;
     template <typename T>
     void checkType_(const std::string& key, msgpack::type::object_type type,
-                    const T& target);
+                    const T& target) const;
 };
 
 // *************************************************************************
@@ -170,9 +170,9 @@ inline void MapDecoder::initFromBuffer(const char* buffer, std::size_t size) {
 void
 inline MapDecoder::copy_decode(const std::string& key, bool required,
                                std::map<std::string, msgpack::object>& target,
-                               msgpack::zone & zone) {
+                               msgpack::zone & zone) const {
     // note: cost of O(M*log(N)) string comparisons (M parsed, N in map)
-    data_map_type_::iterator it = data_map_.find(key);
+    data_map_type_::const_iterator it = data_map_.find(key);
     if (it != data_map_.end()) {
         decoded_keys_.insert(key);
         // expensive copy here
@@ -186,9 +186,9 @@ inline MapDecoder::copy_decode(const std::string& key, bool required,
 }
 
 template<typename T>
-inline void MapDecoder::decode(const std::string& key, bool required, T& target) {
+inline void MapDecoder::decode(const std::string& key, bool required, T& target) const {
     // note: cost of O(M*log(N)) string comparisons (M parsed, N in map)
-    data_map_type_::iterator it = data_map_.find(key);
+    data_map_type_::const_iterator it = data_map_.find(key);
     if (it != data_map_.end()) {
         checkType_(key, it->second->type, target);
         if (it->second->type == msgpack::type::BIN) {
@@ -206,11 +206,11 @@ inline void MapDecoder::decode(const std::string& key, bool required, T& target)
 }
 
 
-inline void MapDecoder::checkExtraKeys() {
+inline void MapDecoder::checkExtraKeys() const {
     // note: cost of O(N*log(M))) string comparisons (M parsed, N in map)
     // simple set difference algorithm
-    data_map_type_::iterator map_it;
-    std::set<std::string>::iterator parsed_it;
+    data_map_type_::const_iterator map_it;
+    std::set<std::string>::const_iterator parsed_it;
     for (map_it = data_map_.begin(); map_it != data_map_.end(); ++map_it) {
          parsed_it = decoded_keys_.find(map_it->first);
          if (parsed_it == decoded_keys_.end()) {
@@ -243,7 +243,7 @@ inline void MapDecoder::init_from_msgpack_obj(const msgpack::object& obj) {
 
 inline void MapDecoder::checkType_(const std::string& key,
                                    msgpack::type::object_type type,
-                                   const float& target) {
+                                   const float& target) const {
     if (type != msgpack::type::FLOAT32 && type != msgpack::type::FLOAT64) {
         std::cerr << "Warning: Non-float type " << type << " found for "
                      "entry " << key << std::endl;
@@ -251,7 +251,7 @@ inline void MapDecoder::checkType_(const std::string& key,
 }
 inline void MapDecoder::checkType_(const std::string& key,
                                    msgpack::type::object_type type,
-                                   const int32_t& target) {
+                                   const int32_t& target) const {
     if (   type != msgpack::type::POSITIVE_INTEGER
         && type != msgpack::type::NEGATIVE_INTEGER) {
         std::cerr << "Warning: Non-int type " << type << " found for "
@@ -260,7 +260,7 @@ inline void MapDecoder::checkType_(const std::string& key,
 }
 inline void MapDecoder::checkType_(const std::string& key,
                                    msgpack::type::object_type type,
-                                   const char& target) {
+                                   const char& target) const {
     if (type != msgpack::type::STR) {
         std::cerr << "Warning: Non-string type " << type << " found for "
                      "entry " << key << std::endl;
@@ -268,7 +268,7 @@ inline void MapDecoder::checkType_(const std::string& key,
 }
 inline void MapDecoder::checkType_(const std::string& key,
                                    msgpack::type::object_type type,
-                                   const std::string& target) {
+                                   const std::string& target) const {
     if (type != msgpack::type::STR) {
         std::cerr << "Warning: Non-string type " << type << " found for "
                      "entry " << key << std::endl;
@@ -278,7 +278,7 @@ inline void MapDecoder::checkType_(const std::string& key,
 template <typename T>
 void MapDecoder::checkType_(const std::string& key,
                             msgpack::type::object_type type,
-                            const std::vector<T>& target) {
+                            const std::vector<T>& target) const {
     if (type != msgpack::type::ARRAY && type != msgpack::type::BIN) {
         std::cerr << "Warning: Non-array type " << type << " found for "
                      "entry " << key << std::endl;
@@ -289,7 +289,7 @@ void MapDecoder::checkType_(const std::string& key,
 template <typename T>
 void MapDecoder::checkType_(const std::string& key,
                             msgpack::type::object_type type,
-                            const T & target) {
+                            const T & target) const {
     // Do nothing -- allow all through
 }
 
