@@ -733,6 +733,16 @@ TEST_CASE("test group export optional") {
   }
 }
 
+// Mainly a compiler check, not useful to actually test
+void
+map_const_sd_helper(mmtf::StructureData const & sd) {
+	std::map< std::string, std::string > map_str_str_out, map_str_str_in;
+	map_str_str_out["test"] = "tset";
+	const mmtf::MapDecoder extraProperties_MD(sd.extraProperties);
+	extraProperties_MD.decode("map_str_str", true, map_str_str_in);
+	REQUIRE(map_str_str_in == map_str_str_out);
+}
+
 TEST_CASE("mapDecoder types") {
 	std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
 	mmtf::StructureData sd;
@@ -742,10 +752,11 @@ TEST_CASE("mapDecoder types") {
 	map_str_str_out["test"] = "tset";
 	sd.extraProperties["map_str_str"] = msgpack::object(map_str_str_out, sd.msgpack_zone);
 
-
-	mmtf::MapDecoder extraProperties_MD(sd.extraProperties);
+	// Also check to make sure const works
+	const mmtf::MapDecoder extraProperties_MD(sd.extraProperties);
 	extraProperties_MD.decode("map_str_str", true, map_str_str_in);
 	REQUIRE(map_str_str_in == map_str_str_out);
+	map_const_sd_helper(sd);
 }
 
 // test/example of how to use extra data

@@ -234,7 +234,7 @@ struct StructureData {
    * InsCode ChainName x y z B-factor Occupancy Charge
    * @param delim what to split columns with
    */
-  std::string print(std::string delim="\t");
+  std::string print(std::string delim="\t") const;
 
   /**
    * @brief Compare two StructureData classes for equality
@@ -1025,7 +1025,7 @@ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_m
   return true;
 }
 
-inline std::string StructureData::print(std::string delim) {
+inline std::string StructureData::print(std::string delim) const {
   std::ostringstream out;
   int modelIndex = 0;
   int chainIndex = 0;
