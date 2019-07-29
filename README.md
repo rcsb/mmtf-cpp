@@ -101,8 +101,6 @@ Example codes:
 
 using the following simple code:
 ```cpp
-#include <string>
-#include <iostream>
 #include <mmtf.hpp>
 
 
@@ -110,7 +108,7 @@ int main(int argc, char** argv)
 {
         for (int i=1; i<argc; ++i) {
                 mmtf::StructureData sd;
-                mmtf::decodeFromFile(sd, std::string(argv[i]));
+                mmtf::decodeFromFile(sd, argv[i]);
         }
 }
 ```
