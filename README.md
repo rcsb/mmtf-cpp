@@ -99,7 +99,7 @@ Example codes:
 
 ## Benchmark
 
-using the following simple code:
+Using the following simple code:
 ```cpp
 #include <mmtf.hpp>
 
