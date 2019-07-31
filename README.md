@@ -97,6 +97,28 @@ Example codes:
 ./examples/print_as_pdb ../mmtf_spec/test-suite/mmtf/173D.mmtf
 ```
 
+## Benchmark
+
+Using the following simple code:
+```cpp
+#include <mmtf.hpp>
+
+
+int main(int argc, char** argv)
+{
+        for (int i=1; i<argc; ++i) {
+                mmtf::StructureData sd;
+                mmtf::decodeFromFile(sd, argv[i]);
+        }
+}
+```
+compiled via:
+```
+g++ -Ofast -Immtf/include  -Imsgpack/include  decode_all_mmtf.cpp
+```
+
+We are able to load 153,987 mmtf files (current size of the pdb) or 14.3GB from an SSD in 211.3 seconds (averaged over 4 runs with minimal differences between the runs).
+
 ## Code documentation
 
 You can generate a [doxygen](http://www.doxygen.org) based documentation of the
