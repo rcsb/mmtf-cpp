@@ -117,7 +117,7 @@ compiled via:
 g++ -Ofast -Immtf/include  -Imsgpack/include  decode_all_mmtf.cpp
 ```
 
-We are able to load 153,987 mmtf files (current size of the pdb) from an SSD in (n=4)
+We are able to load 153,987 mmtf files (current size of the pdb) or  14.3GB from an SSD in (n=4)
 * 215.0 seconds
 * 210.9 seconds
 * 209.3 seconds
