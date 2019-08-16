@@ -1052,6 +1052,61 @@ TEST_CASE("Test is_hetatm (chain_index version)") {
   }
 }
 
+// We dont have a json library, but we can check for basic stuff since
+// we're mostly relying on the msgpack library to do this for us.
+TEST_CASE("Test json") {
+  std::string working_mmtf = "../temporary_test_data/3zqs.mmtf";
+  mmtf::StructureData sd;
+  mmtf::decodeFromFile(sd, working_mmtf);
+  std::string const json_text(sd.to_json());
+  REQUIRE(json_text.find("mmtfVersion\":") != std::string::npos);
+  REQUIRE(json_text.find("mmtfProducer\":") != std::string::npos);
+  REQUIRE(json_text.find("unitCell\":") != std::string::npos);
+  REQUIRE(json_text.find("spaceGroup\":") != std::string::npos);
+  REQUIRE(json_text.find("structureId\":") != std::string::npos);
+  REQUIRE(json_text.find("title\":") != std::string::npos);
+  REQUIRE(json_text.find("depositionDate\":") != std::string::npos);
+  REQUIRE(json_text.find("releaseDate\":") != std::string::npos);
+  REQUIRE(json_text.find("ncsOperatorList\":") != std::string::npos);
+  REQUIRE(json_text.find("bioAssemblyList\":") != std::string::npos);
+  REQUIRE(json_text.find("entityList\":") != std::string::npos);
+  REQUIRE(json_text.find("experimentalMethods\":") != std::string::npos);
+  REQUIRE(json_text.find("resolution\":") != std::string::npos);
+  REQUIRE(json_text.find("rFree\":") != std::string::npos);
+  REQUIRE(json_text.find("rWork\":") != std::string::npos);
+  REQUIRE(json_text.find("numBonds\":") != std::string::npos);
+  REQUIRE(json_text.find("numAtoms\":") != std::string::npos);
+  REQUIRE(json_text.find("numGroups\":") != std::string::npos);
+  REQUIRE(json_text.find("numChains\":") != std::string::npos);
+  REQUIRE(json_text.find("numModels\":") != std::string::npos);
+  REQUIRE(json_text.find("groupList\":") != std::string::npos);
+  REQUIRE(json_text.find("bondAtomList\":") != std::string::npos);
+  REQUIRE(json_text.find("bondOrderList\":") != std::string::npos);
+  REQUIRE(json_text.find("bondResonanceList\":") != std::string::npos);
+  REQUIRE(json_text.find("xCoordList\":") != std::string::npos);
+  REQUIRE(json_text.find("yCoordList\":") != std::string::npos);
+  REQUIRE(json_text.find("zCoordList\":") != std::string::npos);
+  REQUIRE(json_text.find("bFactorList\":") != std::string::npos);
+  REQUIRE(json_text.find("atomIdList\":") != std::string::npos);
+  REQUIRE(json_text.find("altLocList\":") != std::string::npos);
+  REQUIRE(json_text.find("occupancyList\":") != std::string::npos);
+  REQUIRE(json_text.find("groupIdList\":") != std::string::npos);
+  REQUIRE(json_text.find("groupTypeList\":") != std::string::npos);
+  REQUIRE(json_text.find("secStructList\":") != std::string::npos);
+  REQUIRE(json_text.find("insCodeList\":") != std::string::npos);
+  REQUIRE(json_text.find("sequenceIndexList\":") != std::string::npos);
+  REQUIRE(json_text.find("chainIdList\":") != std::string::npos);
+  REQUIRE(json_text.find("chainNameList\":") != std::string::npos);
+  REQUIRE(json_text.find("groupsPerChain\":") != std::string::npos);
+  REQUIRE(json_text.find("chainsPerModel\":") != std::string::npos);
+  REQUIRE(json_text.find("bondProperties\":") != std::string::npos);
+  REQUIRE(json_text.find("atomProperties\":") != std::string::npos);
+  REQUIRE(json_text.find("groupProperties\":") != std::string::npos);
+  REQUIRE(json_text.find("chainProperties\":") != std::string::npos);
+  REQUIRE(json_text.find("modelProperties\":") != std::string::npos);
+  REQUIRE(json_text.find("extraProperties\":") != std::string::npos);
+}
+
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
