@@ -1151,7 +1151,11 @@ inline std::string StructureData::to_json() const {
   {
     std::vector<std::string> tmp_all;
     for (unsigned int i = 0; i < altLocList.size(); ++i) {
-      tmp_all.push_back(std::string(1, altLocList[i]));
+      if (altLocList[i] == 0x00) {
+        tmp_all.push_back(std::string());
+      } else {
+        tmp_all.push_back(std::string(1, altLocList[i]));
+      }
     }
     json_out["altLocList"] = msgpack::object(tmp_all, zone);
   }
@@ -1166,7 +1170,11 @@ inline std::string StructureData::to_json() const {
   {
     std::vector<std::string> tmp_icl;
     for (unsigned int i = 0; i < insCodeList.size(); ++i) {
-      tmp_icl.push_back(std::string(1, insCodeList[i]));
+      if (insCodeList[i] == 0x00) {
+        tmp_icl.push_back(std::string());
+      } else {
+        tmp_icl.push_back(std::string(1, insCodeList[i]));
+      }
     }
     json_out["insCodeList"] = msgpack::object(tmp_icl, zone);
   }
