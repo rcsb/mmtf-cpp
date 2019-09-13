@@ -13,40 +13,6 @@
 
 namespace py = pybind11;
 
-std::string
-array2str1(py::array const & arr) {
-	std::vector<double> array_vec(arr.size());
-	std::memcpy(array_vec.data(),arr.data(),arr.size()*sizeof(double));
-	std::string ret("w");
-	return ret;
-}
-
-std::string
-array2str2(std::vector<float> const & arr) {
-	//if (arr.empty()) return "[]";
-	//std::stringstream ss;
-	//std::string const delim(", ");
-	//for (float const & f  : arr) {
-	//	ss << f << delim;
-	//}
-	//std::string ret(ss.str());
-	//ret.pop_back(); ret.pop_back();
-	std::string ret("x");
-	return ret;
-}
-
-struct Pet {
-	Pet(const std::string &name) : name(name) { 
-			for (int i=0; i< 1000000; ++i) {
-				bdata.push_back(i);
-			}
-		}
-	void setName(const std::string &name_) { name = name_; }
-	const std::string &getName() const { return name; }
-
-	std::string name;
-	std::vector<float> bdata;
-};
 
 template< typename T >
 py::array
@@ -90,25 +56,6 @@ raw_properties(mmtf::StructureData const & sd) {
 
 
 PYBIND11_MODULE(example, m) {
-	py::class_<Pet>(m, "Pet")
-			.def(py::init<const std::string &>())
-			.def("setName", &Pet::setName)
-			.def("getName", &Pet::getName)
-			.def_readwrite("bdata", &Pet::bdata)
-			.def("bdata2", [](Pet &m) -> py::array {
-					py::buffer_info buff_info(py::buffer_info(
-							m.bdata.data(),                               /* Pointer to buffer */
-							sizeof(float),                          /* Size of one scalar */
-							py::format_descriptor<float>::format(), /* Python struct-style format descriptor */
-							m.bdata.size()                                      /* Number of dimensions */
-					));
-					return py::array(buff_info);
-			});
-	m.def("array2str1", &array2str1, "array impl");
-	m.def("array2str2", &array2str2, "vector impl");
-//}
-//
-//PYBIND11_MODULE(notsure, m) {
 	// new stuff here
 	py::class_<mmtf::StructureData>(m, "CPPStructureData")
 		.def( pybind11::init( [](){ return new mmtf::StructureData(); } ) )
@@ -156,13 +103,6 @@ PYBIND11_MODULE(example, m) {
 		.def("groupsPerChain", [](mmtf::StructureData &m){return array1d_from_vector(m.groupsPerChain);})
 		.def("chainsPerModel", [](mmtf::StructureData &m){return array1d_from_vector(m.chainsPerModel);})
 		.def("raw_properties", [](mmtf::StructureData const &m){return raw_properties(m);});
-		//cl.def_readonly("msgpack_zone", &mmtf::StructureData::msgpack_zone);
-		//cl.def_readwrite("bondProperties", &mmtf::StructureData::bondProperties);
-		//cl.def_readwrite("atomProperties", &mmtf::StructureData::atomProperties);
-		//cl.def_readwrite("groupProperties", &mmtf::StructureData::groupProperties);
-		//cl.def_readwrite("chainProperties", &mmtf::StructureData::chainProperties);
-		//cl.def_readwrite("modelProperties", &mmtf::StructureData::modelProperties);
-		//cl.def_readwrite("extraProperties", &mmtf::StructureData::extraProperties);
 	m.def("decodeFromFile", &mmtf::decodeFromFile, "decode a mmtf::StructureData from a file");
 
 	py::class_<mmtf::BioAssembly>(m, "CPPBioAssembly")
@@ -181,8 +121,6 @@ PYBIND11_MODULE(example, m) {
 	py::class_<mmtf::Entity>(m, "CPPEntity")
 		.def( pybind11::init( [](){ return new mmtf::Entity(); } ) )
 		.def( pybind11::init( [](mmtf::Entity const &o){ return new mmtf::Entity(o); } ) );
-
-
 }
 
 
