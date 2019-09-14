@@ -53,6 +53,83 @@ raw_properties(mmtf::StructureData const & sd) {
 	return py::bytes(bytes.str().data());
 }
 
+py::dict
+dump_transform(mmtf::Transform & trans) {
+	py::dict d;
+	d["chainIndexList"] = array1d_from_vector(trans.chainIndexList);
+	std::vector<float> matrix(std::begin(trans.matrix), std::end(trans.matrix));
+	d["matrix"] = array1d_from_vector(matrix);
+	return d;
+}
+
+
+
+py::dict
+dump_bio_assembly(mmtf::BioAssembly & ba) {
+	py::dict d;
+	py::list l;
+	for (mmtf::Transform & trans : ba.transformList) {
+		l.append(dump_transform(trans));
+	}
+	d["transformList"] = l;
+	d["name"] = py::str(ba.name);
+	return d;
+}
+
+
+py::list
+dump_bio_assembly_list(mmtf::StructureData & sd) {
+	py::list bal;
+	for (mmtf::BioAssembly & cba : sd.bioAssemblyList) {
+		bal.append(dump_bio_assembly(cba));
+	}
+	return bal;
+}
+
+
+py::dict
+dump_group(mmtf::GroupType & gt) {
+	py::dict d;
+	d["formalChargeList"] = array1d_from_vector(gt.formalChargeList);
+	py::list anl;
+	for (std::string & s: gt.atomNameList) anl.append(s);
+	d["atomNameList"] = anl;
+	py::list el;
+	for (std::string & s: gt.atomNameList) el.append(s);
+	d["elementList"] = el;
+	d["bondAtomList"] = array1d_from_vector(gt.bondAtomList);
+	d["bondOrderList"] = array1d_from_vector(gt.bondOrderList);
+	d["bondResonanceList"] = array1d_from_vector(gt.bondResonanceList);
+	d["groupName"] = gt.groupName;
+	d["singleLetterCode"] = std::string(1, gt.singleLetterCode);
+	d["chemCompType"] = gt.chemCompType;
+	return d;
+}
+
+
+py::list
+dump_group_list(std::vector<mmtf::GroupType> & gtl) {
+	py::list gl;
+	for (mmtf::GroupType & gt : gtl) {
+		gl.append(dump_group(gt));
+	}
+	return gl;
+}
+
+
+py::list
+dump_entity_list(std::vector<mmtf::Entity> & cpp_el) {
+	py::list el;
+	for (mmtf::Entity & e : cpp_el) {
+		py::dict d;
+		d["chainIndexList"] = array1d_from_vector(e.chainIndexList);
+		d["description"] = e.description;
+		d["type"] = e.type;
+		d["sequence"] = e.sequence;
+		el.append(d);
+	}
+	return el;
+}
 
 
 PYBIND11_MODULE(example, m) {
@@ -68,10 +145,9 @@ PYBIND11_MODULE(example, m) {
 		.def_readwrite("title", &mmtf::StructureData::title)
 		.def_readwrite("depositionDate", &mmtf::StructureData::depositionDate)
 		.def_readwrite("releaseDate", &mmtf::StructureData::releaseDate)
-		//.def("ncsOperatorList", [](mmtf::StructureData &m){return array2d_from_vector(m.ncsOperatorList, 16);})
 		.def("ncsOperatorList", [](mmtf::StructureData &m){return array2d_from_vector(m.ncsOperatorList);})
-		.def_readwrite("bioAssemblyList", &mmtf::StructureData::bioAssemblyList)
-		.def_readwrite("entityList", &mmtf::StructureData::entityList)
+		.def("bioAssemblyList", [](mmtf::StructureData &m){return dump_bio_assembly_list(m);})
+		.def("entityList", [](mmtf::StructureData &m){return dump_entity_list(m.entityList);})
 		.def_readwrite("experimentalMethods", &mmtf::StructureData::experimentalMethods)
 		.def_readwrite("resolution", &mmtf::StructureData::resolution)
 		.def_readwrite("rFree", &mmtf::StructureData::rFree)
@@ -81,7 +157,7 @@ PYBIND11_MODULE(example, m) {
 		.def_readwrite("numGroups", &mmtf::StructureData::numGroups)
 		.def_readwrite("numChains", &mmtf::StructureData::numChains)
 		.def_readwrite("numModels", &mmtf::StructureData::numModels)
-		.def_readwrite("groupList", &mmtf::StructureData::groupList)
+		.def("groupList", [](mmtf::StructureData &m){return dump_group_list(m.groupList);})
 		.def("unitCell", [](mmtf::StructureData &m){return array1d_from_vector(m.unitCell);})
 		.def("bondAtomList", [](mmtf::StructureData &m){return array1d_from_vector(m.bondAtomList);})
 		.def("bondOrderList", [](mmtf::StructureData &m){return array1d_from_vector(m.bondOrderList);})
@@ -107,12 +183,12 @@ PYBIND11_MODULE(example, m) {
 
 	py::class_<mmtf::BioAssembly>(m, "CPPBioAssembly")
 		.def( pybind11::init( [](){ return new mmtf::BioAssembly(); } ) )
-		.def( pybind11::init( [](mmtf::BioAssembly const &o){ return new mmtf::BioAssembly(o); } ) )
-		.def_readwrite("name", &mmtf::BioAssembly::name);
+		.def( pybind11::init( [](mmtf::BioAssembly const &o){ return new mmtf::BioAssembly(o); } ) );
 		// TODO ^^ insert transformlist
 	py::class_<mmtf::Transform>(m, "CPPTransform")
 		.def( pybind11::init( [](){ return new mmtf::Transform(); } ) )
 		.def( pybind11::init( [](mmtf::Transform const &o){ return new mmtf::Transform(o); } ) );
+
 		/// TODO finish ^^
 	py::class_<mmtf::GroupType>(m, "CPPGroupType")
 		.def( pybind11::init( [](){ return new mmtf::GroupType(); } ) )
