@@ -6,8 +6,11 @@ import msgpack
 from typing import List, Dict
 
 import example
-from example import CPPStructureData as CPPSD, decodeFromFile
+from example import CPPStructureData as CPPSD, decodeFromFile, decodeFromBuffer
 
+class Empty:
+    def __init__(self):
+        pass
 
 class Entity:
     def __init__(self,
@@ -25,6 +28,7 @@ class Entity:
                f"description: {self.description}"
                f"type: {self.type}"
                f"sequence: {self.sequence}")
+
 
 
 class GroupType:
@@ -120,12 +124,24 @@ def entity_list_from_cpp(cpp_el):
 
 class StructureData:
     def __init__(self, file_name=None, file_bytes=None):
+        """
+
+        Note:
+            file and bytes are separated because it will be faster
+            if you just let c++ handle the file (rather than have
+            python read the bytes itself and pass them to c++)
+        """
         if file_name:
             self.init_from_file_name(file_name)
         elif file_bytes:
-            self.init_from_raw_bytes(file_bytes)
+            self.init_from_bytes(file_bytes)
         else:
             self.raw_init()
+
+    def init_from_bytes(self, file_bytes: bytes):
+        cppsd = CPPSD()
+        decodeFromBuffer(cppsd, file_bytes, len(file_bytes))
+        self.init_from_cppsd(cppsd)
 
     def init_from_file_name(self, file_name: str):
         cppsd = CPPSD()
@@ -143,7 +159,8 @@ class StructureData:
         self.releaseDate = cppsd.releaseDate
         self.ncsOperatorList = cppsd.ncsOperatorList()
         self.bioAssemblyList = bio_assembly_list_from_cpp(cppsd.bioAssemblyList())
-        self.entityList = entity_list_from_cpp(cppsd.entityList())
+        # self.entityList = entity_list_from_cpp(cppsd.entityList())
+        self.entityList = cppsd.entityList()
         self.experimentalMethods = cppsd.experimentalMethods
         self.resolution = cppsd.resolution
         self.rFree = cppsd.rFree
@@ -153,7 +170,8 @@ class StructureData:
         self.numGroups = cppsd.numGroups
         self.numChains = cppsd.numChains
         self.numModels = cppsd.numModels
-        self.groupList = group_list_from_cpp(cppsd.groupList())
+        # self.groupList = group_list_from_cpp(cppsd.groupList())
+        self.groupList = cppsd.groupList()
         self.bondAtomList = cppsd.bondAtomList()
         self.bondOrderList = cppsd.bondOrderList()
         self.bondResonanceList = cppsd.bondResonanceList()
@@ -174,29 +192,6 @@ class StructureData:
         self.chainNameList = cppsd.chainNameList
         self.groupsPerChain = cppsd.groupsPerChain()
         self.chainsPerModel = cppsd.chainsPerModel()
-
-
-        # self.bondAtomList = np.array(cppsd.bondAtomList(), copy=False)
-        # self.bondOrderList = np.array(cppsd.bondOrderList(), copy=False)
-        # self.bondResonanceList = np.array(cppsd.bondResonanceList(), copy=False)
-        # self.xCoordList = np.array(cppsd.xCoordList(), copy=False)
-        # self.yCoordList = np.array(cppsd.yCoordList(), copy=False)
-        # self.zCoordList = np.array(cppsd.zCoordList(), copy=False)
-        # self.bFactorList = np.array(cppsd.bFactorList(), copy=False)
-        # self.atomIdList = np.array(cppsd.atomIdList(), copy=False)
-        # self.altLocList = np.array(cppsd.altLocList, copy=False)
-        # self.occupancyList = np.array(cppsd.occupancyList(), copy=False)
-        # self.groupIdList = np.array(cppsd.groupIdList(), copy=False)
-        # # print(self.groupIdList)
-        # self.groupIdList = np.array(cppsd.groupIdList(), copy=False)
-        # self.groupTypeList = np.array(cppsd.groupTypeList(), copy=False)
-        # self.secStructList = np.array(cppsd.secStructList(), copy=False)
-        # self.insCodeList = np.array(cppsd.insCodeList, copy=False)
-        # self.sequenceIndexList = np.array(cppsd.sequenceIndexList(), copy=False)
-        # self.chainIdList = np.array(cppsd.chainIdList, copy=False)
-        # self.chainNameList = np.array(cppsd.chainNameList, copy=False)
-        # self.groupsPerChain = np.array(cppsd.groupsPerChain(), copy=False)
-        # self.chainsPerModel = np.array(cppsd.chainsPerModel(), copy=False)
 
         raw_properties = cppsd.raw_properties()
         raw_properties = msgpack.unpackb(raw_properties, raw=False)
@@ -256,14 +251,37 @@ class StructureData:
         self.modelProperties = None
         self.extraProperties = None
 
+    def dump_to_file(self):
+        raise NotImplementedError
+
+    def dump_to_bytes(self):
+        raise NotImplementedError
 
 
-start = time.time()
-for x in range(10000):
-    sd = StructureData("4lgr.mmtf")
-stop = time.time()
-python_t = stop-start
-print("python", python_t)
+# print(dir(example))
+# t = example.try_thing()
+# print(t.this)
+# print(t)
+# t.three = 33
+# print(t.three)
+
+if __name__ == "__main__":
+    start = time.time()
+    # for x in range(10000):
+    #     sd = StructureData(file_bytes=open("4lgr.mmtf", 'rb').read())
+    #     # sd = StructureData("4lgr.mmtf")
+    # stop = time.time()
+    # python_t = stop-start
+    # print("python", python_t)
+    # print("1")
+
+    start = time.time()
+    for x in range(10000):
+        sd = StructureData("4lgr.mmtf")
+    stop = time.time()
+    python_t = stop-start
+    print("python", python_t)
+    print("2")
 
 # start = time.time()
 # for x in range(1000):
