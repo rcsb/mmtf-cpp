@@ -14,6 +14,7 @@
 namespace py = pybind11;
 
 
+// This destroys the original data
 template< typename T >
 py::array
 array1d_from_vector(std::vector<T> & m) {
@@ -27,6 +28,7 @@ array1d_from_vector(std::vector<T> & m) {
 }
 
 
+// This destroys the original data
 template< typename T >
 py::array
 array2d_from_vector(std::vector<std::vector<T>> & m) {
@@ -53,41 +55,9 @@ raw_properties(mmtf::StructureData const & sd) {
 	return py::bytes(bytes.str().data());
 }
 
-py::dict
-dump_transform(mmtf::Transform & trans) {
-	py::dict d;
-	d["chainIndexList"] = array1d_from_vector(trans.chainIndexList);
-	std::vector<float> matrix(std::begin(trans.matrix), std::end(trans.matrix));
-	d["matrix"] = array1d_from_vector(matrix);
-	return d;
-}
-
-
-
-py::dict
-dump_bio_assembly(mmtf::BioAssembly & ba) {
-	py::dict d;
-	py::list l;
-	for (mmtf::Transform & trans : ba.transformList) {
-		l.append(dump_transform(trans));
-	}
-	d["transformList"] = l;
-	d["name"] = py::str(ba.name);
-	return d;
-}
-
 
 py::list
 dump_bio_assembly_list(mmtf::StructureData & sd) {
-	py::list bal;
-	for (mmtf::BioAssembly & cba : sd.bioAssemblyList) {
-		bal.append(dump_bio_assembly(cba));
-	}
-	return bal;
-}
-
-py::list
-dump_bio_assembly_list2(mmtf::StructureData & sd) {
 	py::object py_ba_class = py::module::import("mmtf_t").attr("BioAssembly");
 	py::object py_t_class = py::module::import("mmtf_t").attr("Transform");
 	py::list bal;
@@ -113,64 +83,99 @@ dump_bio_assembly_list2(mmtf::StructureData & sd) {
 }
 
 
-py::dict
-dump_group(mmtf::GroupType & gt) {
-	py::dict d;
-	d["formalChargeList"] = array1d_from_vector(gt.formalChargeList);
-	py::list anl;
-	for (std::string & s: gt.atomNameList) anl.append(s);
-	d["atomNameList"] = anl;
-	py::list el;
-	for (std::string & s: gt.atomNameList) el.append(s);
-	d["elementList"] = el;
-	d["bondAtomList"] = array1d_from_vector(gt.bondAtomList);
-	d["bondOrderList"] = array1d_from_vector(gt.bondOrderList);
-	d["bondResonanceList"] = array1d_from_vector(gt.bondResonanceList);
-	d["groupName"] = gt.groupName;
-	d["singleLetterCode"] = std::string(1, gt.singleLetterCode);
-	d["chemCompType"] = gt.chemCompType;
-	return d;
+std::vector<mmtf::Transform>
+make_transformList(py::list & l) {
+	std::vector<mmtf::Transform> tl;
+	for (auto & trans : l) {
+		mmtf::Transform t;
+		t.chainIndexList = trans.attr("chainIndexList").cast<std::vector<int>>();
+		py::list pymatrix(trans.attr("matrix"));
+		std::size_t count(0);
+		for (auto & x : pymatrix) {
+			t.matrix[count] = x.cast<float>();
+			++count;
+		}
+		tl.push_back(t);
+	}
+	return tl;
+}
+
+
+void
+set_bioAssemblyList(py::list & obj, mmtf::StructureData & sd) {
+	std::vector<mmtf::BioAssembly> bioAs;
+	for (auto & py_bioAssembly : obj ) {
+		mmtf::BioAssembly bioA;
+		bioA.name = py::str(py_bioAssembly.attr("name"));
+		py::list py_transform_list(py_bioAssembly.attr("transformList"));
+		std::vector<mmtf::Transform> transform_list = make_transformList(py_transform_list);
+		bioA.transformList = transform_list;
+		bioAs.push_back(bioA);
+	}
+	sd.bioAssemblyList = bioAs;
+}
+
+
+void
+set_entityList(py::list & obj, mmtf::StructureData & sd) {
+	std::vector<mmtf::Entity> entities;
+	for (auto & py_entity : obj ) {
+		mmtf::Entity entity;
+		entity.chainIndexList = py_entity.attr("chainIndexList").cast<std::vector<int32_t>>();
+		entity.description = py_entity.attr("description").cast<std::string>();
+		entity.type = py_entity.attr("type").cast<std::string>();
+		entity.sequence = py_entity.attr("sequence").cast<std::string>();
+		entities.push_back(entity);
+	}
+	sd.entityList = entities;
+}
+
+
+void
+set_groupList(py::list & obj, mmtf::StructureData & sd) {
+	std::vector<mmtf::GroupType> groups;
+	for (auto & py_group : obj ) {
+		mmtf::GroupType group;
+		group.formalChargeList = py_group.attr("formalChargeList").cast<std::vector<int32_t>>();
+		group.atomNameList = py_group.attr("atomNameList").cast<std::vector<std::string>>();
+		group.elementList = py_group.attr("elementList").cast<std::vector<std::string>>();
+		group.bondAtomList = py_group.attr("bondAtomList").cast<std::vector<int32_t>>();
+		group.bondOrderList = py_group.attr("bondOrderList").cast<std::vector<int8_t>>();
+		group.bondResonanceList = py_group.attr("bondResonanceList").cast<std::vector<int8_t>>();
+		group.groupName = py_group.attr("groupName").cast<std::string>();
+		group.singleLetterCode = py_group.attr("singleLetterCode").cast<char>();
+		group.chemCompType = py_group.attr("chemCompType").cast<std::string>();
+		groups.push_back(group);
+	}
+	sd.groupList = groups;
 }
 
 
 py::list
 dump_group_list(std::vector<mmtf::GroupType> & gtl) {
-	py::list gl;
-	for (mmtf::GroupType & gt : gtl) {
-		gl.append(dump_group(gt));
-	}
-	return gl;
-}
-
-py::object
-group_to_py(mmtf::GroupType & gt, py::object & py_gt_class) {
-	py::object this_group = py_gt_class(
-			array1d_from_vector(gt.formalChargeList),
-			gt.atomNameList,
-			gt.elementList,
-			array1d_from_vector(gt.bondAtomList),
-			array1d_from_vector(gt.bondOrderList),
-			array1d_from_vector(gt.bondResonanceList),
-			gt.groupName,
-			std::string(1, gt.singleLetterCode),
-			gt.chemCompType
-	);
-	return this_group;
-}
-
-py::list
-dump_group_list2(std::vector<mmtf::GroupType> & gtl) {
 	py::object py_gt_class = py::module::import("mmtf_t").attr("GroupType");
 	py::list gl;
 	for (mmtf::GroupType & gt : gtl) {
-		gl.append(group_to_py(gt, py_gt_class));
+		gl.append(
+				py_gt_class(
+					array1d_from_vector(gt.formalChargeList),
+					gt.atomNameList,
+					gt.elementList,
+					array1d_from_vector(gt.bondAtomList),
+					array1d_from_vector(gt.bondOrderList),
+					array1d_from_vector(gt.bondResonanceList),
+					gt.groupName,
+					std::string(1, gt.singleLetterCode),
+					gt.chemCompType
+				)
+		);
 	}
 	return gl;
 }
 
 
 py::list
-dump_entity_list2(std::vector<mmtf::Entity> & cpp_el) {
+dump_entity_list(std::vector<mmtf::Entity> & cpp_el) {
 	py::object entity = py::module::import("mmtf_t").attr("Entity");
 	py::list el;
 	for (mmtf::Entity & e : cpp_el) {
@@ -185,28 +190,6 @@ dump_entity_list2(std::vector<mmtf::Entity> & cpp_el) {
 	return el;
 }
 
-
-py::list
-dump_entity_list(std::vector<mmtf::Entity> & cpp_el) {
-	py::list el;
-	for (mmtf::Entity & e : cpp_el) {
-		py::dict d;
-		d["chainIndexList"] = array1d_from_vector(e.chainIndexList);
-		d["description"] = e.description;
-		d["type"] = e.type;
-		d["sequence"] = e.sequence;
-		el.append(d);
-	}
-	return el;
-}
-
-
-py::object
-try_thing() {
-	py::object Thing = py::module::import(".mmtf_t").attr("Empty");
-	Thing.attr("this") = std::vector<int>({1,2,3});
-	return Thing;
-}
 
 PYBIND11_MODULE(example, m) {
 	// new stuff here
@@ -226,7 +209,7 @@ PYBIND11_MODULE(example, m) {
 		.def_readwrite("ncsOperatorList_io", &mmtf::StructureData::ncsOperatorList)
 		.def("bioAssemblyList", [](mmtf::StructureData &m){return dump_bio_assembly_list(m);})
 		.def_readwrite("bioAssemblyList_io", &mmtf::StructureData::bioAssemblyList)
-		.def("entityList", [](mmtf::StructureData &m){return dump_entity_list2(m.entityList);})
+		.def("entityList", [](mmtf::StructureData &m){return dump_entity_list(m.entityList);})
 		.def_readwrite("entityList_io", &mmtf::StructureData::entityList)
 		.def_readwrite("experimentalMethods", &mmtf::StructureData::experimentalMethods)
 		.def_readwrite("resolution", &mmtf::StructureData::resolution)
@@ -237,7 +220,7 @@ PYBIND11_MODULE(example, m) {
 		.def_readwrite("numGroups", &mmtf::StructureData::numGroups)
 		.def_readwrite("numChains", &mmtf::StructureData::numChains)
 		.def_readwrite("numModels", &mmtf::StructureData::numModels)
-		.def("groupList", [](mmtf::StructureData &m){return dump_group_list2(m.groupList);})
+		.def("groupList", [](mmtf::StructureData &m){return dump_group_list(m.groupList);})
 		.def_readwrite("groupList_io", &mmtf::StructureData::groupList)
 		.def("unitCell", [](mmtf::StructureData &m){return array1d_from_vector(m.unitCell);})
 		.def_readwrite("unitCell_io", &mmtf::StructureData::unitCell)
@@ -276,10 +259,18 @@ PYBIND11_MODULE(example, m) {
 		.def("chainsPerModel", [](mmtf::StructureData &m){return array1d_from_vector(m.chainsPerModel);})
 		.def_readwrite("chainsPerModel_io", &mmtf::StructureData::chainsPerModel)
 		.def("raw_properties", [](mmtf::StructureData const &m){return raw_properties(m);});
-
+ 
+	m.def("set_bioAssemblyList", [](py::list &i, mmtf::StructureData & sd){return set_bioAssemblyList(i, sd);});
+	m.def("set_entityList", [](py::list &i, mmtf::StructureData & sd){return set_entityList(i, sd);});
+	m.def("set_groupList", [](py::list &i, mmtf::StructureData & sd){return set_groupList(i, sd);});
 	m.def("decodeFromFile", &mmtf::decodeFromFile, "decode a mmtf::StructureData from a file");
 	m.def("decodeFromBuffer", &mmtf::decodeFromBuffer, "decode a mmtf::StructureData from bytes");
-	m.def("try_thing", [](){return try_thing();});
+	m.def("encodeToFile", [](mmtf::StructureData const &m, std::string const & fn){mmtf::encodeToFile(m, fn);});
+	m.def("encodeToStream", [](mmtf::StructureData const &m){
+			std::stringstream ss;
+			mmtf::encodeToStream(m, ss);
+			return py::bytes(ss.str());
+			});
 }
 
 //#endif

@@ -6,11 +6,8 @@ import msgpack
 from typing import List, Dict
 
 import example
-from example import CPPStructureData as CPPSD, decodeFromFile, decodeFromBuffer
+from example import CPPStructureData as CPPSD, decodeFromFile, decodeFromBuffer, encodeToFile, encodeToStream
 
-class Empty:
-    def __init__(self):
-        pass
 
 class Entity:
     def __init__(self,
@@ -76,51 +73,49 @@ class BioAssembly:
         self.name = name
 
 
-def transform_list_from_cpp(cpp_trans):
-    transformList = []
-    for trans in cpp_trans:
-        transformList.append(
-                Transform(trans["chainIndexList"], trans["matrix"]))
-    return transformList
-
-
-def bio_assembly_list_from_cpp(cpp_bio_a):
-    bio_assembly_list = []
-    for bio_a in cpp_bio_a:
-        transformList = transform_list_from_cpp(bio_a["transformList"])
-        name = bio_a["name"]
-        bio_assembly_list.append(
-            BioAssembly(transformList, name))
-    return bio_assembly_list
-
-
-def group_list_from_cpp(cpp_gl):
-    group_list = []
-    for cpp_gt in cpp_gl:
-        group_list.append(
-                GroupType(
-                    cpp_gt["formalChargeList"],
-                    cpp_gt["atomNameList"],
-                    cpp_gt["elementList"],
-                    cpp_gt["bondAtomList"],
-                    cpp_gt["bondOrderList"],
-                    cpp_gt["bondResonanceList"],
-                    cpp_gt["groupName"],
-                    cpp_gt["singleLetterCode"],
-                    cpp_gt["chemCompType"]))
-    return group_list
-
-
-def entity_list_from_cpp(cpp_el):
-    entity_list = []
-    for cpp_e in cpp_el:
-        entity_list.append(
-                Entity(cpp_e["chainIndexList"],
-                       cpp_e["description"],
-                       cpp_e["type"],
-                       cpp_e["sequence"]))
-    return entity_list
-
+def cppSD_from_SD(sd: 'StructureData'):
+    cppsd = CPPSD()
+    cppsd.mmtfVersion = sd.mmtfVersion
+    cppsd.mmtfProducer = sd.mmtfProducer
+    cppsd.unitCell_io = sd.unitCell
+    cppsd.spaceGroup = sd.spaceGroup
+    cppsd.structureId = sd.structureId
+    cppsd.title = sd.title
+    cppsd.depositionDate = sd.depositionDate
+    cppsd.releaseDate = sd.releaseDate
+    cppsd.ncsOperatorList_io = sd.ncsOperatorList
+    example.set_bioAssemblyList(sd.bioAssemblyList, cppsd)
+    example.set_entityList(sd.entityList, cppsd)
+    cppsd.experimentalMethods = sd.experimentalMethods
+    cppsd.resolution = sd.resolution
+    cppsd.rFree = sd.rFree
+    cppsd.rWork = sd.rWork
+    cppsd.numBonds = sd.numBonds
+    cppsd.numAtoms = sd.numAtoms
+    cppsd.numGroups = sd.numGroups
+    cppsd.numChains = sd.numChains
+    cppsd.numModels = sd.numModels
+    example.set_groupList(sd.groupList, cppsd)
+    cppsd.bondAtomList_io = sd.bondAtomList
+    cppsd.bondOrderList_io = sd.bondOrderList
+    cppsd.bondResonanceList_io = sd.bondResonanceList
+    cppsd.xCoordList_io = sd.xCoordList
+    cppsd.yCoordList_io = sd.yCoordList
+    cppsd.zCoordList_io = sd.zCoordList
+    cppsd.bFactorList_io = sd.bFactorList
+    cppsd.atomIdList_io = sd.atomIdList
+    cppsd.altLocList = sd.altLocList
+    cppsd.occupancyList_io = sd.occupancyList
+    cppsd.groupIdList_io = sd.groupIdList
+    cppsd.groupTypeList_io = sd.groupTypeList
+    cppsd.secStructList_io = sd.secStructList
+    cppsd.insCodeList = sd.insCodeList
+    cppsd.sequenceIndexList_io = sd.sequenceIndexList
+    cppsd.chainIdList = sd.chainIdList
+    cppsd.chainNameList = sd.chainNameList
+    cppsd.groupsPerChain_io = sd.groupsPerChain
+    cppsd.chainsPerModel_io = sd.chainsPerModel
+    return cppsd
 
 class StructureData:
     def __init__(self, file_name=None, file_bytes=None):
@@ -158,8 +153,7 @@ class StructureData:
         self.depositionDate = cppsd.depositionDate
         self.releaseDate = cppsd.releaseDate
         self.ncsOperatorList = cppsd.ncsOperatorList()
-        self.bioAssemblyList = bio_assembly_list_from_cpp(cppsd.bioAssemblyList())
-        # self.entityList = entity_list_from_cpp(cppsd.entityList())
+        self.bioAssemblyList = cppsd.bioAssemblyList()
         self.entityList = cppsd.entityList()
         self.experimentalMethods = cppsd.experimentalMethods
         self.resolution = cppsd.resolution
@@ -170,7 +164,6 @@ class StructureData:
         self.numGroups = cppsd.numGroups
         self.numChains = cppsd.numChains
         self.numModels = cppsd.numModels
-        # self.groupList = group_list_from_cpp(cppsd.groupList())
         self.groupList = cppsd.groupList()
         self.bondAtomList = cppsd.bondAtomList()
         self.bondOrderList = cppsd.bondOrderList()
@@ -183,7 +176,6 @@ class StructureData:
         self.altLocList = cppsd.altLocList
         self.occupancyList = cppsd.occupancyList()
         self.groupIdList = cppsd.groupIdList()
-        self.groupIdList = cppsd.groupIdList()
         self.groupTypeList = cppsd.groupTypeList()
         self.secStructList = cppsd.secStructList()
         self.insCodeList = cppsd.insCodeList
@@ -195,7 +187,6 @@ class StructureData:
 
         raw_properties = cppsd.raw_properties()
         raw_properties = msgpack.unpackb(raw_properties, raw=False)
-        # print(type(raw_properties), len(raw_properties))
         self.bondProperties = raw_properties["bondProperties"]
         self.atomProperties = raw_properties["atomProperties"]
         self.groupProperties = raw_properties["groupProperties"]
@@ -251,12 +242,14 @@ class StructureData:
         self.modelProperties = None
         self.extraProperties = None
 
-    def dump_to_file(self):
-        raise NotImplementedError
+    def dump_to_file(self, filename: str):
+        cppsd = cppSD_from_SD(self)
+        encodeToFile(cppsd, filename)
 
     def dump_to_bytes(self):
-        raise NotImplementedError
-
+        cppsd = cppSD_from_SD(self)
+        buff = encodeToStream(cppsd)
+        return buff
 
 # print(dir(example))
 # t = example.try_thing()
@@ -276,8 +269,11 @@ if __name__ == "__main__":
     # print("1")
 
     start = time.time()
-    for x in range(10000):
+    for x in range(10):
         sd = StructureData("4lgr.mmtf")
+        sd.dump_to_file("hello.mmtf")
+        print(sd.dump_to_bytes()[:20])
+
     stop = time.time()
     python_t = stop-start
     print("python", python_t)
