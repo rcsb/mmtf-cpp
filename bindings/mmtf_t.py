@@ -267,6 +267,13 @@ if __name__ == "__main__":
     # python_t = stop-start
     # print("python", python_t)
     # print("1")
+    start = time.time()
+    for x in range(10000):
+        cppsd = CPPSD()
+        decodeFromFile(cppsd, "4lgr.mmtf")
+    stop = time.time()
+    cpp_t = stop-start
+    print("cpp", cpp_t)
 
     start = time.time()
     for x in range(10):
@@ -286,10 +293,3 @@ if __name__ == "__main__":
 # python_t = stop-start
 # print("python og", python_t)
 #  
-# start = time.time()
-# for x in range(10000):
-#     cppsd = CPPSD()
-#     decodeFromFile(cppsd, "4lgr.mmtf")
-# stop = time.time()
-# cpp_t = stop-start
-# print("cpp", cpp_t)

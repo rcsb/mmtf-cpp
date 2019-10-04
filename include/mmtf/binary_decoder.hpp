@@ -183,7 +183,7 @@ inline BinaryDecoder::BinaryDecoder(const msgpack::object& obj,
 }
 
 template<typename T>
-void BinaryDecoder::decode(T& target) {
+void BinaryDecoder::decode(T&) {
     throw mmtf::DecodeError("Invalid target type for binary '" + key_ + "'");
 }
 

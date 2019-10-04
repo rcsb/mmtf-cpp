@@ -1,7 +1,4 @@
 
-//#ifndef MMTF_CPP_PYBIND_BINDINGS_HH
-//#define MMTF_CPP_PYBIND_BINDINGS_HH
-
 #include <mmtf.hpp>
 
 #include <pybind11/pybind11.h>
@@ -13,6 +10,12 @@
 
 namespace py = pybind11;
 
+/// CPP -> PY FUNCTIONS
+
+/* Notes
+ * We destory original data because it is much faster to apply move 
+ * than it is to copy the data.
+ */
 
 // This destroys the original data
 template< typename T >
@@ -20,10 +23,13 @@ py::array
 array1d_from_vector(std::vector<T> & m) {
 	if (m.empty()) return py::array_t<T>();
 	std::vector<T>* ptr = new std::vector<T>(std::move(m));
-	auto capsule = py::capsule(ptr, [](void* p) { delete reinterpret_cast<std::vector<T>*>(p); });
-	return py::array_t<T>(ptr->size(),  // shape of array
-												ptr->data(),  // c-style contiguous strides for Sequence
-												capsule       // numpy array references this parent
+	auto capsule = py::capsule(ptr, [](void* p) {
+			delete reinterpret_cast<std::vector<T>*>(p);
+	});
+	return py::array_t<T>(
+			ptr->size(),  // shape of array
+			ptr->data(),  // c-style contiguous strides for Sequence
+			capsule       // numpy array references this parent
 	);
 }
 
@@ -34,28 +40,17 @@ py::array
 array2d_from_vector(std::vector<std::vector<T>> & m) {
 	if (m.empty()) return py::array_t<T>();
 	std::vector<std::vector<T>>* ptr = new std::vector<std::vector<T>>(std::move(m));
-	auto capsule = py::capsule(ptr, [](void* p) { delete reinterpret_cast<std::vector<std::vector<T>>*>(p); });
-	return py::array_t<T>({ptr->size(), ptr->at(0).size()},  // shape of array
-												{ptr->size()*ptr->at(0).size()*sizeof(T)},  // c-style contiguous strides for Sequence
-												capsule       // numpy array references this parent
+	auto capsule = py::capsule(ptr, [](void* p) {
+			delete reinterpret_cast<std::vector<std::vector<T>>*>(p);
+	});
+	return py::array_t<T>(
+			{ptr->size(), ptr->at(0).size()},           // shape of array
+			{ptr->size()*ptr->at(0).size()*sizeof(T)},  // c-style contiguous strides for Sequence
+			capsule                                     // numpy array references this parent
 	);
 }
 
-py::bytes
-raw_properties(mmtf::StructureData const & sd) {
-	std::stringstream bytes;
-	std::map< std::string, std::map< std::string, msgpack::object > > objs({
-			{"bondProperties", sd.bondProperties },
-			{"atomProperties", sd.atomProperties },
-			{"groupProperties", sd.groupProperties },
-			{"chainProperties", sd.chainProperties },
-			{"modelProperties", sd.modelProperties },
-			{"extraProperties", sd.extraProperties }});
-	msgpack::pack(bytes, objs);
-	return py::bytes(bytes.str().data());
-}
-
-
+// This destroys the original data
 py::list
 dump_bio_assembly_list(mmtf::StructureData & sd) {
 	py::object py_ba_class = py::module::import("mmtf_t").attr("BioAssembly");
@@ -82,16 +77,47 @@ dump_bio_assembly_list(mmtf::StructureData & sd) {
 	return bal;
 }
 
+// This destroys the original data
+py::list
+dump_entity_list(std::vector<mmtf::Entity> & cpp_el) {
+	py::object entity = py::module::import("mmtf_t").attr("Entity");
+	py::list el;
+	for (mmtf::Entity & e : cpp_el) {
+		el.append(
+				entity(
+					array1d_from_vector(e.chainIndexList),
+					e.description,
+					e.type,
+					e.sequence)
+		);
+	}
+	return el;
+}
+
+py::bytes
+raw_properties(mmtf::StructureData const & sd) {
+	std::stringstream bytes;
+	std::map< std::string, std::map< std::string, msgpack::object > > objs({
+			{"bondProperties", sd.bondProperties},
+			{"atomProperties", sd.atomProperties},
+			{"groupProperties", sd.groupProperties},
+			{"chainProperties", sd.chainProperties},
+			{"modelProperties", sd.modelProperties},
+			{"extraProperties", sd.extraProperties}});
+	msgpack::pack(bytes, objs);
+	return py::bytes(bytes.str().data());
+}
+
 
 std::vector<mmtf::Transform>
-make_transformList(py::list & l) {
+make_transformList(py::list const & l) {
 	std::vector<mmtf::Transform> tl;
-	for (auto & trans : l) {
+	for (auto const & trans : l) {
 		mmtf::Transform t;
 		t.chainIndexList = trans.attr("chainIndexList").cast<std::vector<int>>();
 		py::list pymatrix(trans.attr("matrix"));
 		std::size_t count(0);
-		for (auto & x : pymatrix) {
+		for (auto const & x : pymatrix) {
 			t.matrix[count] = x.cast<float>();
 			++count;
 		}
@@ -102,9 +128,9 @@ make_transformList(py::list & l) {
 
 
 void
-set_bioAssemblyList(py::list & obj, mmtf::StructureData & sd) {
+set_bioAssemblyList(py::list const & obj, mmtf::StructureData & sd) {
 	std::vector<mmtf::BioAssembly> bioAs;
-	for (auto & py_bioAssembly : obj ) {
+	for (auto const & py_bioAssembly : obj ) {
 		mmtf::BioAssembly bioA;
 		bioA.name = py::str(py_bioAssembly.attr("name"));
 		py::list py_transform_list(py_bioAssembly.attr("transformList"));
@@ -117,9 +143,9 @@ set_bioAssemblyList(py::list & obj, mmtf::StructureData & sd) {
 
 
 void
-set_entityList(py::list & obj, mmtf::StructureData & sd) {
+set_entityList(py::list const & obj, mmtf::StructureData & sd) {
 	std::vector<mmtf::Entity> entities;
-	for (auto & py_entity : obj ) {
+	for (auto const & py_entity : obj ) {
 		mmtf::Entity entity;
 		entity.chainIndexList = py_entity.attr("chainIndexList").cast<std::vector<int32_t>>();
 		entity.description = py_entity.attr("description").cast<std::string>();
@@ -132,9 +158,9 @@ set_entityList(py::list & obj, mmtf::StructureData & sd) {
 
 
 void
-set_groupList(py::list & obj, mmtf::StructureData & sd) {
+set_groupList(py::list const & obj, mmtf::StructureData & sd) {
 	std::vector<mmtf::GroupType> groups;
-	for (auto & py_group : obj ) {
+	for (auto const & py_group : obj ) {
 		mmtf::GroupType group;
 		group.formalChargeList = py_group.attr("formalChargeList").cast<std::vector<int32_t>>();
 		group.atomNameList = py_group.attr("atomNameList").cast<std::vector<std::string>>();
@@ -151,6 +177,7 @@ set_groupList(py::list & obj, mmtf::StructureData & sd) {
 }
 
 
+// This destroys the original data
 py::list
 dump_group_list(std::vector<mmtf::GroupType> & gtl) {
 	py::object py_gt_class = py::module::import("mmtf_t").attr("GroupType");
@@ -174,24 +201,7 @@ dump_group_list(std::vector<mmtf::GroupType> & gtl) {
 }
 
 
-py::list
-dump_entity_list(std::vector<mmtf::Entity> & cpp_el) {
-	py::object entity = py::module::import("mmtf_t").attr("Entity");
-	py::list el;
-	for (mmtf::Entity & e : cpp_el) {
-		el.append(
-				entity(
-					array1d_from_vector(e.chainIndexList),
-					e.description,
-					e.type,
-					e.sequence)
-		);
-	}
-	return el;
-}
-
-
-PYBIND11_MODULE(example, m) {
+PYBIND11_MODULE(mmtf_py, m) {
 	// new stuff here
 	py::class_<mmtf::StructureData>(m, "CPPStructureData")
 		.def( pybind11::init( [](){ return new mmtf::StructureData(); } ) )
@@ -260,9 +270,11 @@ PYBIND11_MODULE(example, m) {
 		.def_readwrite("chainsPerModel_io", &mmtf::StructureData::chainsPerModel)
 		.def("raw_properties", [](mmtf::StructureData const &m){return raw_properties(m);});
  
-	m.def("set_bioAssemblyList", [](py::list &i, mmtf::StructureData & sd){return set_bioAssemblyList(i, sd);});
-	m.def("set_entityList", [](py::list &i, mmtf::StructureData & sd){return set_entityList(i, sd);});
-	m.def("set_groupList", [](py::list &i, mmtf::StructureData & sd){return set_groupList(i, sd);});
+	// I think it would be ideal to not pass in the sd, but it is still very
+	// fast this way.
+	m.def("set_bioAssemblyList", [](py::list const & i, mmtf::StructureData & sd){return set_bioAssemblyList(i, sd);});
+	m.def("set_entityList", [](py::list const & i, mmtf::StructureData & sd){return set_entityList(i, sd);});
+	m.def("set_groupList", [](py::list const & i, mmtf::StructureData & sd){return set_groupList(i, sd);});
 	m.def("decodeFromFile", &mmtf::decodeFromFile, "decode a mmtf::StructureData from a file");
 	m.def("decodeFromBuffer", &mmtf::decodeFromBuffer, "decode a mmtf::StructureData from bytes");
 	m.def("encodeToFile", [](mmtf::StructureData const &m, std::string const & fn){mmtf::encodeToFile(m, fn);});
@@ -270,7 +282,5 @@ PYBIND11_MODULE(example, m) {
 			std::stringstream ss;
 			mmtf::encodeToStream(m, ss);
 			return py::bytes(ss.str());
-			});
+	});
 }
-
-//#endif
