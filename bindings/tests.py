@@ -125,576 +125,70 @@ def test_various_throws(test_data_dir):
         sd.write_to_file("wrk.mmtf")
 
 
-def test_DeltaRecursiveFloat(test_data_dir):
+def test_DeltaRecursiveFloat():
     encoded_data = b'\x00\x00\x00\x0a\x00\x00\x00\x03\x00\x00\x03\xe8\x7f\xffD\xab\x01\x8f\xff\xca'
     decoded_data = np.array([50.346, 50.745, 50.691])
     ret = mmtf_cpp.encodeDeltaRecursiveFloat(decoded_data, 1000)
     assert ret == encoded_data
 
-##TEST_CASE("Test DeltaRecursiveFloat enc/dec") {
-##  std::vector<char> encoded_data;
-##  // h1
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x0a);
-##  // h2
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x03);
-##  // h3
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x03);
-##  encoded_data.push_back(0xe8);
-##  // data
-##  encoded_data.push_back(0x7f);
-##  encoded_data.push_back(0xff);
-##  encoded_data.push_back(0x44);
-##  encoded_data.push_back(0xab);
-##  encoded_data.push_back(0x01);
-##  encoded_data.push_back(0x8f);
-##  encoded_data.push_back(0xff);
-##  encoded_data.push_back(0xca);
-##
-##  msgpack::zone m_zone;
-##  msgpack::object msgp_obj(encoded_data, m_zone);
-##
-##  mmtf::BinaryDecoder bd(msgp_obj, "a_test");
-##  std::vector<float> decoded_input;
-##  bd.decode(decoded_input);
-##
-##  std::vector<float> decoded_data;
-##  decoded_data.push_back(50.346f);
-##  decoded_data.push_back(50.745f);
-##  decoded_data.push_back(50.691f);
-##
-##  std::vector<char> encoded_output
-##    = mmtf::encodeDeltaRecursiveFloat(decoded_data, 1000);
-##  REQUIRE(encoded_data == encoded_output);
-##  REQUIRE(decoded_data.size() ==  decoded_input.size());
-##  REQUIRE(approx_equal_vector(decoded_data, decoded_input));
-##}
-##
-##
-##TEST_CASE("Test RunLengthFloat enc/dec") {
-##  std::vector<char> encoded_data;
-##  // h1
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x09);
-##  // h2
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x03);
-##  // h3
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x64);
-##  // data
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x64);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x03);
-##
-##  msgpack::zone m_zone;
-##  msgpack::object msgp_obj(encoded_data, m_zone);
-##
-##  mmtf::BinaryDecoder bd(msgp_obj, "a_test");
-##  std::vector<float> decoded_input;
-##  bd.decode(decoded_input);
-##
-##  std::vector<float> decoded_data;
-##  decoded_data.push_back(1.00f);
-##  decoded_data.push_back(1.00f);
-##  decoded_data.push_back(1.00f);
-##
-##  std::vector<char> encoded_output = mmtf::encodeRunLengthFloat(decoded_data, 100);
-##
-##  REQUIRE(encoded_data == encoded_output);
-##  REQUIRE(decoded_data.size() ==  decoded_input.size());
-##  REQUIRE(approx_equal_vector(decoded_data, decoded_input));
-##}
-##
-##
-##TEST_CASE("Test RunLengthDeltaInt enc/dec") {
-##  std::vector<char> encoded_data;
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x08);
-##  // h2
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x07);
-##  // h3
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  // data
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x01);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x07);
-##
-##  msgpack::zone m_zone;
-##  msgpack::object msgp_obj(encoded_data, m_zone);
-##
-##  mmtf::BinaryDecoder bd(msgp_obj, "a_test");
-##  std::vector<int32_t> decoded_input;
-##  bd.decode(decoded_input);
-##
-##  std::vector<int32_t> decoded_data;
-##  decoded_data.push_back(1);
-##  decoded_data.push_back(2);
-##  decoded_data.push_back(3);
-##  decoded_data.push_back(4);
-##  decoded_data.push_back(5);
-##  decoded_data.push_back(6);
-##  decoded_data.push_back(7);
-##
-##  std::vector<char> encoded_output = mmtf::encodeRunLengthDeltaInt(decoded_data);
-##
-##  REQUIRE(encoded_data == encoded_output);
-##  REQUIRE(decoded_data.size() ==  decoded_input.size());
-##  REQUIRE(decoded_data == decoded_input);
-##}
-##
-##
-##TEST_CASE("Test RunLengthChar enc/dec") {
-##  std::vector<char> encoded_data;
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x06);
-##  // h2
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x04);
-##  // h3
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  // data
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x41);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x04);
-##
-##  msgpack::zone m_zone;
-##  msgpack::object msgp_obj(encoded_data, m_zone);
-##
-##  mmtf::BinaryDecoder bd(msgp_obj, "a_test");
-##  std::vector<char> decoded_input;
-##  bd.decode(decoded_input);
-##
-##  std::vector<char> decoded_data;
-##  decoded_data.push_back('A');
-##  decoded_data.push_back('A');
-##  decoded_data.push_back('A');
-##  decoded_data.push_back('A');
-##
-##  std::vector<char> encoded_output = mmtf::encodeRunLengthChar(decoded_data);
-##  REQUIRE(encoded_data == encoded_output);
-##  REQUIRE(decoded_data.size() ==  decoded_input.size());
-##  REQUIRE(decoded_data == decoded_input);
-##}
-##
-##
-##TEST_CASE("Test RunLengthInt8 enc/dec") {
-##  std::vector<char> encoded_data;
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x10);
-##  // h2
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x04);
-##  // h3
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  // data
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x02);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x04);
-##
-##  msgpack::zone m_zone;
-##  msgpack::object msgp_obj(encoded_data, m_zone);
-##
-##  mmtf::BinaryDecoder bd(msgp_obj, "a_test");
-##  std::vector<int8_t> decoded_input;
-##  bd.decode(decoded_input);
-##
-##  std::vector<int8_t> decoded_data;
-##  decoded_data.push_back(2);
-##  decoded_data.push_back(2);
-##  decoded_data.push_back(2);
-##  decoded_data.push_back(2);
-##
-##  std::vector<char> encoded_output = mmtf::encodeRunLengthInt8(decoded_data);
-##  REQUIRE(encoded_data == encoded_output);
-##  REQUIRE(decoded_data.size() ==  decoded_input.size());
-##  REQUIRE(decoded_data == decoded_input);
-##}
-##
-##
-##TEST_CASE("Test encodeStringVector enc/dec") {
-##  std::vector<char> encoded_data;
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x05);
-##  // h2
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x06);
-##  // h3
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x04);
-##  // data
-##  encoded_data.push_back('B');
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back('A');
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back('C');
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back('A');
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back('A');
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back('A');
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##
-##  msgpack::zone m_zone;
-##  msgpack::object msgp_obj(encoded_data, m_zone);
-##
-##  mmtf::BinaryDecoder bd(msgp_obj, "a_test");
-##  std::vector<std::string> decoded_input;
-##  bd.decode(decoded_input);
-##
-##  std::vector<std::string> decoded_data;
-##  decoded_data.push_back("B");
-##  decoded_data.push_back("A");
-##  decoded_data.push_back("C");
-##  decoded_data.push_back("A");
-##  decoded_data.push_back("A");
-##  decoded_data.push_back("A");
-##
-##  int chain_name_max_length = 4;
-##  std::vector<char> encoded_output = mmtf::encodeStringVector(decoded_data, chain_name_max_length);
-##  REQUIRE(encoded_data == encoded_output);
-##  REQUIRE(decoded_data.size() ==  decoded_input.size());
-##  REQUIRE(decoded_data == decoded_input);
-##}
-##
-##
-##TEST_CASE("Test int 8 enc/dec") {
-##  std::vector<char> encoded_data;
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x02);
-##  // h2
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x05);
-##  // h3
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  // data
-##  encoded_data.push_back(0x07);
-##  encoded_data.push_back(0x06);
-##  encoded_data.push_back(0x06);
-##  encoded_data.push_back(0x07);
-##  encoded_data.push_back(0x07);
-##
-##  msgpack::zone m_zone;
-##  msgpack::object msgp_obj(encoded_data, m_zone);
-##
-##  mmtf::BinaryDecoder bd(msgp_obj, "a_test");
-##  std::vector<int8_t> decoded_input;
-##  bd.decode(decoded_input);
-##
-##  std::vector<int8_t> decoded_data;
-##  decoded_data.push_back(7);
-##  decoded_data.push_back(6);
-##  decoded_data.push_back(6);
-##  decoded_data.push_back(7);
-##  decoded_data.push_back(7);
-##
-##  std::vector<char> encoded_output = mmtf::encodeInt8ToByte(decoded_data);
-##  REQUIRE(encoded_data == encoded_output);
-##  REQUIRE(decoded_data.size() ==  decoded_input.size());
-##  REQUIRE(decoded_data == decoded_input);
-##}
-##
-##
-##TEST_CASE("Test FourByteInt enc/dec") {
-##  std::vector<char> encoded_data;
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x04);
-##  // h2
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x04);
-##  // h3
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  // data
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x01);
-##
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x02);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x01);
-##
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x00);
-##  encoded_data.push_back(0x02);
-##
-##  msgpack::zone m_zone;
-##  msgpack::object msgp_obj(encoded_data, m_zone);
-##
-##  mmtf::BinaryDecoder bd(msgp_obj, "a_test");
-##  std::vector<int32_t> decoded_input;
-##  bd.decode(decoded_input);
-##
-##  std::vector<int32_t> decoded_data;
-##  decoded_data.push_back(1);
-##  decoded_data.push_back(131073);
-##  decoded_data.push_back(0);
-##  decoded_data.push_back(2);
-##
-##  std::vector<char> encoded_output = mmtf::encodeFourByteInt(decoded_data);
-##  REQUIRE(encoded_data == encoded_output);
-##  REQUIRE(decoded_data.size() ==  decoded_input.size());
-##  REQUIRE(decoded_data == decoded_input);
-##}
-##
-##TEST_CASE("Test bondOrderList vs bondAtomList") {
-##  std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
-##  mmtf::StructureData sd;
-##  mmtf::decodeFromFile(sd, working_mmtf);
-##  SECTION("Deleting all bondOrderLists") {
-##    for (auto & group : sd.groupList) {
-##      group.bondOrderList.clear();
-##    }
-##    sd.bondOrderList.clear();
-##    REQUIRE(sd.hasConsistentData());
-##    // we write files without those fields (tested below), can we roundtrip?
-##    mmtf::StructureData sd2;
-##    mmtf::encodeToFile(sd, "test_mmtf_nobondorder.mmtf");
-##    mmtf::decodeFromFile(sd2, "test_mmtf_nobondorder.mmtf");
-##    REQUIRE( sd == sd2 );
-##  }
-##  SECTION("altering group bondOrderLists") {
-##    sd.groupList[0].bondOrderList.push_back(1);
-##    REQUIRE_FALSE(sd.hasConsistentData());
-##  }
-##  SECTION("altering sd bondOrderLists") {
-##    sd.bondOrderList.push_back(1);
-##    REQUIRE_FALSE(sd.hasConsistentData());
-##  }
-##  SECTION("not ok to have bond orders without atom list in group") {
-##    sd.groupList[0].bondAtomList.clear();
-##    REQUIRE_FALSE(sd.hasConsistentData());
-##  }
-##  SECTION("not ok to have bond orders without atom list") {
-##    sd.bondAtomList.clear();
-##    REQUIRE_FALSE(sd.hasConsistentData());
-##  }
-##}
-##
-##
-##TEST_CASE("test valid bonds") {
-##  std::string working_mmtf = "../temporary_test_data/all_canoncial.mmtf";
-##  mmtf::StructureData sd;
-##  mmtf::decodeFromFile(sd, working_mmtf);
-##  REQUIRE(sd.hasConsistentData());
-##
-##  SECTION("invalid bond numbers in group") {
-##    int8_t original = sd.groupList[0].bondResonanceList[0];
-##    sd.groupList[0].bondResonanceList[0] = -3;
-##    REQUIRE_FALSE(sd.hasConsistentData());
-##    sd.groupList[0].bondResonanceList[0] = 2;
-##    REQUIRE_FALSE(sd.hasConsistentData());
-##    sd.groupList[0].bondResonanceList[0] = original;
-##
-##    original = sd.groupList[0].bondOrderList[0];
-##    sd.groupList[0].bondOrderList[0] = 0;
-##    REQUIRE_FALSE(sd.hasConsistentData());
-##    sd.groupList[0].bondOrderList[0] = 5;
-##    REQUIRE_FALSE(sd.hasConsistentData());
-##
-##    sd.groupList[0].bondOrderList[0] = -1;
-##    sd.groupList[0].bondResonanceList[0] = -1;
-##    REQUIRE_FALSE(sd.hasConsistentData());
-##  }
-##  SECTION("invalid bond numbers") {
-##    int8_t original = sd.bondResonanceList[0];
-##    sd.bondResonanceList[0] = -3;
-##    REQUIRE_FALSE(sd.hasConsistentData());
-##    sd.bondResonanceList[0] = 2;
-##    REQUIRE_FALSE(sd.hasConsistentData());
-##    sd.bondResonanceList[0] = original;
-##
-##    original = sd.bondOrderList[0];
-##    sd.bondOrderList[0] = 0;
-##    REQUIRE_FALSE(sd.hasConsistentData());
-##    sd.bondOrderList[0] = 5;
-##    REQUIRE_FALSE(sd.hasConsistentData());
-##
-##    sd.bondOrderList[0] = -1;
-##    sd.bondResonanceList[0] = -1;
-##    REQUIRE_FALSE(sd.hasConsistentData());
-##  }
-##
-##  SECTION("invalid bondResonanceList size in group") {
-##    sd.groupList[0].bondResonanceList.push_back(1);
-##    REQUIRE_FALSE(sd.hasConsistentData());
-##  }
-##  SECTION("invalid bondResonanceList size") {
-##    sd.bondResonanceList.push_back(1);
-##    REQUIRE_FALSE(sd.hasConsistentData());
-##  }
-##
-##  SECTION("not ok to have bond resonances without order list in group") {
-##    sd.groupList[0].bondOrderList.clear();
-##    REQUIRE_FALSE(sd.hasConsistentData());
-##  }
-##  SECTION("not ok to have bond resonances without order list") {
-##    sd.bondOrderList.clear();
-##    REQUIRE_FALSE(sd.hasConsistentData());
-##  }
-##}
-##
-##
-##TEST_CASE("test group export optional") {
-##  std::string working_mmtf = "../temporary_test_data/all_canoncial.mmtf";
-##  mmtf::StructureData sd;
-##  mmtf::decodeFromFile(sd, working_mmtf);
-##  REQUIRE(sd.hasConsistentData());
-##
-##  mmtf::GroupType & first_group(sd.groupList[0]);
-##
-##  SECTION("check that optional fields exist fist") {
-##    msgpack::zone my_zone;
-##    msgpack::object obj(first_group, my_zone);
-##    std::map<std::string, msgpack::object*> my_map(msgpack_obj_to_map(obj));
-##    REQUIRE(my_map.find("bondOrderList") != my_map.end());
-##    REQUIRE(my_map.find("bondResonanceList") != my_map.end());
-##    REQUIRE(my_map.find("bondAtomList") != my_map.end());
-##  }
-##  SECTION("removing group bondOrderLists") {
-##    msgpack::zone my_zone;
-##    first_group.bondOrderList = std::vector<int8_t>();
-##    msgpack::object obj(first_group, my_zone);
-##    std::map<std::string, msgpack::object*> my_map(msgpack_obj_to_map(obj));
-##    REQUIRE(my_map.find("bondOrderList") == my_map.end());
-##  }
-##  SECTION("altering group bondResonanceLists") {
-##    msgpack::zone my_zone;
-##    first_group.bondResonanceList = std::vector<int8_t>();
-##    msgpack::object obj(first_group, my_zone);
-##    std::map<std::string, msgpack::object*> my_map(msgpack_obj_to_map(obj));
-##    REQUIRE(my_map.find("bondResonanceList") == my_map.end());
-##  }
-##  SECTION("altering group bondAtomLists") {
-##    msgpack::zone my_zone;
-##    first_group.bondAtomList = std::vector<int32_t>();
-##    msgpack::object obj(first_group, my_zone);
-##    std::map<std::string, msgpack::object*> my_map(msgpack_obj_to_map(obj));
-##    REQUIRE(my_map.find("bondAtomList") == my_map.end());
-##  }
-##}
-##
-##// Mainly a compiler check, not useful to actually test
-##void
-##map_const_sd_helper(mmtf::StructureData const & sd) {
-##	std::map< std::string, std::string > map_str_str_out, map_str_str_in;
-##	map_str_str_out["test"] = "tset";
-##	const mmtf::MapDecoder extraProperties_MD(sd.extraProperties);
-##	extraProperties_MD.decode("map_str_str", true, map_str_str_in);
-##	REQUIRE(map_str_str_in == map_str_str_out);
-##}
-##
-##TEST_CASE("mapDecoder types") {
-##	std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
-##	mmtf::StructureData sd;
-##	mmtf::decodeFromFile(sd, working_mmtf);
-##
-##	std::map< std::string, std::string > map_str_str_out, map_str_str_in;
-##	map_str_str_out["test"] = "tset";
-##	sd.extraProperties["map_str_str"] = msgpack::object(map_str_str_out, sd.msgpack_zone);
-##
-##	// Also check to make sure const works
-##	const mmtf::MapDecoder extraProperties_MD(sd.extraProperties);
-##	extraProperties_MD.decode("map_str_str", true, map_str_str_in);
-##	REQUIRE(map_str_str_in == map_str_str_out);
-##	map_const_sd_helper(sd);
-##}
-##
+
+def test_RunLengthFloat():
+    encoded_data = b'\x00\x00\x00\x09\x00\x00\x00\x03\x00\x00\x00\x64\x00\x00\x00\x64\x00\x00\x00\x03'
+    decoded_data = np.array([1.0, 1.0, 1.0])
+    ret = mmtf_cpp.encodeRunLengthFloat(decoded_data, 100)
+    assert ret == encoded_data
+
+
+def test_RunLengthDeltaInt():
+    encoded_data = b'\x00\x00\x00\x08\x00\x00\x00\x07\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x07'
+    decoded_data = np.array(range(1,8))
+    ret = mmtf_cpp.encodeRunLengthDeltaInt(decoded_data)
+    assert ret == encoded_data
+
+
+def test_RunLengthChar():
+    encoded_data = b'\x00\x00\x00\x06\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x41\x00\x00\x00\x04'
+    decoded_data = np.array(list(map(ord, ("A", "A", "A", "A"))), dtype=np.int8)
+    ret = mmtf_cpp.encodeRunLengthChar(decoded_data)
+    assert ret == encoded_data
+
+
+def test_RunLengthInt8():
+    encoded_data = b'\x00\x00\x00\x10\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x04'
+    decoded_data = np.array((2, 2, 2, 2), dtype=np.int8)
+    ret = mmtf_cpp.encodeRunLengthInt8(decoded_data)
+    assert ret == encoded_data
+
+
+def test_Int8():
+    encoded_data = b'\x00\x00\x00\x02\x00\x00\x00\x05\x00\x00\x00\x00\x07\x06\x06\x07\x07'
+    decoded_data = np.array((7, 6, 6, 7, 7), dtype=np.int8)
+    ret = mmtf_cpp.encodeInt8ToByte(decoded_data)
+    assert ret == encoded_data
+
+
+def test_FourByteInt():
+    encoded_data = b'\x00\x00\x00\x04\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x01\x00\x02\x00\x01\x00\x00\x00\x00\x00\x00\x00\x02'
+    decoded_data = np.array((1, 131073, 0, 2), dtype=np.int32)
+    ret = mmtf_cpp.encodeFourByteInt(decoded_data)
+    assert ret == encoded_data
+
+
+def test_atomProperties(test_data_dir):
+    working_mmtf_fn = os.path.join(test_data_dir, "mmtf_spec/test-suite/mmtf/173D.mmtf")
+    sd = StructureData(working_mmtf_fn)
+    random_data = list(range(256))
+    encoded_random_data = mmtf_cpp.encodeRunLengthDeltaInt(list((range(256))))
+    sd.atomProperties["256_atomColorList"] = random_data
+    sd.atomProperties["256_atomColorList_encoded"] = encoded_random_data
+    sd.write_to_file("atomProperties_test.mmtf")
+    sd2 = StructureData("atomProperties_test.mmtf")
+    assert sd2.atomProperties["256_atomColorList"] == random_data
+    assert mmtf_cpp.decBin(sd2.atomProperties["256_atomColorList_encoded"]) == encoded_random_data
+    # mmtf_cpp.CPPBinaryDecoder(sd2.atomProperties["256_atomColorList_encoded"], b'xxx')
+    # assert random_data == mmtf_cpp.CPPBinaryDecoder(sd2.atomProperties["256_atomColorList_encoded"]).decode()
+
+
 ##// test/example of how to use extra data
 ##TEST_CASE("atomProperties field") {
 ##  std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";

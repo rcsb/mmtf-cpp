@@ -166,6 +166,15 @@ def cppSD_from_SD(sd: "StructureData"):
     cppsd.chainNameList_io = sd.chainNameList
     cppsd.groupsPerChain_io = sd.groupsPerChain
     cppsd.chainsPerModel_io = sd.chainsPerModel
+    packed_data = msgpack.packb({
+            "bondProperties": sd.bondProperties,
+            "atomProperties": sd.atomProperties,
+            "groupProperties": sd.groupProperties,
+            "chainProperties": sd.chainProperties,
+            "modelProperties": sd.modelProperties,
+            "extraProperties": sd.extraProperties},
+            use_bin_type=True)
+    cppsd.set_properties(packed_data)
     return cppsd
 
 
