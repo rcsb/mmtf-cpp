@@ -50,15 +50,15 @@ if (build_py)
     set(CMAKE_CXX_FLAGS_RELEASE "-O3")
     add_definitions(-DNDEBUG)
     add_library(mmtf_py SHARED
-    	${CMAKE_CURRENT_SOURCE_DIR}/bindings/bindings.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/bindings/bindings.cpp
     )
 
     set(MSGPACKC_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/msgpack-c/include)
     set(PYBIND_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/pybind11/include)
-	# set(PYTHON_INCLUDE_DIR_A python_include_A)
+    # set(PYTHON_INCLUDE_DIR_A python_include_A)
     # set(PYTHON_INCLUDE_DIR_B python_include_B)
 
-	target_include_directories(mmtf_py PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    target_include_directories(mmtf_py PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
     target_include_directories(mmtf_py PUBLIC ${MSGPACKC_INCLUDE_DIR})
     target_include_directories(mmtf_py PUBLIC ${PYBIND_INCLUDE_DIR})
     target_include_directories(mmtf_py PUBLIC ${PYTHON_INCLUDE_DIR_A})
