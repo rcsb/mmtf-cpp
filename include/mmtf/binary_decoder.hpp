@@ -121,11 +121,17 @@ namespace {
 
 #ifndef __EMSCRIPTEN__
 void assignBigendian4(void* dst, const char* src) {
-    *((uint32_t*)dst) = ntohl(*((uint32_t*)src));
+    uint32_t tmp;
+    std::memcpy(&tmp, src, sizeof(uint32_t));
+    tmp = ntohl(tmp);
+    std::memcpy(dst, &tmp, sizeof(uint32_t));
 }
 
 void assignBigendian2(void* dst, const char* src) {
-    *((uint16_t*)dst) = ntohs(*((uint16_t*)src));
+    uint16_t tmp;
+    std::memcpy(&tmp, src, sizeof(uint16_t));
+    tmp = ntohs(tmp);
+    std::memcpy(dst, &tmp, sizeof(uint16_t));
 }
 #else
 // Need to avoid how emscripten handles memory
