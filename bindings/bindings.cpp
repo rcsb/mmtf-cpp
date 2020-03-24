@@ -34,6 +34,29 @@ array1d_from_vector(std::vector<T> & m) {
 }
 
 
+template<>
+py::array
+array1d_from_vector(std::vector<char> & m) {
+	//if (m.empty()) return py::array_t<char>();
+	std::vector<char>* ptr = new std::vector<char>(std::move(m));
+	auto capsule = py::capsule(ptr, [](void* p) {
+			delete reinterpret_cast<std::vector<char>*>(p);
+	});
+	return py::array(
+			py::dtype("<S1"),
+			{ptr->size()},  // shape of array
+			{},
+			ptr->data(),  // c-style contiguous strides for Sequence
+			capsule       // numpy array references this parent
+	);
+}
+
+template< >
+py::array
+array1d_from_vector(std::vector<std::string> & m) {
+	return py::array(py::cast(std::move(m)));
+}
+
 // This destroys the original data
 template< typename T >
 py::array
@@ -45,7 +68,7 @@ array2d_from_vector(std::vector<std::vector<T>> & m) {
 	});
 	return py::array_t<T>(
 			{ptr->size(), ptr->at(0).size()},           // shape of array
-			{ptr->size()*ptr->at(0).size()*sizeof(T)},  // c-style contiguous strides for Sequence
+			{ptr->at(0).size()*sizeof(T), sizeof(T)},   // c-style contiguous strides
 			capsule                                     // numpy array references this parent
 	);
 }
@@ -53,8 +76,8 @@ array2d_from_vector(std::vector<std::vector<T>> & m) {
 // This destroys the original data
 py::list
 dump_bio_assembly_list(mmtf::StructureData & sd) {
-	py::object py_ba_class = py::module::import("mmtf_t").attr("BioAssembly");
-	py::object py_t_class = py::module::import("mmtf_t").attr("Transform");
+	py::object py_ba_class = py::module::import("structure_data").attr("BioAssembly");
+	py::object py_t_class = py::module::import("structure_data").attr("Transform");
 	py::list bal;
 	for (mmtf::BioAssembly & cba : sd.bioAssemblyList) {
 		py::list transform_list;
@@ -80,7 +103,7 @@ dump_bio_assembly_list(mmtf::StructureData & sd) {
 // This destroys the original data
 py::list
 dump_entity_list(std::vector<mmtf::Entity> & cpp_el) {
-	py::object entity = py::module::import("mmtf_t").attr("Entity");
+	py::object entity = py::module::import("structure_data").attr("Entity");
 	py::list el;
 	for (mmtf::Entity & e : cpp_el) {
 		el.append(
@@ -180,7 +203,7 @@ set_groupList(py::list const & obj, mmtf::StructureData & sd) {
 // This destroys the original data
 py::list
 dump_group_list(std::vector<mmtf::GroupType> & gtl) {
-	py::object py_gt_class = py::module::import("mmtf_t").attr("GroupType");
+	py::object py_gt_class = py::module::import("structure_data").attr("GroupType");
 	py::list gl;
 	for (mmtf::GroupType & gt : gtl) {
 		gl.append(
@@ -200,8 +223,70 @@ dump_group_list(std::vector<mmtf::GroupType> & gtl) {
 	return gl;
 }
 
+template< typename T>
+std::vector<T>
+py_array_to_vector(py::array_t<T, py::array::c_style | py::array::forcecast> const & array_in) {
+	std::vector<T> vec_array(array_in.size());
+	std::memcpy(vec_array.data(), array_in.data(), array_in.size()*sizeof(T));
+	return vec_array;
+}
 
-PYBIND11_MODULE(mmtf_py, m) {
+template<>
+std::vector<char>
+py_array_to_vector(py::array_t<char, py::array::c_style | py::array::forcecast> const & array_in) {
+	std::string tmpstr(array_in.data());
+	std::vector<char> vec_array(tmpstr.begin(), tmpstr.end());
+	return vec_array;
+}
+
+/* This isn't really necessary, but lets make the interface anyway
+ */
+py::bytes
+py_encodeInt8ToByte(py::array_t<int8_t, py::array::c_style | py::array::forcecast> const & array_in) {
+	std::vector<char> cpp_vec(mmtf::encodeInt8ToByte(py_array_to_vector<int8_t>(array_in)));
+	return py::bytes(std::string(cpp_vec.begin(), cpp_vec.end()));
+}
+
+py::bytes
+py_encodeFourByteInt(py::array_t<int32_t, py::array::c_style | py::array::forcecast> const & array_in) {
+	std::vector<int32_t> const cpp_vec(py_array_to_vector<int32_t>(array_in));
+	std::vector<char> encoded(mmtf::encodeFourByteInt(cpp_vec));
+	return py::bytes(encoded.data(), encoded.size());
+}
+
+py::bytes
+py_encodeRunLengthChar(py::array_t<char, py::array::c_style | py::array::forcecast> const & array_in) {
+	std::vector<char> const cpp_vec(py_array_to_vector<char>(array_in));
+	std::vector<char> encoded(mmtf::encodeRunLengthChar(cpp_vec));
+	return py::bytes(encoded.data(), encoded.size());
+}
+
+py::bytes
+py_encodeRunLengthDeltaInt(py::array_t<int32_t, py::array::c_style | py::array::forcecast> const & array_in) {
+	std::vector<int32_t> const cpp_vec(py_array_to_vector<int32_t>(array_in));
+	std::vector<char> encoded(mmtf::encodeRunLengthDeltaInt(cpp_vec));
+	return py::bytes(encoded.data(), encoded.size());
+}
+
+py::bytes
+py_encodeDeltaRecursiveFloat(py::array_t<float, py::array::c_style | py::array::forcecast> const & array_in, int32_t const multiplier = 1000) {
+	std::vector<float> const cpp_vec(py_array_to_vector<float>(array_in));
+	std::vector<char> encoded(mmtf::encodeDeltaRecursiveFloat(cpp_vec, multiplier));
+	return py::bytes(encoded.data(), encoded.size());
+}
+
+
+
+std::vector<std::string>
+char_vector_to_string_vector(std::vector<char> const & cvec) {
+	std::vector<std::string> ret(cvec.size());
+	for (std::size_t i=0; i<cvec.size(); ++i) {
+		ret[i] = std::string(1, cvec[i]);
+	}
+	return ret;
+}
+
+PYBIND11_MODULE(mmtf_cpp, m) {
 	// new stuff here
 	py::class_<mmtf::StructureData>(m, "CPPStructureData")
 		.def( pybind11::init( [](){ return new mmtf::StructureData(); } ) )
@@ -250,7 +335,14 @@ PYBIND11_MODULE(mmtf_py, m) {
 		.def_readwrite("bFactorList_io", &mmtf::StructureData::bFactorList)
 		.def("atomIdList", [](mmtf::StructureData &m){return array1d_from_vector(m.atomIdList);})
 		.def_readwrite("atomIdList_io", &mmtf::StructureData::atomIdList)
-		.def_readwrite("altLocList", &mmtf::StructureData::altLocList)
+		.def("altLocList", [](mmtf::StructureData &m) {
+			return array1d_from_vector<char>(m.altLocList);
+			/* std::vector<std::string> tmp(char_vector_to_string_vector(m.altLocList)); */
+			/* return array1d_from_vector(tmp); */
+		})
+		.def("set_altLocList", [](mmtf::StructureData &m, py::array_t<int8_t> const & st) {
+				m.altLocList = std::vector<char>(st.data(), st.data()+st.size());
+		})
 		.def("occupancyList", [](mmtf::StructureData &m){return array1d_from_vector(m.occupancyList);})
 		.def_readwrite("occupancyList_io", &mmtf::StructureData::occupancyList)
 		.def("groupIdList", [](mmtf::StructureData &m){return array1d_from_vector(m.groupIdList);})
@@ -259,11 +351,19 @@ PYBIND11_MODULE(mmtf_py, m) {
 		.def_readwrite("groupTypeList_io", &mmtf::StructureData::groupTypeList)
 		.def("secStructList", [](mmtf::StructureData &m){return array1d_from_vector(m.secStructList);})
 		.def_readwrite("secStructList_io", &mmtf::StructureData::secStructList)
-		.def_readwrite("insCodeList", &mmtf::StructureData::insCodeList)
+		.def("insCodeList", [](mmtf::StructureData &m) {
+			std::vector<std::string> tmp(char_vector_to_string_vector(m.insCodeList));
+			return array1d_from_vector(tmp);
+		})
+		.def("set_insCodeList", [](mmtf::StructureData &m, py::array_t<char> const & st) {
+			m.insCodeList = std::vector<char>(st.data(), st.data()+st.size());
+		})
 		.def("sequenceIndexList", [](mmtf::StructureData &m){return array1d_from_vector(m.sequenceIndexList);})
 		.def_readwrite("sequenceIndexList_io", &mmtf::StructureData::sequenceIndexList)
-		.def_readwrite("chainIdList", &mmtf::StructureData::chainIdList)
-		.def_readwrite("chainNameList", &mmtf::StructureData::chainNameList)
+		.def("chainIdList", [](mmtf::StructureData &m){return array1d_from_vector(m.chainIdList);})
+		.def_readwrite("chainIdList_io", &mmtf::StructureData::chainIdList)
+		.def("chainNameList", [](mmtf::StructureData &m){return array1d_from_vector(m.chainNameList);})
+		.def_readwrite("chainNameList_io", &mmtf::StructureData::chainNameList)
 		.def("groupsPerChain", [](mmtf::StructureData &m){return array1d_from_vector(m.groupsPerChain);})
 		.def_readwrite("groupsPerChain_io", &mmtf::StructureData::groupsPerChain)
 		.def("chainsPerModel", [](mmtf::StructureData &m){return array1d_from_vector(m.chainsPerModel);})
@@ -279,8 +379,49 @@ PYBIND11_MODULE(mmtf_py, m) {
 	m.def("decodeFromBuffer", &mmtf::decodeFromBuffer, "decode a mmtf::StructureData from bytes");
 	m.def("encodeToFile", [](mmtf::StructureData const &m, std::string const & fn){mmtf::encodeToFile(m, fn);});
 	m.def("encodeToStream", [](mmtf::StructureData const &m){
-			std::stringstream ss;
-			mmtf::encodeToStream(m, ss);
-			return py::bytes(ss.str());
+		std::stringstream ss;
+		mmtf::encodeToStream(m, ss);
+		return py::bytes(ss.str());
 	});
+	// encoders
+	m.def("encodeInt8ToByte", &py_encodeInt8ToByte);
+	m.def("encodeFourByteInt", &py_encodeFourByteInt);
+	m.def("encodeRunLengthChar", &py_encodeRunLengthChar);
+	m.def("encodeRunLengthDeltaInt", &py_encodeRunLengthDeltaInt);
+	m.def("encodeDeltaRecursiveFloat", &py_encodeDeltaRecursiveFloat);
 }
+//
+///** Encode string vector encoding (type 5)
+// * @param[in] in_sv         Vector of strings to encode
+// * @param[in] CHAIN_LEN     Maximum length of string
+// * @return Char vector of encoded bytes
+// */
+//inline std::vector<char> encodeStringVector(std::vector<std::string> in_sv, int32_t CHAIN_LEN);
+//
+///** Encode Run Length Delta Int encoding (type 8)
+// * @param[in] int_vec       Vector of ints to encode
+// * @return Char vector of encoded bytes
+// */
+//inline std::vector<char> encodeRunLengthDeltaInt(std::vector<int32_t> int_vec);
+//
+///** Encode Run Length Float encoding (type 9)
+// * @param[in] floats_in     Vector of floats to encode
+// * @param[in] multiplier    Multiplier to convert float to int
+// * @return Char vector of encoded bytes
+// */
+//inline std::vector<char> encodeRunLengthFloat(std::vector<float> floats_in, int32_t multiplier);
+//
+///** Encode Delta Recursive Float encoding (type 10)
+// * @param[in] floats_in     Vector of floats to encode
+// * @param[in] multiplier    Multiplier to convert float to int
+// * @return Char vector of encoded bytes
+// */
+//inline std::vector<char> encodeDeltaRecursiveFloat(std::vector<float> floats_in, int32_t multiplier);
+//
+///** Encode Run-Length 8bit int encoding (type 16)
+// * @param[in] int8_vec     Vector of ints to encode
+// * @return Char vector of encoded bytes
+// */
+//inline std::vector<char> encodeRunLengthInt8(std::vector<int8_t> int8_vec);
+//
+//

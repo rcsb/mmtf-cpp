@@ -98,21 +98,21 @@ inline std::vector<char> encodeInt8ToByte(std::vector<int8_t> vec_in);
  * @param[in] vec_in        Vector of ints to encode
  * @return Char vector of encoded bytes
  */
-inline std::vector<char> encodeFourByteInt(std::vector<int32_t> vec_in);
+inline std::vector<char> encodeFourByteInt(std::vector<int32_t> const & vec_in);
 
 /** Encode string vector encoding (type 5)
  * @param[in] in_sv         Vector of strings to encode
  * @param[in] CHAIN_LEN     Maximum length of string
  * @return Char vector of encoded bytes
  */
-inline std::vector<char> encodeStringVector(std::vector<std::string> in_sv, int32_t CHAIN_LEN);
+inline std::vector<char> encodeStringVector(std::vector<std::string> const & in_sv, int32_t const CHAIN_LEN);
 
 
 /** Encode Run Length Char encoding (type 6)
  * @param[in] in_cv         Vector of chars to encode
  * @return Char vector of encoded bytes
  */
-inline std::vector<char> encodeRunLengthChar(std::vector<char> in_cv);
+inline std::vector<char> encodeRunLengthChar(std::vector<char> const & in_cv);
 
 
 /** Encode Run Length Delta Int encoding (type 8)
@@ -126,20 +126,20 @@ inline std::vector<char> encodeRunLengthDeltaInt(std::vector<int32_t> int_vec);
  * @param[in] multiplier    Multiplier to convert float to int
  * @return Char vector of encoded bytes
  */
-inline std::vector<char> encodeRunLengthFloat(std::vector<float> floats_in, int32_t multiplier);
+inline std::vector<char> encodeRunLengthFloat(std::vector<float> const & floats_in, int32_t const multiplier);
 
 /** Encode Delta Recursive Float encoding (type 10)
  * @param[in] floats_in     Vector of floats to encode
  * @param[in] multiplier    Multiplier to convert float to int
  * @return Char vector of encoded bytes
  */
-inline std::vector<char> encodeDeltaRecursiveFloat(std::vector<float> floats_in, int32_t multiplier);
+inline std::vector<char> encodeDeltaRecursiveFloat(std::vector<float> const & floats_in, int32_t const multiplier);
 
 /** Encode Run-Length 8bit int encoding (type 16)
  * @param[in] int8_vec     Vector of ints to encode
  * @return Char vector of encoded bytes
  */
-inline std::vector<char> encodeRunLengthInt8(std::vector<int8_t> int8_vec);
+inline std::vector<char> encodeRunLengthInt8(std::vector<int8_t> const & int8_vec);
 
 // *************************************************************************
 // IMPLEMENTATION
@@ -148,7 +148,7 @@ inline std::vector<char> encodeRunLengthInt8(std::vector<int8_t> int8_vec);
 namespace { // private helpers
 
 inline std::vector<int32_t> convertFloatsToInts(std::vector<float> const & vec_in,
-                                            int multiplier) {
+                                            int const multiplier) {
   std::vector<int32_t> vec_out;
   for (size_t i=0; i<vec_in.size(); ++i) {
     vec_out.push_back(static_cast<int32_t>(round(vec_in[i]*multiplier)));
@@ -242,7 +242,7 @@ inline std::vector<char> encodeInt8ToByte(std::vector<int8_t> vec_in) {
 }
 
 
-inline std::vector<char> encodeFourByteInt(std::vector<int32_t> vec_in) {
+inline std::vector<char> encodeFourByteInt(std::vector<int32_t> const & vec_in) {
   std::stringstream ss;
   add_header(ss, vec_in.size(), 4, 0);
   for (size_t i=0; i<vec_in.size(); ++i) {
@@ -253,7 +253,7 @@ inline std::vector<char> encodeFourByteInt(std::vector<int32_t> vec_in) {
 }
 
 
-inline std::vector<char> encodeStringVector(std::vector<std::string> in_sv, int32_t CHAIN_LEN) {
+inline std::vector<char> encodeStringVector(std::vector<std::string> const & in_sv, int32_t const CHAIN_LEN) {
   char NULL_BYTE = 0x00;
   std::stringstream ss;
   add_header(ss, in_sv.size(), 5, CHAIN_LEN);
@@ -271,7 +271,7 @@ inline std::vector<char> encodeStringVector(std::vector<std::string> in_sv, int3
 }
 
 
-inline std::vector<char> encodeRunLengthChar(std::vector<char> in_cv) {
+inline std::vector<char> encodeRunLengthChar(std::vector<char> const & in_cv) {
   std::stringstream ss;
   add_header(ss, in_cv.size(), 6, 0);
   std::vector<int32_t> int_vec = runLengthEncode(in_cv);
@@ -295,7 +295,7 @@ inline std::vector<char> encodeRunLengthDeltaInt(std::vector<int32_t> int_vec) {
   return stringstreamToCharVector(ss);
 }
 
-inline std::vector<char> encodeRunLengthFloat(std::vector<float> floats_in, int32_t multiplier) {
+inline std::vector<char> encodeRunLengthFloat(std::vector<float> const & floats_in, int32_t const multiplier) {
   std::stringstream ss;
   add_header(ss, floats_in.size(), 9, multiplier);
   std::vector<int32_t> int_vec = convertFloatsToInts(floats_in, multiplier);
@@ -308,7 +308,7 @@ inline std::vector<char> encodeRunLengthFloat(std::vector<float> floats_in, int3
 }
 
 
-inline std::vector<char> encodeDeltaRecursiveFloat(std::vector<float> floats_in, int32_t multiplier) {
+inline std::vector<char> encodeDeltaRecursiveFloat(std::vector<float> const & floats_in, int32_t const multiplier) {
   std::stringstream ss;
   add_header(ss, floats_in.size(), 10, multiplier);
   std::vector<int32_t> int_vec = convertFloatsToInts(floats_in, multiplier);
@@ -322,10 +322,10 @@ inline std::vector<char> encodeDeltaRecursiveFloat(std::vector<float> floats_in,
 }
 
 
-inline std::vector<char> encodeRunLengthInt8(std::vector<int8_t> int8_vec) {
+inline std::vector<char> encodeRunLengthInt8(std::vector<int8_t> const & int8_vec) {
   std::stringstream ss;
   add_header(ss, int8_vec.size(), 16, 0);
-  std::vector<int32_t> int_vec = runLengthEncode(int8_vec);
+  std::vector<int32_t> const int_vec = runLengthEncode(int8_vec);
   for (size_t i=0; i<int_vec.size(); ++i) {
     int32_t temp = htonl(int_vec[i]);
     ss.write(reinterpret_cast< char * >(&temp), sizeof(temp));
