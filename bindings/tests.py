@@ -173,6 +173,14 @@ def test_FourByteInt():
     ret = mmtf_cpp.encodeFourByteInt(decoded_data)
     assert ret == encoded_data
 
+# TODO figure out numpy array -> c++ vector string
+# def test_encodeStringVector():
+#     encoded_data = b'\x00\x00\x00\x05\x00\x00\x00\x06\x00\x00\x00\x04B\x00\x00\x00A\x00\x00\x00C\x00\x00\x00A\x00\x00\x00A\x00\x00\x00A\x00\x00\x00'
+#     decoded_data = np.array(("B", "A", "C", "A", "A", "A"))
+#     ret = mmtf_cpp.encodeStringVector(decoded_data, 4)
+#     assert ret == encoded_data
+
+
 
 def test_atomProperties(test_data_dir):
     working_mmtf_fn = os.path.join(test_data_dir, "mmtf_spec/test-suite/mmtf/173D.mmtf")
@@ -184,49 +192,8 @@ def test_atomProperties(test_data_dir):
     sd.write_to_file("atomProperties_test.mmtf")
     sd2 = StructureData("atomProperties_test.mmtf")
     assert sd2.atomProperties["256_atomColorList"] == random_data
-    assert mmtf_cpp.decBin(sd2.atomProperties["256_atomColorList_encoded"]) == encoded_random_data
-    # mmtf_cpp.CPPBinaryDecoder(sd2.atomProperties["256_atomColorList_encoded"], b'xxx')
-    # assert random_data == mmtf_cpp.CPPBinaryDecoder(sd2.atomProperties["256_atomColorList_encoded"]).decode()
-
-
-##// test/example of how to use extra data
-##TEST_CASE("atomProperties field") {
-##  std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
-##  mmtf::StructureData sd, sd2;
-##  mmtf::decodeFromFile(sd, working_mmtf);
-##
-##  /// Pack
-##  // 1. Make your input data
-##  std::vector<int32_t> clist_out;
-##  std::vector<int32_t> clist_in, clist_in_decoded, nothing;
-##  for (int32_t i = 0; i < sd.numAtoms; ++i) {
-##    clist_out.push_back(i % 256);
-##  }
-##  // 2. msgpack zones have weird lifetimes, make sure you use the zone
-##  // in StructureData to avoid any weird errors
-##  sd.atomProperties["256_atomColorList"]
-##    = msgpack::object(clist_out, sd.msgpack_zone);
-##  sd.atomProperties["256_atomColorList_encoded"]
-##    = msgpack::object(mmtf::encodeRunLengthDeltaInt(clist_out), sd.msgpack_zone);
-##
-##  mmtf::encodeToFile(sd, "test_atomProperties.mmtf");
-##  /// Done Pack
-##
-##  /// Start Unpack
-##  mmtf::decodeFromFile(sd2, "test_atomProperties.mmtf");
-##  // Retrieve our 256 color list via convert
-##  mmtf::MapDecoder atomProperties_MD(sd2.atomProperties);
-##  atomProperties_MD.decode("256_atomColorList", true, clist_in);
-##  atomProperties_MD.decode("256_atomColorList_encoded", true, clist_in_decoded);
-##
-##  /// Done Unpack
-##  REQUIRE(clist_out == clist_in);
-##  REQUIRE(clist_in == clist_in_decoded);
-##
-##  // you would catch mmtf::DecodeError if you wanted continue even after using
-##  // required=true.
-##  REQUIRE_THROWS_AS(atomProperties_MD.decode("NONEXISTANT", true, nothing),
-##                    mmtf::DecodeError);
+    assert sd2.atomProperties["256_atomColorList_encoded"] == encoded_random_data
+    assert (mmtf_cpp.decode_int32(sd2.atomProperties["256_atomColorList_encoded"]) == np.array(random_data)).all()
 ##}
 ##
 ##// simple helper adding vector (numbers 0 to num_items-1) of given length both

@@ -8,6 +8,8 @@
 #include <string>
 #include <sstream>
 
+#include <msgpack.hpp>
+
 namespace py = pybind11;
 
 /// CPP -> PY FUNCTIONS
@@ -128,7 +130,7 @@ raw_properties(mmtf::StructureData const & sd) {
 			{"modelProperties", sd.modelProperties},
 			{"extraProperties", sd.extraProperties}});
 	msgpack::pack(bytes, objs);
-	return py::bytes(bytes.str().data());
+	return py::bytes(bytes.str());
 }
 
 
@@ -234,7 +236,7 @@ py_array_to_vector(py::array_t<T, py::array::c_style | py::array::forcecast> con
 template<>
 std::vector<char>
 py_array_to_vector(py::array_t<char, py::array::c_style | py::array::forcecast> const & array_in) {
-	std::string tmpstr(array_in.data());
+	std::string tmpstr(array_in.data(), array_in.size());
 	std::vector<char> vec_array(tmpstr.begin(), tmpstr.end());
 	return vec_array;
 }
@@ -275,6 +277,36 @@ py_encodeDeltaRecursiveFloat(py::array_t<float, py::array::c_style | py::array::
 	return py::bytes(encoded.data(), encoded.size());
 }
 
+py::bytes
+py_encodeRunLengthFloat(py::array_t<float, py::array::c_style | py::array::forcecast> const & array_in, int32_t const multiplier = 1000) {
+	std::vector<float> const cpp_vec(py_array_to_vector<float>(array_in));
+	std::vector<char> encoded(mmtf::encodeRunLengthFloat(cpp_vec, multiplier));
+	return py::bytes(encoded.data(), encoded.size());
+}
+
+
+
+py::bytes
+py_encodeRunLengthInt8(py::array_t<int8_t, py::array::c_style | py::array::forcecast> const & array_in) {
+	std::vector<int8_t> const cpp_vec(py_array_to_vector<int8_t>(array_in));
+	std::vector<char> encoded(mmtf::encodeRunLengthInt8(cpp_vec));
+	return py::bytes(encoded.data(), encoded.size());
+}
+
+// TODO pyarray POD types to numpy array? seems hard
+//py::bytes
+//py_encodeStringVector4(py::array_t<std::array<char, 4>> const & array_in) {
+//	using np_str_t = std::array<char, 4>;
+//	pybind11::array_t<np_str_t> cstring_array(vector.size());
+//	const char * data = 
+//	np_str_t* array_of_cstr_ptr = reinterpret_cast<np_str_t*>(cstring_array.request().ptr);
+//
+//
+///* 	std::vector<std::string> tobuild; */
+///* 	std::vector<std::string> const cpp_vec(py_array_to_vector<std::array[char, max_string_size]>(array_in)); */
+///* 	std::vector<char> encoded(mmtf::encodeStringVector(cpp_vec, max_string_size)); */
+///* 	return py::bytes(encoded.data(), encoded.size()); */
+//}
 
 
 std::vector<std::string>
@@ -286,7 +318,80 @@ char_vector_to_string_vector(std::vector<char> const & cvec) {
 	return ret;
 }
 
+void
+set_properties(mmtf::StructureData & sd, py::bytes const & bytes_in) {
+	std::size_t offset(0);
+	std::string const xbits(bytes_in);
+	msgpack::object tmp_object(msgpack::unpack(sd.msgpack_zone, xbits.data(), xbits.size(), offset));
+	std::map< std::string, std::map< std::string, msgpack::object> > tmp_target;
+	tmp_object.convert(tmp_target);
+	sd.bondProperties = tmp_target["bondProperties"];
+	sd.atomProperties = tmp_target["atomProperties"];
+	sd.groupProperties = tmp_target["groupProperties"];
+	sd.chainProperties = tmp_target["chainProperties"];
+	sd.modelProperties = tmp_target["modelProperties"];
+	sd.extraProperties = tmp_target["extraProperties"];
+}
+
+
+py::array
+binary_decode_int32(py::bytes const & bytes) {
+	using namespace pybind11::literals;
+	std::string const tmpstr(bytes);
+	std::vector<int32_t> tmp;
+	mmtf::BinaryDecoder bd(tmpstr);
+	bd.decode(tmp);
+	return array1d_from_vector<int32_t>(tmp);
+}
+
+py::array
+binary_decode_int16(py::bytes const & bytes) {
+	using namespace pybind11::literals;
+	std::string const tmpstr(bytes);
+	std::vector<int16_t> tmp;
+	mmtf::BinaryDecoder bd(tmpstr);
+	bd.decode(tmp);
+	return array1d_from_vector<int16_t>(tmp);
+}
+
+py::array
+binary_decode_int8(py::bytes const & bytes) {
+	using namespace pybind11::literals;
+	std::string const tmpstr(bytes);
+	std::vector<int8_t> tmp;
+	mmtf::BinaryDecoder bd(tmpstr);
+	bd.decode(tmp);
+	return array1d_from_vector<int8_t>(tmp);
+}
+
+
+py::array
+binary_decode_char(py::bytes const & bytes) {
+	using namespace pybind11::literals;
+	std::string const tmpstr(bytes);
+	std::vector<char> tmp;
+	mmtf::BinaryDecoder bd(tmpstr);
+	bd.decode(tmp);
+	return array1d_from_vector<char>(tmp);
+}
+
+py::array
+binary_decode_float(py::bytes const & bytes) {
+	using namespace pybind11::literals;
+	std::string const tmpstr(bytes);
+	std::vector<float> tmp;
+	mmtf::BinaryDecoder bd(tmpstr);
+	bd.decode(tmp);
+	return array1d_from_vector<float>(tmp);
+}
+
+
 PYBIND11_MODULE(mmtf_cpp, m) {
+	m.def("decode_int32", &binary_decode_int32, "decode array[int32_t]");
+	m.def("decode_int16", &binary_decode_int16, "decode array[int16_t]");
+	m.def("decode_int8", &binary_decode_int8, "decode array[int8_t]");
+	m.def("decode_char", &binary_decode_char, "decode array[char]");
+	m.def("decode_float", &binary_decode_float, "decode array[float]");
 	// new stuff here
 	py::class_<mmtf::StructureData>(m, "CPPStructureData")
 		.def( pybind11::init( [](){ return new mmtf::StructureData(); } ) )
@@ -368,6 +473,7 @@ PYBIND11_MODULE(mmtf_cpp, m) {
 		.def_readwrite("groupsPerChain_io", &mmtf::StructureData::groupsPerChain)
 		.def("chainsPerModel", [](mmtf::StructureData &m){return array1d_from_vector(m.chainsPerModel);})
 		.def_readwrite("chainsPerModel_io", &mmtf::StructureData::chainsPerModel)
+		.def("set_properties", [](mmtf::StructureData & sd, py::bytes const & bytes_in){set_properties(sd, bytes_in);})
 		.def("raw_properties", [](mmtf::StructureData const &m){return raw_properties(m);});
  
 	// I think it would be ideal to not pass in the sd, but it is still very
@@ -389,39 +495,7 @@ PYBIND11_MODULE(mmtf_cpp, m) {
 	m.def("encodeRunLengthChar", &py_encodeRunLengthChar);
 	m.def("encodeRunLengthDeltaInt", &py_encodeRunLengthDeltaInt);
 	m.def("encodeDeltaRecursiveFloat", &py_encodeDeltaRecursiveFloat);
+	m.def("encodeRunLengthFloat", &py_encodeRunLengthFloat);
+	m.def("encodeRunLengthInt8", &py_encodeRunLengthInt8);
+	//m.def("encodeStringVector", &py_encodeStringVector);
 }
-//
-///** Encode string vector encoding (type 5)
-// * @param[in] in_sv         Vector of strings to encode
-// * @param[in] CHAIN_LEN     Maximum length of string
-// * @return Char vector of encoded bytes
-// */
-//inline std::vector<char> encodeStringVector(std::vector<std::string> in_sv, int32_t CHAIN_LEN);
-//
-///** Encode Run Length Delta Int encoding (type 8)
-// * @param[in] int_vec       Vector of ints to encode
-// * @return Char vector of encoded bytes
-// */
-//inline std::vector<char> encodeRunLengthDeltaInt(std::vector<int32_t> int_vec);
-//
-///** Encode Run Length Float encoding (type 9)
-// * @param[in] floats_in     Vector of floats to encode
-// * @param[in] multiplier    Multiplier to convert float to int
-// * @return Char vector of encoded bytes
-// */
-//inline std::vector<char> encodeRunLengthFloat(std::vector<float> floats_in, int32_t multiplier);
-//
-///** Encode Delta Recursive Float encoding (type 10)
-// * @param[in] floats_in     Vector of floats to encode
-// * @param[in] multiplier    Multiplier to convert float to int
-// * @return Char vector of encoded bytes
-// */
-//inline std::vector<char> encodeDeltaRecursiveFloat(std::vector<float> floats_in, int32_t multiplier);
-//
-///** Encode Run-Length 8bit int encoding (type 16)
-// * @param[in] int8_vec     Vector of ints to encode
-// * @return Char vector of encoded bytes
-// */
-//inline std::vector<char> encodeRunLengthInt8(std::vector<int8_t> int8_vec);
-//
-//

@@ -79,8 +79,8 @@ private:
 
     // helper function for constructors
     void
-    initFromMsgpackObj(const msgpack::object& obj,
-                       const std::string& key = "UNNAMED_BINARY");
+    initFromData(const char * str_data,
+                 const std::size_t len);
 
     // check length consistency (throws)
     void checkLength_(int32_t exp_length) const;
@@ -183,8 +183,17 @@ void arrayCopyBigendian2(void* dst, const char* src, size_t n) {
 
 
 // note this does not set key_, you must set it in ctor
-inline void BinaryDecoder::initFromMsgpackObj(const msgpack::object& obj,
-                                         const std::string& key) {
+inline void BinaryDecoder::initFromData(const char * bytes, std::size_t const len) {
+    assignBigendian4(&strategy_, bytes);
+    assignBigendian4(&length_, bytes + 4);
+    assignBigendian4(&parameter_, bytes + 8);
+    encodedData_ = bytes + 12;
+    encodedDataLength_ = len - 12;
+}
+
+inline BinaryDecoder::BinaryDecoder(const msgpack::object& obj,
+                                    const std::string& key)
+                                   : key_(key) {
     // sanity checks
     if (obj.type != msgpack::type::BIN) {
         throw DecodeError("The '" + key + "' entry is not binary data");
@@ -194,28 +203,13 @@ inline void BinaryDecoder::initFromMsgpackObj(const msgpack::object& obj,
         err << "The '" + key + "' entry is too short " << obj.via.bin.size;
         throw DecodeError(err.str());
     }
-    // get data (encoded data is only pointed to and not parsed here)
-    const char* bytes = obj.via.bin.ptr;
-
-    assignBigendian4(&strategy_, bytes);
-    assignBigendian4(&length_, bytes + 4);
-    assignBigendian4(&parameter_, bytes + 8);
-    encodedData_ = bytes + 12;
-    encodedDataLength_ = obj.via.bin.size - 12;
-}
-
-inline BinaryDecoder::BinaryDecoder(const msgpack::object& obj,
-                                    const std::string& key)
-                                   : key_(key) {
-    this->initFromMsgpackObj(obj, key);
+    this->initFromData(obj.via.bin.ptr, obj.via.bin.size);
 }
 
 inline BinaryDecoder::BinaryDecoder(const std::string& str,
                                     const std::string& key)
                                    : key_(key) {
-    msgpack::object_handle tmp_h(msgpack::unpack(str.data(), str.size()));
-    msgpack::object obj = tmp_h.get();
-    this->initFromMsgpackObj(obj, key);
+    this->initFromData(str.data(), str.size());
 }
 
 template<typename T>
