@@ -34,14 +34,14 @@ matrix:
   fast_finish: true
   include:
     - os: linux
-      env: EMSCRIPTEN=ON
+      env: EMSCRIPTEN=ON TEST_COMMAND=$TRAVIS_BUILD_DIR/ci/build_and_run_tests.sh
       addons: *linux64
     - os: linux
       compiler: clang
       addons: *linux64
     - os: linux
       compiler: gcc
-      env: ARCH=x86 CMAKE_EXTRA=-DHAVE_LIBM=/lib32/libm.so.6
+      env: ARCH=x86 CMAKE_EXTRA=-DHAVE_LIBM=/lib32/libm.so.6 TEST_COMMAND=$TRAVIS_BUILD_DIR/ci/build_and_run_tests.sh
       addons: *linux32
     - os: osx
       compiler: clang
