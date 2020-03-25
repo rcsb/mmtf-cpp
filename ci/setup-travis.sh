@@ -25,9 +25,17 @@ if [[ "$EMSCRIPTEN" == "ON" ]]; then
 fi
 
 if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    if [[ "$CC" == "gcc" ]]; then
-        export CC=gcc-4.8
-        export CXX=g++-4.8
+    if [[ "$TRAVIS_DIST" == "trusty" ]]; then
+        if [[ "$CC" == "gcc" ]]; then
+            export CC=gcc-4.8
+            export CXX=g++-4.8
+        fi
+    fi
+    if [[ "$TRAVIS_DIST" == "bionic" ]]; then
+        if [[ "$CC" == "gcc" ]]; then
+            export CC=gcc-7.4.0
+            export CXX=g++-7.4.0
+        fi
     fi
 fi
 

@@ -21,8 +21,16 @@ linux32_addons:
         - linux-libc-dev:i386
         - libc6-dev-i386
 
+linux64_cpp17addons:
+    addons: &linux64
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - g++-7.4.0
+
 # Set empty values for allow_failures to work
-env:
+env: TEST_COMMAND=$TRAVIS_BUILD_DIR/ci/build_and_run_tests.sh
 
 matrix:
   fast_finish: true
@@ -39,6 +47,11 @@ matrix:
       addons: *linux32
     - os: osx
       compiler: clang
+    - os: linux
+      compiler: gcc
+      addons: *linux64_cpp17addons
+      dist: Bionic
+
 
 before_install:
   # Setting environement
@@ -48,10 +61,4 @@ before_install:
   - $CXX --version
 
 script:
-  - cd $TRAVIS_BUILD_DIR
-  - mkdir build && cd build
-  - $CMAKE_CONFIGURE cmake $CMAKE_ARGS $CMAKE_EXTRA ..
-  - make -j2
-  - ctest -j2 --output-on-failure
-  - bash $TRAVIS_BUILD_DIR/ci/travis-test-example.sh
-  - cd $TRAVIS_BUILD_DIR
+  - (eval "$TEST_COMMAND")
