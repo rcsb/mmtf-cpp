@@ -64,14 +64,10 @@ class CMakeBuild(build_ext):
         env["CXXFLAGS"] = '{} -DVERSION_INFO=\\"{}\\"'.format(env.get("CXXFLAGS", ""), self.distribution.get_version())
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
-        print("WORKING FROM", self.build_temp)
         cmake_set_args = ["cmake", ext.sourcedir] + cmake_args
-        print("NOT SURE")
-        print(" ".join(cmake_set_args))
         cmake_build_args = ["cmake", "--build", "."] + build_args
-        print(" ".join(cmake_build_args))
-        subprocess.check_call(["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
-        subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
+        subprocess.check_call(cmake_set_args, cwd=self.build_temp, env=env)
+        subprocess.check_call(cmake_build_args, cwd=self.build_temp)
 
 
 setup(
