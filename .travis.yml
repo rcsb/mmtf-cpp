@@ -50,7 +50,7 @@ matrix:
     - os: linux
       compiler: gcc
       addons: *linux64_cpp17addons
-      dist: Bionic
+      dist: bionic
 
 
 before_install:
