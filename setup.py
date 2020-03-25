@@ -101,5 +101,6 @@ setup(
     install_requires=[
         'numpy',
         'msgpack',
+        'pybind11',
     ],
 )
