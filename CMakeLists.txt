@@ -49,25 +49,23 @@ if (build_py)
     set(CMAKE_CXX_FLAGS_DEBUG "-g")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3")
     add_definitions(-DNDEBUG)
-    add_library(mmtf_py SHARED
-        ${CMAKE_CURRENT_SOURCE_DIR}/bindings/bindings.cpp
+    add_library(mmtf_bindings SHARED
+        ${CMAKE_CURRENT_SOURCE_DIR}/python_bindings/bindings.cpp
     )
 
     set(MSGPACKC_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/msgpack-c/include)
     set(PYBIND_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/pybind11/include)
-    # set(PYTHON_INCLUDE_DIR_A python_include_A)
-    # set(PYTHON_INCLUDE_DIR_B python_include_B)
 
-    target_include_directories(mmtf_py PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-    target_include_directories(mmtf_py PUBLIC ${MSGPACKC_INCLUDE_DIR})
-    target_include_directories(mmtf_py PUBLIC ${PYBIND_INCLUDE_DIR})
-    target_include_directories(mmtf_py PUBLIC ${PYTHON_INCLUDE_DIR_A})
-    target_include_directories(mmtf_py PUBLIC ${PYTHON_INCLUDE_DIR_B})
+    target_include_directories(mmtf_bindings PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    target_include_directories(mmtf_bindings PUBLIC ${MSGPACKC_INCLUDE_DIR})
+    target_include_directories(mmtf_bindings PUBLIC ${PYBIND_INCLUDE_DIR})
+    target_include_directories(mmtf_bindings PUBLIC ${python_include_A})
+    target_include_directories(mmtf_bindings PUBLIC ${python_include_B})
 
-    set_target_properties(mmtf_py PROPERTIES POSITION_INDEPENDENT_CODE ON)
-    set_target_properties(mmtf_py PROPERTIES PREFIX "")
-    set_target_properties(mmtf_py PROPERTIES SUFFIX ".so")
-    set_target_properties(mmtf_py PROPERTIES CXX_STANDARD 11)
+    set_target_properties(mmtf_bindings PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    set_target_properties(mmtf_bindings PROPERTIES PREFIX "")
+    set_target_properties(mmtf_bindings PROPERTIES SUFFIX ".so")
+    set_target_properties(mmtf_bindings PROPERTIES CXX_STANDARD 17)
 endif()
 
 install(

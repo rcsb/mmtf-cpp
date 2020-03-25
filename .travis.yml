@@ -49,6 +49,11 @@ matrix:
       compiler: gcc
       addons: *linux64cpp17
       dist: bionic
+    - os: linux
+      compiler: gcc
+      addons: *linux64cpp17
+      dist: bionic
+      env: TEST_COMMAND=$TRAVIS_BUILD_DIR/ci/build_and_run_python_tests.sh
 
 
 before_install:

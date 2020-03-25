@@ -386,7 +386,7 @@ binary_decode_float(py::bytes const & bytes) {
 }
 
 
-PYBIND11_MODULE(mmtf_cpp, m) {
+PYBIND11_MODULE(mmtf_bindings, m) {
 	m.def("decode_int32", &binary_decode_int32, "decode array[int32_t]");
 	m.def("decode_int16", &binary_decode_int16, "decode array[int16_t]");
 	m.def("decode_int8", &binary_decode_int8, "decode array[int8_t]");
