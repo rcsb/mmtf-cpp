@@ -33,8 +33,8 @@ if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
     fi
     if [[ "$TRAVIS_DIST" == "bionic" ]]; then
         if [[ "$CC" == "gcc" ]]; then
-            export CC=gcc-7.4.0
-            export CXX=g++-7.4.0
+            export CC=gcc-7
+            export CXX=g++-7
         fi
     fi
 fi
