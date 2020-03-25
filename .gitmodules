@@ -1,12 +1,15 @@
 [submodule "Catch2"]
-	path = Catch2
-	url = https://github.com/catchorg/Catch2
-[submodule "msgpack-c"]
-	path = msgpack-c
-	url = https://github.com/msgpack/msgpack-c
+	path = submodules/Catch2
+	url = https://github.com/catchorg/Catch2.git
 [submodule "mmtf_spec"]
-	path = mmtf_spec
-	url = https://github.com/rcsb/mmtf
+	path = submodules/mmtf_spec
+	url = https://github.com/rcsb/mmtf.git
 [submodule "pybind11"]
-	path = pybind11
+	path = submodules/pybind11
 	url = https://github.com/pybind/pybind11.git
+[submodule "submodules/msgpack-c"]
+	path = submodules/msgpack-c
+	url = https://github.com/msgpack/msgpack-c.git
+[submodule "submodules/Catch2"]
+	path = submodules/Catch2
+	url = https://github.com/catchorg/Catch2.git
