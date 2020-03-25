@@ -144,14 +144,17 @@ def cppSD_from_SD(sd: "StructureData"):
     cppsd.chainNameList_io = sd.chainNameList
     cppsd.groupsPerChain_io = sd.groupsPerChain
     cppsd.chainsPerModel_io = sd.chainsPerModel
-    packed_data = msgpack.packb({
+    packed_data = msgpack.packb(
+        {
             "bondProperties": sd.bondProperties,
             "atomProperties": sd.atomProperties,
             "groupProperties": sd.groupProperties,
             "chainProperties": sd.chainProperties,
             "modelProperties": sd.modelProperties,
-            "extraProperties": sd.extraProperties},
-            use_bin_type=True)
+            "extraProperties": sd.extraProperties,
+        },
+        use_bin_type=True,
+    )
     cppsd.set_properties(packed_data)
     return cppsd
 
@@ -217,7 +220,7 @@ class StructureData:
         self.altLocList = cppsd.altLocList()  # slow
         self.occupancyList = cppsd.occupancyList()
         self.groupIdList = cppsd.groupIdList()
-        self.groupTypeList = cppsd.groupTypeList() # slow
+        self.groupTypeList = cppsd.groupTypeList()  # slow
         self.secStructList = cppsd.secStructList()
         self.insCodeList = cppsd.insCodeList()  # slow
         self.sequenceIndexList = cppsd.sequenceIndexList()

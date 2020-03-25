@@ -1,4 +1,3 @@
-
 import os
 import mmtf_cppy
 from mmtf_cppy import CPPStructureData, decodeFromFile, StructureData
@@ -56,9 +55,7 @@ def test_roundtrip(test_data_dir):
 
 
 def test_bad_mmtf(test_data_dir):
-    doesnt_work = [
-    "mmtf_spec/test-suite/mmtf/empty-mmtfVersion99999999.mmtf"
-    ]
+    doesnt_work = ["mmtf_spec/test-suite/mmtf/empty-mmtfVersion99999999.mmtf"]
     for filename in doesnt_work:
         with pytest.raises(RuntimeError) as einfo:
             s1 = StructureData(os.path.join(test_data_dir, filename))
@@ -125,52 +122,53 @@ def test_various_throws(test_data_dir):
 
 
 def test_DeltaRecursiveFloat():
-    encoded_data = b'\x00\x00\x00\x0a\x00\x00\x00\x03\x00\x00\x03\xe8\x7f\xffD\xab\x01\x8f\xff\xca'
+    encoded_data = b"\x00\x00\x00\x0a\x00\x00\x00\x03\x00\x00\x03\xe8\x7f\xffD\xab\x01\x8f\xff\xca"
     decoded_data = np.array([50.346, 50.745, 50.691])
     ret = mmtf_cppy.encodeDeltaRecursiveFloat(decoded_data, 1000)
     assert ret == encoded_data
 
 
 def test_RunLengthFloat():
-    encoded_data = b'\x00\x00\x00\x09\x00\x00\x00\x03\x00\x00\x00\x64\x00\x00\x00\x64\x00\x00\x00\x03'
+    encoded_data = b"\x00\x00\x00\x09\x00\x00\x00\x03\x00\x00\x00\x64\x00\x00\x00\x64\x00\x00\x00\x03"
     decoded_data = np.array([1.0, 1.0, 1.0])
     ret = mmtf_cppy.encodeRunLengthFloat(decoded_data, 100)
     assert ret == encoded_data
 
 
 def test_RunLengthDeltaInt():
-    encoded_data = b'\x00\x00\x00\x08\x00\x00\x00\x07\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x07'
-    decoded_data = np.array(range(1,8))
+    encoded_data = b"\x00\x00\x00\x08\x00\x00\x00\x07\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x07"
+    decoded_data = np.array(range(1, 8))
     ret = mmtf_cppy.encodeRunLengthDeltaInt(decoded_data)
     assert ret == encoded_data
 
 
 def test_RunLengthChar():
-    encoded_data = b'\x00\x00\x00\x06\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x41\x00\x00\x00\x04'
+    encoded_data = b"\x00\x00\x00\x06\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x41\x00\x00\x00\x04"
     decoded_data = np.array(list(map(ord, ("A", "A", "A", "A"))), dtype=np.int8)
     ret = mmtf_cppy.encodeRunLengthChar(decoded_data)
     assert ret == encoded_data
 
 
 def test_RunLengthInt8():
-    encoded_data = b'\x00\x00\x00\x10\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x04'
+    encoded_data = b"\x00\x00\x00\x10\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x04"
     decoded_data = np.array((2, 2, 2, 2), dtype=np.int8)
     ret = mmtf_cppy.encodeRunLengthInt8(decoded_data)
     assert ret == encoded_data
 
 
 def test_Int8():
-    encoded_data = b'\x00\x00\x00\x02\x00\x00\x00\x05\x00\x00\x00\x00\x07\x06\x06\x07\x07'
+    encoded_data = b"\x00\x00\x00\x02\x00\x00\x00\x05\x00\x00\x00\x00\x07\x06\x06\x07\x07"
     decoded_data = np.array((7, 6, 6, 7, 7), dtype=np.int8)
     ret = mmtf_cppy.encodeInt8ToByte(decoded_data)
     assert ret == encoded_data
 
 
 def test_FourByteInt():
-    encoded_data = b'\x00\x00\x00\x04\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x01\x00\x02\x00\x01\x00\x00\x00\x00\x00\x00\x00\x02'
+    encoded_data = b"\x00\x00\x00\x04\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x01\x00\x02\x00\x01\x00\x00\x00\x00\x00\x00\x00\x02"
     decoded_data = np.array((1, 131073, 0, 2), dtype=np.int32)
     ret = mmtf_cppy.encodeFourByteInt(decoded_data)
     assert ret == encoded_data
+
 
 # TODO figure out numpy array -> c++ vector string
 # def test_encodeStringVector():
@@ -178,7 +176,6 @@ def test_FourByteInt():
 #     decoded_data = np.array(("B", "A", "C", "A", "A", "A"))
 #     ret = mmtf_cppy.encodeStringVector(decoded_data, 4)
 #     assert ret == encoded_data
-
 
 
 def test_atomProperties(test_data_dir):
