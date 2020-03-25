@@ -59,4 +59,5 @@ before_install:
   - $CXX --version
 
 script:
+  - echo $TEST_COMMAND
   - (eval "$TEST_COMMAND")
