@@ -29,7 +29,6 @@ linux64_cpp17addons:
 
 # Set empty values for allow_failures to work
 env: TEST_COMMAND=$TRAVIS_BUILD_DIR/ci/build_and_run_tests.sh
-python: 
 
 matrix:
   fast_finish: true
