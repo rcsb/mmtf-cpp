@@ -16,3 +16,6 @@
 [submodule "submodules/--force"]
 	path = submodules/--force
 	url = https://github.com/msgpack/msgpack-c.git
+[submodule "submodules/mmtf_spec"]
+	path = submodules/mmtf_spec
+	url = https://github.com/rcsb/mmtf.git
