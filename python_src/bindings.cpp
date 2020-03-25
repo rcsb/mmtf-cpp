@@ -78,8 +78,8 @@ array2d_from_vector(std::vector<std::vector<T>> & m) {
 // This destroys the original data
 py::list
 dump_bio_assembly_list(mmtf::StructureData & sd) {
-	py::object py_ba_class = py::module::import("structure_data").attr("BioAssembly");
-	py::object py_t_class = py::module::import("structure_data").attr("Transform");
+	py::object py_ba_class = py::module::import("mmtf_cppy").attr("BioAssembly");
+	py::object py_t_class = py::module::import("mmtf_cppy").attr("Transform");
 	py::list bal;
 	for (mmtf::BioAssembly & cba : sd.bioAssemblyList) {
 		py::list transform_list;
@@ -105,7 +105,7 @@ dump_bio_assembly_list(mmtf::StructureData & sd) {
 // This destroys the original data
 py::list
 dump_entity_list(std::vector<mmtf::Entity> & cpp_el) {
-	py::object entity = py::module::import("structure_data").attr("Entity");
+	py::object entity = py::module::import("mmtf_cppy").attr("Entity");
 	py::list el;
 	for (mmtf::Entity & e : cpp_el) {
 		el.append(
@@ -205,7 +205,7 @@ set_groupList(py::list const & obj, mmtf::StructureData & sd) {
 // This destroys the original data
 py::list
 dump_group_list(std::vector<mmtf::GroupType> & gtl) {
-	py::object py_gt_class = py::module::import("structure_data").attr("GroupType");
+	py::object py_gt_class = py::module::import("mmtf_cppy").attr("GroupType");
 	py::list gl;
 	for (mmtf::GroupType & gt : gtl) {
 		gl.append(

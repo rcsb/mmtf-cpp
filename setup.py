@@ -79,6 +79,7 @@ class CMakeBuild(build_ext):
                               cwd=self.build_temp)
 
 
+
 setup(
     name='mmtf_bindings',
     version="0.1.0",
@@ -87,10 +88,18 @@ setup(
     url='https://github.com/rcsb/mmtf-cpp',
     description='A hybrid Python/C++ test project',
     long_description=open("README.md").read(),
-    packages=find_packages('python_src'),
+    packages=find_packages('python_src', exclude=['tests', "python_src/tests"]),
     package_dir={'': 'python_src'},
     ext_modules=[CMakeExtension('mmtf_cppy/')],
     cmdclass=dict(build_ext=CMakeBuild),
     test_suite='tests',
     zip_safe=False,
+    tests_require=[
+        "pytest",
+        "pytest-cov"
+    ],
+    install_requires=[
+        'numpy',
+        'msgpack',
+    ],
 )
