@@ -125,8 +125,8 @@ TEST_CASE("Test round trip StructureData working") {
   works.push_back("../submodules/mmtf_spec/test-suite/mmtf/empty-all0.mmtf");
   works.push_back("../submodules/mmtf_spec/test-suite/mmtf/empty-numChains1.mmtf");
   works.push_back("../submodules/mmtf_spec/test-suite/mmtf/empty-numModels1.mmtf");
-  works.push_back("../submodules/temporary_test_data/all_canoncial.mmtf");
-  works.push_back("../submodules/temporary_test_data/1PEF_with_resonance.mmtf");
+  works.push_back("../temporary_test_data/all_canoncial.mmtf");
+  works.push_back("../temporary_test_data/1PEF_with_resonance.mmtf");
   for (size_t i=0; i<works.size(); ++i) {
     mmtf::StructureData sd1, sd2;
     mmtf::decodeFromFile(sd1, works[i]);
@@ -632,7 +632,7 @@ TEST_CASE("Test bondOrderList vs bondAtomList") {
 
 
 TEST_CASE("test valid bonds") {
-  std::string working_mmtf = "../submodules/temporary_test_data/all_canoncial.mmtf";
+  std::string working_mmtf = "../temporary_test_data/all_canoncial.mmtf";
   mmtf::StructureData sd;
   mmtf::decodeFromFile(sd, working_mmtf);
   REQUIRE(sd.hasConsistentData());
@@ -695,7 +695,7 @@ TEST_CASE("test valid bonds") {
 
 
 TEST_CASE("test group export optional") {
-  std::string working_mmtf = "../submodules/temporary_test_data/all_canoncial.mmtf";
+  std::string working_mmtf = "../temporary_test_data/all_canoncial.mmtf";
   mmtf::StructureData sd;
   mmtf::decodeFromFile(sd, working_mmtf);
   REQUIRE(sd.hasConsistentData());
@@ -1003,7 +1003,7 @@ TEST_CASE("Test various encode and decode options") {
 }
 
 TEST_CASE("Test is_hetatm (chain_index version)") {
-  std::string working_mmtf = "../submodules/temporary_test_data/3zqs.mmtf";
+  std::string working_mmtf = "../temporary_test_data/3zqs.mmtf";
   mmtf::StructureData sd;
   mmtf::decodeFromFile(sd, working_mmtf);
 
