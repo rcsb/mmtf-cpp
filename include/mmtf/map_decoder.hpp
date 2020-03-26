@@ -243,7 +243,7 @@ inline void MapDecoder::init_from_msgpack_obj(const msgpack::object& obj) {
 
 inline void MapDecoder::checkType_(const std::string& key,
                                    msgpack::type::object_type type,
-                                   const float& target) const {
+                                   const float&) const {
     if (type != msgpack::type::FLOAT32 && type != msgpack::type::FLOAT64) {
         std::cerr << "Warning: Non-float type " << type << " found for "
                      "entry " << key << std::endl;
@@ -251,7 +251,7 @@ inline void MapDecoder::checkType_(const std::string& key,
 }
 inline void MapDecoder::checkType_(const std::string& key,
                                    msgpack::type::object_type type,
-                                   const int32_t& target) const {
+                                   const int32_t&) const {
     if (   type != msgpack::type::POSITIVE_INTEGER
         && type != msgpack::type::NEGATIVE_INTEGER) {
         std::cerr << "Warning: Non-int type " << type << " found for "
@@ -260,7 +260,7 @@ inline void MapDecoder::checkType_(const std::string& key,
 }
 inline void MapDecoder::checkType_(const std::string& key,
                                    msgpack::type::object_type type,
-                                   const char& target) const {
+                                   const char&) const {
     if (type != msgpack::type::STR) {
         std::cerr << "Warning: Non-string type " << type << " found for "
                      "entry " << key << std::endl;
@@ -268,7 +268,7 @@ inline void MapDecoder::checkType_(const std::string& key,
 }
 inline void MapDecoder::checkType_(const std::string& key,
                                    msgpack::type::object_type type,
-                                   const std::string& target) const {
+                                   const std::string&) const {
     if (type != msgpack::type::STR) {
         std::cerr << "Warning: Non-string type " << type << " found for "
                      "entry " << key << std::endl;
@@ -278,7 +278,7 @@ inline void MapDecoder::checkType_(const std::string& key,
 template <typename T>
 void MapDecoder::checkType_(const std::string& key,
                             msgpack::type::object_type type,
-                            const std::vector<T>& target) const {
+                            const std::vector<T>&) const {
     if (type != msgpack::type::ARRAY && type != msgpack::type::BIN) {
         std::cerr << "Warning: Non-array type " << type << " found for "
                      "entry " << key << std::endl;
@@ -287,9 +287,9 @@ void MapDecoder::checkType_(const std::string& key,
 
 
 template <typename T>
-void MapDecoder::checkType_(const std::string& key,
-                            msgpack::type::object_type type,
-                            const T & target) const {
+void MapDecoder::checkType_(const std::string&,
+                            msgpack::type::object_type,
+                            const T &) const {
     // Do nothing -- allow all through
 }
 
