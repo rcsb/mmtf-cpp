@@ -49,7 +49,6 @@ if (build_py)
     set(CMAKE_CXX_FLAGS "-Wall -Wextra")
     set(CMAKE_CXX_FLAGS_DEBUG "-g")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-    add_definitions(-DNDEBUG)
     add_library(mmtf_bindings SHARED
         ${CMAKE_CURRENT_SOURCE_DIR}/python_src/bindings.cpp
     )
