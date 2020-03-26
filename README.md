@@ -52,6 +52,10 @@ For your more complicated projects, a `CMakeLists.txt` is included for you.
 The C++ MMTF library now can build python bindings using pybind11.  To use them
 you must have A) a c++11 compatible compiler and B) python >= 3.6
 
+to install, it is as simple as `pip install .`
+
+(in the future possible `pip install mmtf-cpp`)
+
 ```python
 from mmtf_cppy import StructureData
 import numpy as np
