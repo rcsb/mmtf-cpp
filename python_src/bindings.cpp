@@ -59,20 +59,34 @@ array1d_from_vector(std::vector<std::string> & m) {
 	return py::array(py::cast(std::move(m)));
 }
 
-// This destroys the original data
+template <typename T>
+std::vector<T>
+flatten2D(std::vector<std::vector<T>> const & v) {
+	std::size_t total_size = 0;
+	for (auto const & x : v)
+			total_size += x.size();
+	std::vector<T> result;
+	result.reserve(total_size);
+	for (auto const & subv : v)
+			result.insert(result.end(), subv.begin(), subv.end());
+	return result;
+}
+
+
+// would be nice if this was faster
 template< typename T >
 py::array
-array2d_from_vector(std::vector<std::vector<T>> & m) {
+array2D_from_vector(std::vector<std::vector<T>> const & m) {
 	if (m.empty()) return py::array_t<T>();
-	std::vector<std::vector<T>>* ptr = new std::vector<std::vector<T>>(std::move(m));
+	std::vector<T>* ptr = new std::vector<T>(flatten2D(m));
 	auto capsule = py::capsule(ptr, [](void* p) {
-			delete reinterpret_cast<std::vector<std::vector<T>>*>(p);
+			delete reinterpret_cast<std::vector<T>*>(p);
 	});
 	return py::array_t<T>(
-			{ptr->size(), ptr->at(0).size()},           // shape of array
-			{ptr->at(0).size()*sizeof(T), sizeof(T)},   // c-style contiguous strides
-			capsule                                     // numpy array references this parent
-	);
+			{m.size(), m.at(0).size()},           // shape of array
+			{m.at(0).size()*sizeof(T), sizeof(T)},   // c-style contiguous strides
+			ptr->data(),
+			capsule);
 }
 
 // This destroys the original data
@@ -405,8 +419,8 @@ PYBIND11_MODULE(mmtf_bindings, m) {
 		.def_readwrite("title", &mmtf::StructureData::title)
 		.def_readwrite("depositionDate", &mmtf::StructureData::depositionDate)
 		.def_readwrite("releaseDate", &mmtf::StructureData::releaseDate)
-		.def("ncsOperatorList", [](mmtf::StructureData &m){return array2d_from_vector(m.ncsOperatorList);})
-		.def_readwrite("ncsOperatorList_io", &mmtf::StructureData::ncsOperatorList)
+		.def("ncsOperatorList", [](mmtf::StructureData &m){return array2D_from_vector<float>(m.ncsOperatorList);})
+		.def_readwrite("ncsOperatorList_io", &mmtf::StructureData::ncsOperatorList, py::return_value_policy::move)
 		.def("bioAssemblyList", [](mmtf::StructureData &m){return dump_bio_assembly_list(m);})
 		.def_readwrite("bioAssemblyList_io", &mmtf::StructureData::bioAssemblyList)
 		.def("entityList", [](mmtf::StructureData &m){return dump_entity_list(m.entityList);})
