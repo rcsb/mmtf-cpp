@@ -28,8 +28,8 @@ linux64_cpp17addons:
         - ubuntu-toolchain-r-test
 
 
-linux64_cpp17addons_py36:
-    addons: &linux64cpp17py36
+linux64_cpp17addons_py:
+    addons: &linux64cpp17py
       apt:
         sources:
         - ubuntu-toolchain-r-test
@@ -61,21 +61,21 @@ matrix:
       dist: bionic
     - os: linux
       compiler: gcc
-      addons: *linux64cpp17py36
+      addons: *linux64cpp17py
       dist: bionic
       env: TEST_COMMAND=$TRAVIS_BUILD_DIR/ci/build_and_run_python_tests.sh CC=gcc
       python: 3.6
       language: python
     - os: linux
       compiler: gcc
-      addons: *linux64cpp17py36
+      addons: *linux64cpp17py
       dist: bionic
       env: TEST_COMMAND=$TRAVIS_BUILD_DIR/ci/build_and_run_python_tests.sh CC=gcc
       python: 3.7
       language: python
     - os: linux
       compiler: gcc
-      addons: *linux64cpp17py36
+      addons: *linux64cpp17py
       dist: bionic
       env: TEST_COMMAND=$TRAVIS_BUILD_DIR/ci/build_and_run_python_tests.sh CC=gcc
       python: 3.8
