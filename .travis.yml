@@ -63,7 +63,7 @@ matrix:
       compiler: gcc
       addons: *linux64cpp17py
       dist: bionic
-      env: TEST_COMMAND=$TRAVIS_BUILD_DIR/ci/build_and_run_python_tests.sh CC=gcc
+      env: TEST_COMMAND=$TRAVIS_BUILD_DIR/ci/build_and_run_python_tests.sh
       python: 3.6
       language: python
     - os: linux
