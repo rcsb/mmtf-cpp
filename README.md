@@ -83,18 +83,18 @@ Example codes:
 - mmtf_demo.cpp: Loads an MMTF file and checks internal consistency using
             mmtf::StructureData::hasConsistentData.
 ```bash
-./examples/mmtf_demo ../mmtf_spec/test-suite/mmtf/173D.mmtf
+./examples/mmtf_demo ../submodules/mmtf_spec/test-suite/mmtf/173D.mmtf
 ```
 - traverse.cpp: Loads an MMTF file and dumps it in human-readable forms.
 ```bash
-./examples/traverse ../mmtf_spec/test-suite/mmtf/173D.mmtf
-./examples/traverse ../mmtf_spec/test-suite/mmtf/173D.mmtf json
-./examples/traverse ../mmtf_spec/test-suite/mmtf/173D.mmtf print
+./examples/traverse ../submodules/mmtf_spec/test-suite/mmtf/173D.mmtf
+./examples/traverse ../submodules/mmtf_spec/test-suite/mmtf/173D.mmtf json
+./examples/traverse ../submodules/mmtf_spec/test-suite/mmtf/173D.mmtf print
 ```
 
 - print_as_pdb.cpp: Loads an MMTF file and prints it in pdb format.
 ```bash
-./examples/print_as_pdb ../mmtf_spec/test-suite/mmtf/173D.mmtf
+./examples/print_as_pdb ../submodules/mmtf_spec/test-suite/mmtf/173D.mmtf
 ```
 
 ## Benchmark
