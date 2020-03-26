@@ -36,6 +36,7 @@ linux64_cpp17addons_py:
         - gcc-7
         - g++-7
 
+python_test_command_sub: &python_test_command TEST_COMMAND=$TRAVIS_BUILD_DIR/ci/build_and_run_python_tests.sh
 # Set empty values for allow_failures to work
 env: TEST_COMMAND=$TRAVIS_BUILD_DIR/ci/build_and_run_tests.sh
 python:
@@ -63,21 +64,21 @@ matrix:
       compiler: gcc
       addons: *linux64cpp17py
       dist: bionic
-      env: TEST_COMMAND=$TRAVIS_BUILD_DIR/ci/build_and_run_python_tests.sh
+      env: *python_test_command
       python: 3.6
       language: python
     - os: linux
       compiler: gcc
       addons: *linux64cpp17py
       dist: bionic
-      env: TEST_COMMAND=$TRAVIS_BUILD_DIR/ci/build_and_run_python_tests.sh CC=gcc
+      env: *python_test_command
       python: 3.7
       language: python
     - os: linux
       compiler: gcc
       addons: *linux64cpp17py
       dist: bionic
-      env: TEST_COMMAND=$TRAVIS_BUILD_DIR/ci/build_and_run_python_tests.sh CC=gcc
+      env: *python_test_command
       python: 3.8
       language: python
 
