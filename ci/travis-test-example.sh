@@ -12,10 +12,10 @@ if [ -z "$EMSCRIPTEN" ]; then
     # Compile with C++03 forced
     $CXX -I"../submodules/msgpack-c/include" -I"../include" -std=c++03 -O2 \
          -o read_and_write read_and_write.cpp
-    ./read_and_write ../mmtf_spec/test-suite/mmtf/3NJW.mmtf test.mmtf
+    ./read_and_write ../submodules/mmtf_spec/test-suite/mmtf/3NJW.mmtf test.mmtf
 else
     # Cannot do C++03 here and need to embed input file for running it with node
-    cp ../mmtf_spec/test-suite/mmtf/3NJW.mmtf .
+    cp ../submodules/mmtf_spec/test-suite/mmtf/3NJW.mmtf .
     $CXX -I"../submodules/msgpack-c/include" -I"../include" -O2 \
          -o read_and_write.js read_and_write.cpp --embed-file 3NJW.mmtf
     node read_and_write.js 3NJW.mmtf test.mmtf
