@@ -42,7 +42,7 @@ msgpack_obj_to_map(const msgpack::object& obj) {
 }
 
 TEST_CASE("assignment operator") {
-  std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
+  std::string working_mmtf = "../submodules/mmtf_spec/test-suite/mmtf/173D.mmtf";
   mmtf::StructureData sd;
   mmtf::decodeFromFile(sd, working_mmtf);
   SECTION("basic assignment operator") {
@@ -78,7 +78,7 @@ TEST_CASE("assignment operator") {
 
 
 TEST_CASE("copy constructor") {
-  std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
+  std::string working_mmtf = "../submodules/mmtf_spec/test-suite/mmtf/173D.mmtf";
   mmtf::StructureData sd;
   mmtf::decodeFromFile(sd, working_mmtf);
   SECTION("Basic copy constructor") {
@@ -99,32 +99,32 @@ TEST_CASE("copy constructor") {
 // Tests for structure_data.hpp
 TEST_CASE("Test round trip StructureData working") {
   std::vector<std::string> works;
-  works.push_back("../mmtf_spec/test-suite/mmtf/173D.mmtf");
-  works.push_back("../mmtf_spec/test-suite/mmtf/1AA6.mmtf");
-  works.push_back("../mmtf_spec/test-suite/mmtf/1AUY.mmtf");
-  works.push_back("../mmtf_spec/test-suite/mmtf/1BNA.mmtf");
-  works.push_back("../mmtf_spec/test-suite/mmtf/1CAG.mmtf");
-  works.push_back("../mmtf_spec/test-suite/mmtf/1HTQ.mmtf");
-  works.push_back("../mmtf_spec/test-suite/mmtf/1IGT.mmtf");
-  works.push_back("../mmtf_spec/test-suite/mmtf/1L2Q.mmtf");
-  works.push_back("../mmtf_spec/test-suite/mmtf/1LPV.mmtf");
-  works.push_back("../mmtf_spec/test-suite/mmtf/1MSH.mmtf");
-  works.push_back("../mmtf_spec/test-suite/mmtf/1O2F.mmtf");
-  works.push_back("../mmtf_spec/test-suite/mmtf/1R9V.mmtf");
-  works.push_back("../mmtf_spec/test-suite/mmtf/1SKM.mmtf");
-  works.push_back("../mmtf_spec/test-suite/mmtf/3NJW.mmtf");
-  works.push_back("../mmtf_spec/test-suite/mmtf/3ZYB.mmtf");
-  works.push_back("../mmtf_spec/test-suite/mmtf/4CK4.mmtf");
-  works.push_back("../mmtf_spec/test-suite/mmtf/4CUP.mmtf");
-  works.push_back("../mmtf_spec/test-suite/mmtf/4OPJ.mmtf");
-  works.push_back("../mmtf_spec/test-suite/mmtf/4P3R.mmtf");
-  works.push_back("../mmtf_spec/test-suite/mmtf/4V5A.mmtf");
-  works.push_back("../mmtf_spec/test-suite/mmtf/4Y60.mmtf");
-  works.push_back("../mmtf_spec/test-suite/mmtf/5EMG.mmtf");
-  works.push_back("../mmtf_spec/test-suite/mmtf/5ESW.mmtf");
-  works.push_back("../mmtf_spec/test-suite/mmtf/empty-all0.mmtf");
-  works.push_back("../mmtf_spec/test-suite/mmtf/empty-numChains1.mmtf");
-  works.push_back("../mmtf_spec/test-suite/mmtf/empty-numModels1.mmtf");
+  works.push_back("../submodules/mmtf_spec/test-suite/mmtf/173D.mmtf");
+  works.push_back("../submodules/mmtf_spec/test-suite/mmtf/1AA6.mmtf");
+  works.push_back("../submodules/mmtf_spec/test-suite/mmtf/1AUY.mmtf");
+  works.push_back("../submodules/mmtf_spec/test-suite/mmtf/1BNA.mmtf");
+  works.push_back("../submodules/mmtf_spec/test-suite/mmtf/1CAG.mmtf");
+  works.push_back("../submodules/mmtf_spec/test-suite/mmtf/1HTQ.mmtf");
+  works.push_back("../submodules/mmtf_spec/test-suite/mmtf/1IGT.mmtf");
+  works.push_back("../submodules/mmtf_spec/test-suite/mmtf/1L2Q.mmtf");
+  works.push_back("../submodules/mmtf_spec/test-suite/mmtf/1LPV.mmtf");
+  works.push_back("../submodules/mmtf_spec/test-suite/mmtf/1MSH.mmtf");
+  works.push_back("../submodules/mmtf_spec/test-suite/mmtf/1O2F.mmtf");
+  works.push_back("../submodules/mmtf_spec/test-suite/mmtf/1R9V.mmtf");
+  works.push_back("../submodules/mmtf_spec/test-suite/mmtf/1SKM.mmtf");
+  works.push_back("../submodules/mmtf_spec/test-suite/mmtf/3NJW.mmtf");
+  works.push_back("../submodules/mmtf_spec/test-suite/mmtf/3ZYB.mmtf");
+  works.push_back("../submodules/mmtf_spec/test-suite/mmtf/4CK4.mmtf");
+  works.push_back("../submodules/mmtf_spec/test-suite/mmtf/4CUP.mmtf");
+  works.push_back("../submodules/mmtf_spec/test-suite/mmtf/4OPJ.mmtf");
+  works.push_back("../submodules/mmtf_spec/test-suite/mmtf/4P3R.mmtf");
+  works.push_back("../submodules/mmtf_spec/test-suite/mmtf/4V5A.mmtf");
+  works.push_back("../submodules/mmtf_spec/test-suite/mmtf/4Y60.mmtf");
+  works.push_back("../submodules/mmtf_spec/test-suite/mmtf/5EMG.mmtf");
+  works.push_back("../submodules/mmtf_spec/test-suite/mmtf/5ESW.mmtf");
+  works.push_back("../submodules/mmtf_spec/test-suite/mmtf/empty-all0.mmtf");
+  works.push_back("../submodules/mmtf_spec/test-suite/mmtf/empty-numChains1.mmtf");
+  works.push_back("../submodules/mmtf_spec/test-suite/mmtf/empty-numModels1.mmtf");
   works.push_back("../temporary_test_data/all_canoncial.mmtf");
   works.push_back("../temporary_test_data/1PEF_with_resonance.mmtf");
   for (size_t i=0; i<works.size(); ++i) {
@@ -138,7 +138,7 @@ TEST_CASE("Test round trip StructureData working") {
 
 
 TEST_CASE("Test round trip StructureData not working - EncodeError") {
-  std::string basic = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
+  std::string basic = "../submodules/mmtf_spec/test-suite/mmtf/173D.mmtf";
   mmtf::StructureData sd;
   mmtf::decodeFromFile(sd, basic);
   SECTION("Alter xCoordList") {
@@ -187,7 +187,7 @@ TEST_CASE("Test round trip StructureData not working - EncodeError") {
 
 TEST_CASE("Test StructureData DecodeError") {
   std::vector<std::string> doesnt_work;
-  doesnt_work.push_back("../mmtf_spec/test-suite/mmtf/empty-mmtfVersion99999999.mmtf");
+  doesnt_work.push_back("../submodules/mmtf_spec/test-suite/mmtf/empty-mmtfVersion99999999.mmtf");
   for (size_t i=0; i<doesnt_work.size(); ++i) {
     mmtf::StructureData sd;
     REQUIRE_THROWS_AS(mmtf::decodeFromFile(sd, doesnt_work[i]), mmtf::DecodeError);
@@ -597,7 +597,7 @@ TEST_CASE("Test FourByteInt enc/dec") {
 }
 
 TEST_CASE("Test bondOrderList vs bondAtomList") {
-  std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
+  std::string working_mmtf = "../submodules/mmtf_spec/test-suite/mmtf/173D.mmtf";
   mmtf::StructureData sd;
   mmtf::decodeFromFile(sd, working_mmtf);
   SECTION("Deleting all bondOrderLists") {
@@ -744,7 +744,7 @@ map_const_sd_helper(mmtf::StructureData const & sd) {
 }
 
 TEST_CASE("mapDecoder types") {
-	std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
+	std::string working_mmtf = "../submodules/mmtf_spec/test-suite/mmtf/173D.mmtf";
 	mmtf::StructureData sd;
 	mmtf::decodeFromFile(sd, working_mmtf);
 
@@ -761,7 +761,7 @@ TEST_CASE("mapDecoder types") {
 
 // test/example of how to use extra data
 TEST_CASE("atomProperties field") {
-  std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
+  std::string working_mmtf = "../submodules/mmtf_spec/test-suite/mmtf/173D.mmtf";
   mmtf::StructureData sd, sd2;
   mmtf::decodeFromFile(sd, working_mmtf);
 
@@ -831,7 +831,7 @@ void check_extra_data(const std::map<std::string, msgpack::object>& sd_map,
 // test round trips with all extra data set
 TEST_CASE("extra data fields") {
   // Randomly chosen, small example MMTF
-  std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
+  std::string working_mmtf = "../submodules/mmtf_spec/test-suite/mmtf/173D.mmtf";
   mmtf::StructureData sd, sd2, sd3;
   mmtf::decodeFromFile(sd, working_mmtf);
 
@@ -863,7 +863,7 @@ TEST_CASE("extra data fields") {
 }
 
 TEST_CASE("Test export_helpers") {
-  std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/3NJW.mmtf";
+  std::string working_mmtf = "../submodules/mmtf_spec/test-suite/mmtf/3NJW.mmtf";
   mmtf::StructureData sd;
   mmtf::decodeFromFile(sd, working_mmtf);
   size_t numbonds_ref = sd.numBonds;
@@ -942,7 +942,7 @@ TEST_CASE("Test export_helpers") {
 }
 
 TEST_CASE("Test mapdecoder from raw mmtf") {
-  std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
+  std::string working_mmtf = "../submodules/mmtf_spec/test-suite/mmtf/173D.mmtf";
   mmtf::MapDecoder md;
   mmtf::mapDecoderFromFile(md, working_mmtf);
   std::vector<int> bonds;
@@ -955,7 +955,7 @@ TEST_CASE("Test mapdecoder from raw mmtf") {
 
 TEST_CASE("Test various encode and decode options") {
   // fetch reference data
-  std::string working_mmtf = "../mmtf_spec/test-suite/mmtf/173D.mmtf";
+  std::string working_mmtf = "../submodules/mmtf_spec/test-suite/mmtf/173D.mmtf";
   mmtf::StructureData sd_ref;
   mmtf::decodeFromFile(sd_ref, working_mmtf);
   // write into buffer

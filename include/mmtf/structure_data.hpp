@@ -163,7 +163,7 @@ struct StructureData {
   std::string                              title;
   std::string                              depositionDate;
   std::string                              releaseDate;
-  std::vector<std::vector<float> >         ncsOperatorList;
+  std::vector<std::vector<float>>          ncsOperatorList;
   std::vector<BioAssembly>                 bioAssemblyList;
   std::vector<Entity>                      entityList;
   std::vector<std::string>                 experimentalMethods;

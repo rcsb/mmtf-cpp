@@ -39,3 +39,10 @@ build/*
 docs/html/*
 examples/out/*
 examples/out_json_ref/*
+
+# python eggs
+python_src/*.egg-info
+**/__pycache__
+**/*.pyc
+
+

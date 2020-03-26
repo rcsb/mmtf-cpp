@@ -40,6 +40,16 @@ public:
                   const std::string& key = "UNNAMED_BINARY");
 
     /**
+     * @brief Initialize object given a msgpack binary string.
+     * Reads out binary header to prepare for call of decode.
+     * @param[in]  obj  Object to decode.
+     * @param[in]  key  Key used to report errors.
+     * @throw mmtf::DecodeError if obj is not a binary or is too short.
+     */
+    BinaryDecoder(const std::string& str,
+                  const std::string& key = "UNNAMED_BINARY");
+
+    /**
      * @brief Decode binary msgpack object into the given target.
      *
      * @param[out] target   Store decoded vector into this field.
@@ -55,7 +65,7 @@ public:
      * @throw mmtf::DecodeError if we fail to decode.
      */
     template<typename T>
-    void decode(T& target);
+    void decode(T& target) const;
 
 private:
     // for error reporting
@@ -67,42 +77,47 @@ private:
     const char* encodedData_;
     uint32_t encodedDataLength_;  // max. size for binary is 2^32 - 1
 
+    // helper function for constructors
+    void
+    initFromData(const char * str_data,
+                 const std::size_t len);
+
     // check length consistency (throws)
-    void checkLength_(int32_t exp_length);
+    void checkLength_(int32_t exp_length) const;
     // check if binary data is divisible by x (throws)
-    void checkDivisibleBy_(int32_t item_size);
+    void checkDivisibleBy_(int32_t item_size) const;
 
     // byte decoders
-    void decodeFromBytes_(std::vector<float>& output);
-    void decodeFromBytes_(std::vector<int8_t>& output);
-    void decodeFromBytes_(std::vector<int16_t>& output);
-    void decodeFromBytes_(std::vector<int32_t>& output);
+    void decodeFromBytes_(std::vector<float>& output) const;
+    void decodeFromBytes_(std::vector<int8_t>& output) const;
+    void decodeFromBytes_(std::vector<int16_t>& output) const;
+    void decodeFromBytes_(std::vector<int32_t>& output) const;
     // special one: decode to vector of strings
-    void decodeFromBytes_(std::vector<std::string>& output);
+    void decodeFromBytes_(std::vector<std::string>& output) const;
 
     // run length decoding
     // -> Int and IntOut can be any integer types
     // -> Int values are blindly converted to IntOut
     template<typename Int, typename IntOut>
     void runLengthDecode_(const std::vector<Int>& input,
-                          std::vector<IntOut>& output);
+                          std::vector<IntOut>& output) const;
 
     // delta decoding -> Int can be any integer type
     template<typename Int>
-    void deltaDecode_(const std::vector<Int>& input, std::vector<Int>& output);
+    void deltaDecode_(const std::vector<Int>& input, std::vector<Int>& output) const;
     // variant doing it in-place
     template<typename Int>
-    void deltaDecode_(std::vector<Int>& in_out);
+    void deltaDecode_(std::vector<Int>& in_out) const;
 
     // recursive indexing decode -> SmallInt must be smaller than Int
     template<typename SmallInt, typename Int>
     void recursiveIndexDecode_(const std::vector<SmallInt>& input,
-                               std::vector<Int>& output);
+                               std::vector<Int>& output) const;
 
     // decode integer to float -> Int can be any integer type
     template<typename Int>
-    void decodeDivide_(const std::vector<Int>& input, float divisor,
-                       std::vector<float>& output);
+    void decodeDivide_(const std::vector<Int>& input, float const divisor,
+                       std::vector<float>& output) const;
 };
 
 // *************************************************************************
@@ -121,11 +136,17 @@ namespace {
 
 #ifndef __EMSCRIPTEN__
 void assignBigendian4(void* dst, const char* src) {
-    *((uint32_t*)dst) = ntohl(*((uint32_t*)src));
+    uint32_t tmp;
+    std::memcpy(&tmp, src, sizeof(uint32_t));
+    tmp = ntohl(tmp);
+    std::memcpy(dst, &tmp, sizeof(uint32_t));
 }
 
 void assignBigendian2(void* dst, const char* src) {
-    *((uint16_t*)dst) = ntohs(*((uint16_t*)src));
+    uint16_t tmp;
+    std::memcpy(&tmp, src, sizeof(uint16_t));
+    tmp = ntohs(tmp);
+    std::memcpy(dst, &tmp, sizeof(uint16_t));
 }
 #else
 // Need to avoid how emscripten handles memory
@@ -160,6 +181,16 @@ void arrayCopyBigendian2(void* dst, const char* src, size_t n) {
 
 } // anon ns
 
+
+// note this does not set key_, you must set it in ctor
+inline void BinaryDecoder::initFromData(const char * bytes, std::size_t const len) {
+    assignBigendian4(&strategy_, bytes);
+    assignBigendian4(&length_, bytes + 4);
+    assignBigendian4(&parameter_, bytes + 8);
+    encodedData_ = bytes + 12;
+    encodedDataLength_ = len - 12;
+}
+
 inline BinaryDecoder::BinaryDecoder(const msgpack::object& obj,
                                     const std::string& key)
                                    : key_(key) {
@@ -172,23 +203,22 @@ inline BinaryDecoder::BinaryDecoder(const msgpack::object& obj,
         err << "The '" + key + "' entry is too short " << obj.via.bin.size;
         throw DecodeError(err.str());
     }
-    // get data (encoded data is only pointed to and not parsed here)
-    const char* bytes = obj.via.bin.ptr;
+    this->initFromData(obj.via.bin.ptr, obj.via.bin.size);
+}
 
-    assignBigendian4(&strategy_, bytes);
-    assignBigendian4(&length_, bytes + 4);
-    assignBigendian4(&parameter_, bytes + 8);
-    encodedData_ = bytes + 12;
-    encodedDataLength_ = obj.via.bin.size - 12;
+inline BinaryDecoder::BinaryDecoder(const std::string& str,
+                                    const std::string& key)
+                                   : key_(key) {
+    this->initFromData(str.data(), str.size());
 }
 
 template<typename T>
-void BinaryDecoder::decode(T& target) {
+void BinaryDecoder::decode(T&) const {
     throw mmtf::DecodeError("Invalid target type for binary '" + key_ + "'");
 }
 
 template<>
-inline void BinaryDecoder::decode(std::vector<float>& output) {
+inline void BinaryDecoder::decode(std::vector<float>& output) const {
 
     // check strategy to parse
     switch (strategy_) {
@@ -248,7 +278,7 @@ inline void BinaryDecoder::decode(std::vector<float>& output) {
 }
 
 template<>
-inline void BinaryDecoder::decode(std::vector<int8_t>& output) {
+inline void BinaryDecoder::decode(std::vector<int8_t>& output) const {
 
     // check strategy to parse
     switch (strategy_) {
@@ -275,7 +305,7 @@ inline void BinaryDecoder::decode(std::vector<int8_t>& output) {
 }
 
 template<>
-inline void BinaryDecoder::decode(std::vector<int16_t>& output) {
+inline void BinaryDecoder::decode(std::vector<int16_t>& output) const {
 
     // check strategy to parse
     switch (strategy_) {
@@ -296,7 +326,7 @@ inline void BinaryDecoder::decode(std::vector<int16_t>& output) {
 }
 
 template<>
-inline void BinaryDecoder::decode(std::vector<int32_t>& output) {
+inline void BinaryDecoder::decode(std::vector<int32_t>& output) const {
 
     // check strategy to parse
     switch (strategy_) {
@@ -342,7 +372,7 @@ inline void BinaryDecoder::decode(std::vector<int32_t>& output) {
 }
 
 template<>
-inline void BinaryDecoder::decode(std::vector<std::string>& output) {
+inline void BinaryDecoder::decode(std::vector<std::string>& output) const {
 
     // check strategy to parse
     switch (strategy_) {
@@ -363,7 +393,7 @@ inline void BinaryDecoder::decode(std::vector<std::string>& output) {
 }
 
 template<>
-inline void BinaryDecoder::decode(std::vector<char>& output) {
+inline void BinaryDecoder::decode(std::vector<char>& output) const {
 
     // check strategy to parse
     switch (strategy_) {
@@ -386,7 +416,7 @@ inline void BinaryDecoder::decode(std::vector<char>& output) {
 }
 
 // checks
-inline void BinaryDecoder::checkLength_(int32_t exp_length) {
+inline void BinaryDecoder::checkLength_(int32_t exp_length) const {
     if (length_ != exp_length) {
         std::stringstream err;
         err << "Length mismatch for binary '" + key_ + "': "
@@ -395,7 +425,7 @@ inline void BinaryDecoder::checkLength_(int32_t exp_length) {
     }
 }
 
-inline void BinaryDecoder::checkDivisibleBy_(int32_t item_size) {
+inline void BinaryDecoder::checkDivisibleBy_(int32_t item_size) const {
     if (encodedDataLength_ % item_size != 0) {
         std::stringstream err;
         err << "Binary length of '" + key_ + "': "
@@ -405,7 +435,7 @@ inline void BinaryDecoder::checkDivisibleBy_(int32_t item_size) {
 }
 
 // byte decoders
-inline void BinaryDecoder::decodeFromBytes_(std::vector<float>& output) {
+inline void BinaryDecoder::decodeFromBytes_(std::vector<float>& output) const {
     checkDivisibleBy_(4);
     // prepare memory
     output.resize(encodedDataLength_ / 4);
@@ -414,7 +444,7 @@ inline void BinaryDecoder::decodeFromBytes_(std::vector<float>& output) {
         arrayCopyBigendian4(&output[0], encodedData_, encodedDataLength_);
     }
 }
-inline void BinaryDecoder::decodeFromBytes_(std::vector<int8_t>& output) {
+inline void BinaryDecoder::decodeFromBytes_(std::vector<int8_t>& output) const {
     // prepare memory
     output.resize(encodedDataLength_);
     // get data
@@ -422,7 +452,7 @@ inline void BinaryDecoder::decodeFromBytes_(std::vector<int8_t>& output) {
         memcpy(&output[0], encodedData_, encodedDataLength_);
     }
 }
-inline void BinaryDecoder::decodeFromBytes_(std::vector<int16_t>& output) {
+inline void BinaryDecoder::decodeFromBytes_(std::vector<int16_t>& output) const {
     checkDivisibleBy_(2);
     // prepare memory
     output.resize(encodedDataLength_ / 2);
@@ -431,7 +461,7 @@ inline void BinaryDecoder::decodeFromBytes_(std::vector<int16_t>& output) {
         arrayCopyBigendian2(&output[0], encodedData_, encodedDataLength_);
     }
 }
-inline void BinaryDecoder::decodeFromBytes_(std::vector<int32_t>& output) {
+inline void BinaryDecoder::decodeFromBytes_(std::vector<int32_t>& output) const {
     checkDivisibleBy_(4);
     // prepare memory
     output.resize(encodedDataLength_ / 4);
@@ -441,7 +471,7 @@ inline void BinaryDecoder::decodeFromBytes_(std::vector<int32_t>& output) {
     }
 }
 // special one: decode to vector of strings
-inline void BinaryDecoder::decodeFromBytes_(std::vector<std::string>& output) {
+inline void BinaryDecoder::decodeFromBytes_(std::vector<std::string>& output) const {
     char NULL_BYTE = 0x00;
     // check parameter
     const int32_t str_len = parameter_;
@@ -458,7 +488,7 @@ inline void BinaryDecoder::decodeFromBytes_(std::vector<std::string>& output) {
 // run length decoding
 template<typename Int, typename IntOut>
 void BinaryDecoder::runLengthDecode_(const std::vector<Int>& input,
-                      std::vector<IntOut>& output) {
+                      std::vector<IntOut>& output) const {
     // we work with pairs of numbers
     checkDivisibleBy_(2);
     // find out size of resulting vector (for speed)
@@ -482,7 +512,7 @@ void BinaryDecoder::runLengthDecode_(const std::vector<Int>& input,
 // delta decoding
 template<typename Int>
 void BinaryDecoder::deltaDecode_(const std::vector<Int>& input,
-                                 std::vector<Int>& output) {
+                                 std::vector<Int>& output) const {
     // reserve space (for speed)
     output.clear();
     if (input.empty()) return; // ensure we have some values
@@ -494,7 +524,7 @@ void BinaryDecoder::deltaDecode_(const std::vector<Int>& input,
     }
 }
 template<typename Int>
-void BinaryDecoder::deltaDecode_(std::vector<Int>& in_out) {
+void BinaryDecoder::deltaDecode_(std::vector<Int>& in_out) const {
     for (size_t i = 1; i < in_out.size(); ++i) {
         in_out[i] = in_out[i - 1] + in_out[i];
     }
@@ -503,7 +533,7 @@ void BinaryDecoder::deltaDecode_(std::vector<Int>& in_out) {
 // recursive indexing decode
 template<typename SmallInt, typename Int>
 void BinaryDecoder::recursiveIndexDecode_(const std::vector<SmallInt>& input,
-                                          std::vector<Int>& output) {
+                                          std::vector<Int>& output) const {
     // get limits
     const SmallInt min_int = std::numeric_limits<SmallInt>::min();
     const SmallInt max_int = std::numeric_limits<SmallInt>::max();
@@ -528,8 +558,8 @@ void BinaryDecoder::recursiveIndexDecode_(const std::vector<SmallInt>& input,
 
 // decode integer to float
 template<typename Int>
-void BinaryDecoder::decodeDivide_(const std::vector<Int>& input, float divisor,
-                                  std::vector<float>& output) {
+void BinaryDecoder::decodeDivide_(const std::vector<Int>& input, float const divisor,
+                                  std::vector<float>& output) const {
     // reserve space and get inverted divisor (for speed)
     output.clear();
     output.reserve(input.size());
