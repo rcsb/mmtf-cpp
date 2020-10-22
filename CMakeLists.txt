@@ -15,11 +15,11 @@ target_include_directories(MMTFcpp INTERFACE
 
 if (mmtf_build_local)
     # use header only
-    set(MSGPACKC_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/msgpack-c/include)
+    set(MSGPACKC_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/submodules/msgpack-c/include)
     add_library(msgpackc INTERFACE)
     target_include_directories(msgpackc INTERFACE ${MSGPACKC_INCLUDE_DIR})
     if (BUILD_TESTS)
-        set(CATCH_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Catch2/single_include)
+        set(CATCH_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/submodules/Catch2/single_include)
         add_library(Catch INTERFACE)
         target_include_directories(Catch INTERFACE ${CATCH_INCLUDE_DIR})
     endif()
