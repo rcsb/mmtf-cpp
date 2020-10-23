@@ -4,54 +4,65 @@ dist: trusty
 
 linux64_addons:
     addons: &linux64
-      apt:
-        sources:
-        - ubuntu-toolchain-r-test
-        packages:
-        - g++-4.8
+        apt:
+            sources:
+                - ubuntu-toolchain-r-test
+            packages:
+                - g++-4.8
 
 linux32_addons:
     addons: &linux32
-      apt:
-        sources:
-        - ubuntu-toolchain-r-test
-        packages:
-        - g++-4.8
-        - g++-4.8-multilib
-        - linux-libc-dev:i386
-        - libc6-dev-i386
+        apt:
+            sources:
+                - ubuntu-toolchain-r-test
+            packages:
+                - g++-4.8
+                - g++-4.8-multilib
+                - linux-libc-dev:i386
+                - libc6-dev-i386
+
+linux64_cpp17addons:
+    addons: &linux64cpp17
+        apt:
+            sources:
+                - ubuntu-toolchain-r-test
 
 # Set empty values for allow_failures to work
-env:
+env: TEST_COMMAND=$TRAVIS_BUILD_DIR/ci/build_and_run_tests.sh
 
 matrix:
-  fast_finish: true
-  include:
-    - os: linux
-      env: EMSCRIPTEN=ON
-      addons: *linux64
-    - os: linux
-      compiler: clang
-      addons: *linux64
-    - os: linux
-      compiler: gcc
-      env: ARCH=x86 CMAKE_EXTRA=-DHAVE_LIBM=/lib32/libm.so.6
-      addons: *linux32
-    - os: osx
-      compiler: clang
+    fast_finish: true
+    include:
+        - os: linux
+          env: EMSCRIPTEN=ON TEST_COMMAND=$TRAVIS_BUILD_DIR/ci/build_and_run_tests.sh
+          addons: *linux64
+        - os: linux
+          compiler: clang
+          addons: *linux64
+        - os: linux
+          compiler: gcc
+          env: ARCH=x86 CMAKE_EXTRA=-DHAVE_LIBM=/lib32/libm.so.6 TEST_COMMAND=$TRAVIS_BUILD_DIR/ci/build_and_run_tests.sh
+          addons: *linux32
+        - os: osx
+          compiler: clang
+        - os: linux
+          compiler: gcc
+          env: CMAKE_EXTRA="-DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS='-march=native'" TEST_COMMAND=$TRAVIS_BUILD_DIR/ci/build_and_run_tests.sh
+          addons: *linux64cpp17
+          dist: bionic
+        - os: linux
+          compiler: gcc
+          addons: *linux64cpp17
+          dist: bionic
+
 
 before_install:
-  # Setting environement
-  - cd $TRAVIS_BUILD_DIR
-  - source ci/setup-travis.sh
-  - $CC --version
-  - $CXX --version
+    # Setting environement
+    - cd $TRAVIS_BUILD_DIR
+    - source ci/setup-travis.sh
+    - $CC --version
+    - $CXX --version
 
 script:
-  - cd $TRAVIS_BUILD_DIR
-  - mkdir build && cd build
-  - $CMAKE_CONFIGURE cmake $CMAKE_ARGS $CMAKE_EXTRA ..
-  - make -j2
-  - ctest -j2 --output-on-failure
-  - bash $TRAVIS_BUILD_DIR/ci/travis-test-example.sh
-  - cd $TRAVIS_BUILD_DIR
+    - echo $TEST_COMMAND
+    - (eval "$TEST_COMMAND")
