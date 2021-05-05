@@ -14,7 +14,6 @@
 // C-style libraries used here to keep it close to traverse.c
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
 
 // *************************************************************************
 // JSON-style
@@ -121,6 +120,39 @@ void json_print_opt(const char* label, const std::vector<T>& v,
     }
 }
 
+// for optional map-data (extra props)
+template<typename T>
+void json_print_opt(const char* label, const std::map<std::string, T>& m,
+                    int indent, bool last = false) {
+    if (!mmtf::isDefaultValue(m)) {
+        printf("%s: {", label);
+        typename std::map<std::string, T>::const_iterator it;
+        for (it = m.begin(); it != m.end(); ++it) {
+            if (it != m.begin()) printf(",");
+            printf("\n%*s\"%s\": null", indent+1, " ", it->first.c_str());
+        }
+        printf("\n%*s%s\n", indent+1, "}", (last) ? "" : ",");
+    } else {
+        printf("%s: null%s\n", label, (last) ? "" : ",");
+    }
+}
+
+// define how to print vectors of chars (hard-coded)
+// -> either list of numbers or converted to strings
+void json_print_opt_chars(const char* label,
+                          const std::vector<char>& vec, bool last = false) {
+    // v1: use numbers
+    // printopt(label, "%d", vec, last);
+    // v2: convert to string first
+    std::vector<std::string> tmp;
+    tmp.reserve(vec.size());
+    for (size_t i = 0; i < vec.size(); ++i) {
+        if (vec[i] == 0x00) tmp.push_back(std::string());
+        else                tmp.push_back(std::string(1, vec[i]));
+    }
+    printopt(label, "\"%s\"", tmp, last);
+}
+
 // just aimed for ncsOperatorList
 template<>
 void json_print(const std::vector<float>& list) {
@@ -159,6 +191,7 @@ void json_print(const mmtf::GroupType& group) {
     printf("  {\n");
     printreq("   \"formalChargeList\"", "%d", group.formalChargeList);
     printreq("   \"atomNameList\"", "\"%s\"", group.atomNameList);
+    printreq("   \"elementList\"", "\"%s\"", group.elementList);
     printopt("   \"bondAtomList\"", "%d", group.bondAtomList);
     printopt("   \"bondOrderList\"", "%d", group.bondOrderList);
     printopt("   \"bondResonanceList\"", "%d", group.bondResonanceList);
@@ -184,7 +217,7 @@ void json_print(const mmtf::StructureData& example) {
     printopt(" \"depositionDate\"", example.depositionDate);
     printopt(" \"releaseDate\"", example.releaseDate);
     
-    // json_print_opt(" \"ncsOperatorList\"", example.ncsOperatorList, 1);
+    json_print_opt(" \"ncsOperatorList\"", example.ncsOperatorList, 1);
     json_print_opt(" \"bioAssemblyList\"", example.bioAssemblyList, 1);
     json_print_opt(" \"entityList\"", example.entityList, 1);
     printopt(" \"experimentalMethods\"", "\"%s\"", example.experimentalMethods);
@@ -210,19 +243,26 @@ void json_print(const mmtf::StructureData& example) {
     printreq(" \"zCoordList\"", "%g", example.zCoordList);
     printopt(" \"bFactorList\"", "%g", example.bFactorList);
     printopt(" \"atomIdList\"", "%d", example.atomIdList);
-    printopt(" \"altLocList\"", "%d", example.altLocList);
+    json_print_opt_chars(" \"altLocList\"", example.altLocList);
     printopt(" \"occupancyList\"", "%g", example.occupancyList);
 
     printreq(" \"groupIdList\"", "%d", example.groupIdList);
     printreq(" \"groupTypeList\"", "%d", example.groupTypeList);
     printopt(" \"secStructList\"", "%d", example.secStructList);
-    printopt(" \"insCodeList\"", "%d", example.insCodeList);
+    json_print_opt_chars(" \"insCodeList\"", example.insCodeList);
     printopt(" \"sequenceIndexList\"", "%d", example.sequenceIndexList);
 
     printreq(" \"chainIdList\"", "\"%s\"", example.chainIdList);
     printopt(" \"chainNameList\"", "\"%s\"", example.chainNameList);
     printreq(" \"groupsPerChain\"", "%d", example.groupsPerChain);
-    printreq(" \"chainsPerModel\"", "%d", example.chainsPerModel, true);
+    printreq(" \"chainsPerModel\"", "%d", example.chainsPerModel);
+
+    json_print_opt(" \"bondProperties\"", example.bondProperties, 1);
+    json_print_opt(" \"atomProperties\"", example.atomProperties, 1);
+    json_print_opt(" \"groupProperties\"", example.groupProperties, 1);
+    json_print_opt(" \"chainProperties\"", example.chainProperties, 1);
+    json_print_opt(" \"modelProperties\"", example.modelProperties, 1);
+    json_print_opt(" \"extraProperties\"", example.extraProperties, 1, true);
 
     printf("}\n");
 }
@@ -483,6 +523,8 @@ int main(int argc, char** argv) {
     if (argc > 2) {
         if (strcmp(argv[2], "json") == 0) {
             json_print(example);
+        } else if (strcmp(argv[2], "sd_json") == 0) {
+            std::cout << example.to_json() << std::endl;
         } else if (strcmp(argv[2], "print") == 0) {
             std::cout << example.print() << std::endl;
         } else {
