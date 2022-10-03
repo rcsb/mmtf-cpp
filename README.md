@@ -1,8 +1,7 @@
 <!--- Batch image URLs generated at https://shields.io -->
 [![Release](https://img.shields.io/github/v/release/rcsb/mmtf-cpp)](https://github.com/rcsb/mmtf-cpp/releases)
 [![License](https://img.shields.io/github/license/rcsb/mmtf-cpp)](https://github.com/rcsb/mmtf-cpp/blob/master/LICENSE)
-[![Build Status (Travis)](https://img.shields.io/travis/com/rcsb/mmtf-cpp/master)](https://travis-ci.com/rcsb/mmtf-cpp)
-[![Build Status (AppVeyor)](https://img.shields.io/appveyor/build/rcsb/mmtf-cpp/master)](https://ci.appveyor.com/project/rcsb/mmtf-cpp)
+[![Build Status (Travis)](https://img.shields.io/travis/com/rcsb/mmtf-cpp/master)](https://app.travis-ci.com/github/rcsb/mmtf-cpp)
 
 The <b>m</b>acro<b>m</b>olecular <b>t</b>ransmission <b>f</b>ormat
 ([MMTF](http://mmtf.rcsb.org)) is a binary encoding of biological structures.
