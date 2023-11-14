@@ -77,21 +77,21 @@ matrix:
           addons: *linux64cpp17py
           dist: bionic
           env: *python_test_command
-          python: 3.6
-          language: python
-        - os: linux
-          compiler: gcc
-          addons: *linux64cpp17py
-          dist: bionic
-          env: *python_test_command
-          python: 3.7
-          language: python
-        - os: linux
-          compiler: gcc
-          addons: *linux64cpp17py
-          dist: bionic
-          env: *python_test_command
           python: 3.8
+          language: python
+        - os: linux
+          compiler: gcc
+          addons: *linux64cpp17py
+          dist: bionic
+          env: *python_test_command
+          python: 3.11
+          language: python
+        - os: linux
+          compiler: gcc
+          addons: *linux64cpp17py
+          dist: bionic
+          env: *python_test_command
+          python: 3.12
           language: python
 
 before_install:

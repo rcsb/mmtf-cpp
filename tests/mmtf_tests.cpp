@@ -1,11 +1,9 @@
 #ifdef __EMSCRIPTEN__
 #define CATCH_INTERNAL_CONFIG_NO_POSIX_SIGNALS
-#define CATCH_CONFIG_RUNNER
-#else
-#define CATCH_CONFIG_MAIN
 #endif
 
-#include "catch.hpp"
+#include <catch2/catch_all.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <mmtf.hpp>
 #include <mmtf/export_helpers.hpp>
@@ -17,7 +15,7 @@ template <typename T>
 bool approx_equal_vector(const T& a, const T& b, float eps = 0.00001) {
   if (a.size() != b.size()) return false;
   for (std::size_t i=0; i < a.size(); ++i) {
-    if (a[i] != Approx(b[i]).margin(eps)) return false;
+    if (a[i] != Catch::Approx(b[i]).margin(eps)) return false;
   }
   return true;
 }
