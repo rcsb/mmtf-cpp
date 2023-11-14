@@ -28,6 +28,12 @@ linux64_cpp17addons:
             sources:
                 - ubuntu-toolchain-r-test
 
+linux64_cpp17addons:
+    addons: &linux64cpp17
+        apt:
+            sources:
+                - ubuntu-toolchain-r-test
+
 
 linux64_cpp17addons_py:
     addons: &linux64cpp17py
@@ -59,6 +65,11 @@ matrix:
           compiler: clang
         - os: linux
           compiler: gcc
+          env: CMAKE_EXTRA="-DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS='-march=native'" TEST_COMMAND=$TRAVIS_BUILD_DIR/ci/build_and_run_tests.sh
+          addons: *linux64cpp17
+          dist: bionic
+        - os: linux
+          compiler: gcc
           addons: *linux64cpp17
           dist: bionic
         - os: linux
@@ -82,7 +93,6 @@ matrix:
           env: *python_test_command
           python: 3.8
           language: python
-
 
 before_install:
     # Setting environement

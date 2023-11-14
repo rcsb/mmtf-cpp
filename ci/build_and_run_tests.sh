@@ -1,4 +1,7 @@
-cd $TRAVIS_BUILD_DIR
+#!/usr/bin/env bash
+
+set -e
+cd "$TRAVIS_BUILD_DIR"
 mkdir build && cd build
 $CMAKE_CONFIGURE cmake $CMAKE_ARGS $CMAKE_EXTRA ..
 make -j2

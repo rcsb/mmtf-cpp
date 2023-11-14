@@ -34,6 +34,8 @@ public:
      * Reads out binary header to prepare for call of decode.
      * @param[in]  obj  Object to decode.
      * @param[in]  key  Key used to report errors.
+     * @warning This uses a pointer to the data of obj. obj must stay alive
+     *  while this instance exists or it will result in undefined behavior.
      * @throw mmtf::DecodeError if obj is not a binary or is too short.
      */
     BinaryDecoder(const msgpack::object& obj,
@@ -42,8 +44,10 @@ public:
     /**
      * @brief Initialize object given a msgpack binary string.
      * Reads out binary header to prepare for call of decode.
-     * @param[in]  obj  Object to decode.
+     * @param[in]  str  Object to decode.
      * @param[in]  key  Key used to report errors.
+     * @warning This uses a pointer to the data of str. str must stay alive
+     *  while this instance exists or it will result in undefined behavior.
      * @throw mmtf::DecodeError if obj is not a binary or is too short.
      */
     BinaryDecoder(const std::string& str,
