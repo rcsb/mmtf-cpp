@@ -1,3 +1,4 @@
+---
 language: cpp
 sudo: false
 dist: trusty
@@ -27,8 +28,25 @@ linux64_cpp17addons:
             sources:
                 - ubuntu-toolchain-r-test
 
+linux64_cpp17addons:
+    addons: &linux64cpp17
+        apt:
+            sources:
+                - ubuntu-toolchain-r-test
+
+
+linux64_cpp17addons_py:
+    addons: &linux64cpp17py
+        apt:
+            sources:
+                - ubuntu-toolchain-r-test
+                - gcc-7
+                - g++-7
+
+python_test_command_sub: &python_test_command TEST_COMMAND=$TRAVIS_BUILD_DIR/ci/build_and_run_python_tests.sh CC=gcc
 # Set empty values for allow_failures to work
 env: TEST_COMMAND=$TRAVIS_BUILD_DIR/ci/build_and_run_tests.sh
+python:
 
 matrix:
     fast_finish: true
@@ -54,7 +72,27 @@ matrix:
           compiler: gcc
           addons: *linux64cpp17
           dist: bionic
-
+        - os: linux
+          compiler: gcc
+          addons: *linux64cpp17py
+          dist: bionic
+          env: *python_test_command
+          python: 3.8
+          language: python
+        - os: linux
+          compiler: gcc
+          addons: *linux64cpp17py
+          dist: bionic
+          env: *python_test_command
+          python: 3.11
+          language: python
+        - os: linux
+          compiler: gcc
+          addons: *linux64cpp17py
+          dist: bionic
+          env: *python_test_command
+          python: 3.12
+          language: python
 
 before_install:
     # Setting environement

@@ -45,6 +45,53 @@ Here, `<MSGPACK_INCLUDE_PATH>` and `<MMTF_INCLUDE_PATH>` are the paths to the
 
 For your more complicated projects, a `CMakeLists.txt` is included for you.
 
+
+### Python bindings
+
+The C++ MMTF library now can build python bindings using pybind11.  To use them
+you must have A) a c++11 compatible compiler and B) python >= 3.6
+
+to install, it is as simple as `pip install .`
+
+(in the future possible `pip install mmtf-cpp`)
+
+```python
+from mmtf_cppy import StructureData
+import numpy as np
+import math
+
+
+def rotation_matrix(axis, theta):
+    """
+    Return the rotation matrix associated with counterclockwise rotation about
+    the given axis by theta radians.
+    from https://stackoverflow.com/a/6802723
+    """
+    axis = np.asarray(axis)
+    axis = axis / math.sqrt(np.dot(axis, axis))
+    a = math.cos(theta / 2.0)
+    b, c, d = -axis * math.sin(theta / 2.0)
+    aa, bb, cc, dd = a * a, b * b, c * c, d * d
+    bc, ad, ac, ab, bd, cd = b * c, a * d, a * c, a * b, b * d, c * d
+    return np.array([[aa + bb - cc - dd, 2 * (bc + ad), 2 * (bd - ac)],
+                     [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab)],
+                     [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc]])
+
+
+theta = 1.2
+axis = [0, 0, 1]
+
+sd = StructureData("my_favorite_structure.mmtf")
+sd.atomProperties["pymol_colorList"] = [1 if x % 2 == 0 else 5 for x in sd.xCoordList]
+xyz = np.column_stack((sd.xCoordList, sd.yCoordList, sd.zCoordList))
+xyz_rot = rotation_matrix(axis, theta).dot(xyz.T).T
+sd.xCoordList, sd.yCoordList, sd.zCoordList = np.hsplit(xyz_rot, 3)
+sd.write_to_file("my_favorite_structure_rot.mmtf")
+
+```
+
+
+
 ## Installation
 You can also perform a system wide installation with `cmake` and `ninja` (or `make`).  
 To do so:

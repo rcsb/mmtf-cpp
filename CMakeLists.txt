@@ -19,9 +19,7 @@ if (mmtf_build_local)
     add_library(msgpackc INTERFACE)
     target_include_directories(msgpackc INTERFACE ${MSGPACKC_INCLUDE_DIR})
     if (BUILD_TESTS)
-        set(CATCH_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/submodules/Catch2/single_include)
-        add_library(Catch INTERFACE)
-        target_include_directories(Catch INTERFACE ${CATCH_INCLUDE_DIR})
+        add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/submodules/Catch2)
     endif()
 endif()
 
@@ -38,6 +36,34 @@ endif()
 
 if (mmtf_build_examples)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/examples)
+endif()
+
+
+if (build_py)
+
+    if(NOT CMAKE_BUILD_TYPE)
+      set(CMAKE_BUILD_TYPE Release)
+    endif()
+    set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+    set(CMAKE_CXX_FLAGS_DEBUG "-g")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+    add_library(mmtf_bindings SHARED
+        ${CMAKE_CURRENT_SOURCE_DIR}/python_src/bindings.cpp
+    )
+
+    set(MSGPACKC_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/submodules/msgpack-c/include)
+    set(PYBIND_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/submodules/pybind11/include)
+
+    target_include_directories(mmtf_bindings PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    target_include_directories(mmtf_bindings PUBLIC ${MSGPACKC_INCLUDE_DIR})
+    target_include_directories(mmtf_bindings PUBLIC ${PYBIND_INCLUDE_DIR})
+    target_include_directories(mmtf_bindings PUBLIC ${python_include_A})
+    target_include_directories(mmtf_bindings PUBLIC ${python_include_B})
+
+    set_target_properties(mmtf_bindings PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    set_target_properties(mmtf_bindings PROPERTIES PREFIX "")
+    set_target_properties(mmtf_bindings PROPERTIES SUFFIX ".so")
+    set_target_properties(mmtf_bindings PROPERTIES CXX_STANDARD 17)
 endif()
 
 install(
