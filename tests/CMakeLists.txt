@@ -22,6 +22,13 @@ else()
     target_link_libraries(multi_cpp_test MMTFcpp)
 endif()
 
+add_executable(to_json to_json.cpp)
+if(WIN32)
+    target_link_libraries(to_json MMTFcpp ws2_32)
+else()
+    target_link_libraries(to_json MMTFcpp)
+endif()
+
 set(TEST_RUNNER "none" CACHE STRING "External runner for the tests")
 
 if (${TEST_RUNNER} STREQUAL "node")

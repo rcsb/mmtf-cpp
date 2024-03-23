@@ -237,6 +237,11 @@ struct StructureData {
   std::string print(std::string delim="\t") const;
 
   /**
+   * @brief Read out the contents of mmtf::StructureData to json (unencoded)
+   */
+  std::string to_json() const;
+
+  /**
    * @brief Compare two StructureData classes for equality
    * @param c What to compare to
    */
@@ -1102,6 +1107,92 @@ inline std::string StructureData::print(std::string delim) const {
     }
   }
   return out.str();
+}
+
+inline std::string StructureData::to_json() const {
+  msgpack::zone zone;
+  std::map<std::string, msgpack::object> json_out;
+
+  json_out["mmtfVersion"] = msgpack::object(mmtfVersion, zone);
+  json_out["mmtfProducer"] = msgpack::object(mmtfProducer, zone);
+  json_out["unitCell"] = msgpack::object(unitCell, zone);
+  json_out["spaceGroup"] = msgpack::object(spaceGroup, zone);
+  json_out["structureId"] = msgpack::object(structureId, zone);
+  json_out["title"] = msgpack::object(title, zone);
+  json_out["depositionDate"] = msgpack::object(depositionDate, zone);
+  json_out["releaseDate"] = msgpack::object(releaseDate, zone);
+  json_out["ncsOperatorList"] = msgpack::object(ncsOperatorList, zone);
+  json_out["bioAssemblyList"] = msgpack::object(bioAssemblyList, zone);
+  json_out["entityList"] = msgpack::object(entityList, zone);
+  json_out["experimentalMethods"] = msgpack::object(experimentalMethods, zone);
+  json_out["resolution"] = msgpack::object(resolution, zone);
+  json_out["rFree"] = msgpack::object(rFree, zone);
+  json_out["rWork"] = msgpack::object(rWork, zone);
+  json_out["numBonds"] = msgpack::object(numBonds, zone);
+  json_out["numAtoms"] = msgpack::object(numAtoms, zone);
+  json_out["numGroups"] = msgpack::object(numGroups, zone);
+  json_out["numChains"] = msgpack::object(numChains, zone);
+  json_out["numModels"] = msgpack::object(numModels, zone);
+  json_out["groupList"] = msgpack::object(groupList, zone);
+  json_out["bondAtomList"] = msgpack::object(bondAtomList, zone);
+  {
+    std::vector<int32_t> tmp_bol(bondOrderList.begin(), bondOrderList.end());
+    json_out["bondOrderList"] = msgpack::object(tmp_bol, zone);
+  }
+  {
+    std::vector<int32_t> tmp_brl(bondResonanceList.begin(), bondResonanceList.end());
+    json_out["bondResonanceList"] = msgpack::object(bondResonanceList, zone);
+  }
+  json_out["xCoordList"] = msgpack::object(xCoordList, zone);
+  json_out["yCoordList"] = msgpack::object(yCoordList, zone);
+  json_out["zCoordList"] = msgpack::object(zCoordList, zone);
+  json_out["bFactorList"] = msgpack::object(bFactorList, zone);
+  json_out["atomIdList"] = msgpack::object(atomIdList, zone);
+  {
+    std::vector<std::string> tmp_all;
+    for (unsigned int i = 0; i < altLocList.size(); ++i) {
+      if (altLocList[i] == 0x00) {
+        tmp_all.push_back(std::string());
+      } else {
+        tmp_all.push_back(std::string(1, altLocList[i]));
+      }
+    }
+    json_out["altLocList"] = msgpack::object(tmp_all, zone);
+  }
+
+  json_out["occupancyList"] = msgpack::object(occupancyList, zone);
+  json_out["groupIdList"] = msgpack::object(groupIdList, zone);
+  json_out["groupTypeList"] = msgpack::object(groupTypeList, zone);
+  {
+    std::vector<int32_t> tmp_ssl(secStructList.begin(), secStructList.end());
+    json_out["secStructList"] = msgpack::object(tmp_ssl, zone);
+  }
+  {
+    std::vector<std::string> tmp_icl;
+    for (unsigned int i = 0; i < insCodeList.size(); ++i) {
+      if (insCodeList[i] == 0x00) {
+        tmp_icl.push_back(std::string());
+      } else {
+        tmp_icl.push_back(std::string(1, insCodeList[i]));
+      }
+    }
+    json_out["insCodeList"] = msgpack::object(tmp_icl, zone);
+  }
+  json_out["sequenceIndexList"] = msgpack::object(sequenceIndexList, zone);
+  json_out["chainIdList"] = msgpack::object(chainIdList, zone);
+  json_out["chainNameList"] = msgpack::object(chainNameList, zone);
+  json_out["groupsPerChain"] = msgpack::object(groupsPerChain, zone);
+  json_out["chainsPerModel"] = msgpack::object(chainsPerModel, zone);
+  json_out["bondProperties"] = msgpack::object(bondProperties, zone);
+  json_out["atomProperties"] = msgpack::object(atomProperties, zone);
+  json_out["groupProperties"] = msgpack::object(groupProperties, zone);
+  json_out["chainProperties"] = msgpack::object(chainProperties, zone);
+  json_out["modelProperties"] = msgpack::object(modelProperties, zone);
+  json_out["extraProperties"] = msgpack::object(extraProperties, zone);
+  std::stringstream ss;
+  msgpack::object f(json_out, zone);
+  ss << f;
+  return ss.str();
 }
 
 inline void StructureData::copyMapData_(
